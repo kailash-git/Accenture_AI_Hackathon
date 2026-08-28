@@ -1,0 +1,494 @@
+/* ==========================================================================
+   CHARTS & METRIC VISUALIZERS CSS
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Large Revenue Visualizer Card (Matching Image 2 Impressions style)
+   -------------------------------------------------------------------------- */
+.large-visualizer-card {
+  background-color: transparent;
+  border-top: 1px solid var(--border-medium);
+  border-bottom: 1px solid var(--border-medium);
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  padding: 32px 0;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.visualizer-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.viz-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.viz-title-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+
+.viz-title-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.viz-title-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.viz-time-filters {
+  display: flex;
+  gap: 4px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.viz-filter-btn {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 6px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.viz-filter-btn:hover {
+  color: var(--text-primary);
+}
+
+.viz-filter-btn.active {
+  background-color: var(--bg-elevated);
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+/* Metric Big Headline */
+.viz-headline-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.viz-big-number {
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.viz-big-number .currency-prefix {
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  margin-right: 2px;
+}
+
+.viz-delta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+}
+
+.viz-delta-badge.negative {
+  background-color: var(--accent-red-glow);
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red-border);
+}
+
+.viz-delta-badge.positive {
+  background-color: var(--accent-green-glow);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green-border);
+}
+
+/* Canvas Wrap */
+.viz-canvas-container {
+  height: 240px;
+  width: 100%;
+  position: relative;
+  margin-bottom: 24px;
+}
+
+/* Footer KPIs under Chart */
+.viz-footer-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.vf-kpi-item .vf-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.vf-kpi-item .vf-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.vf-kpi-item .vf-value.highlight {
+  color: var(--accent-green);
+}
+
+/* RBAC Masking behavior */
+body.role-planner .rbac-masked {
+  filter: blur(4px);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* --------------------------------------------------------------------------
+   Interactive PVM Waterfall (Section 2)
+   -------------------------------------------------------------------------- */
+.pvm-waterfall-card {
+  background-color: transparent;
+  border-top: 1px solid var(--border-medium);
+  border-bottom: 1px solid var(--border-medium);
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  padding: 32px 0;
+  margin-bottom: 40px;
+}
+
+.pvm-bars-layout {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  height: 180px;
+  margin-bottom: 16px;
+  padding: 0 20px;
+}
+
+.pvm-column-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--dur-medium) var(--ease-standard);
+}
+
+.pvm-column-item:hover {
+  transform: translateY(-2px);
+}
+
+.pvm-val-tag {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pvm-bar-track {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+}
+
+.pvm-solid-bar {
+  width: 100%;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: all var(--dur-medium) var(--ease-standard);
+  position: relative;
+}
+
+.pvm-column-item:hover .pvm-solid-bar {
+  filter: brightness(1.15);
+}
+
+.pvm-col-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* PVM Hover Tooltip */
+.pvm-hover-card {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-prominent);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  transition: all var(--dur-fast) var(--ease-standard);
+  min-width: 220px;
+}
+
+.pvm-column-item:hover .pvm-hover-card {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.pvm-tt-header {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.pvm-tt-explanation {
+  color: var(--text-secondary);
+  line-height: 1.4;
+  white-space: normal;
+}
+
+/* PVM Inline Expanded Product Breakdown */
+.pvm-expanded-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s var(--ease-smooth);
+}
+
+.pvm-expanded-panel.open {
+  max-height: 280px;
+}
+
+.pvm-expanded-inner {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-top: 20px;
+}
+
+.pvm-panel-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin-bottom: 14px;
+}
+
+.pvm-drill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px;
+}
+
+.pvm-drill-row:last-child {
+  border-bottom: none;
+}
+
+.pvm-drill-sku {
+  font-weight: 600;
+  font-family: 'SF Mono', monospace;
+}
+
+/* --------------------------------------------------------------------------
+   Two-Column Grid for Supply & Goals (Image 2 style)
+   -------------------------------------------------------------------------- */
+.dual-module-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.module-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.module-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.module-title-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Semicircular Gauge (Matching Image 2 Marketing Goals) */
+.gauge-box-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin: 10px 0;
+}
+
+.gauge-canvas-wrap {
+  width: 220px;
+  height: 125px;
+  position: relative;
+}
+
+.gauge-center-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  margin-bottom: 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--accent-green-dim);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green-border);
+  z-index: 2;
+}
+
+.gauge-score-value {
+  position: absolute;
+  bottom: 0;
+  text-align: center;
+}
+
+.gauge-score-num {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.gauge-score-sub {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+/* Detection: STATISTICAL / EVIDENCE-DRIVEN / HYBRID / SPARSE HISTORY badge + evidence
+   bullets -- shown per anomaly beneath the confidence gauge (see js/evidence.js
+   applyDetectionPanel(), fed by anomalies.detection_type/evidence_score/evidence_classification). */
+.detection-type-panel {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.detection-type-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
+.detection-type-badge.statistical { background-color: var(--bg-surface); color: var(--text-tertiary); border: 1px solid var(--border-subtle); }
+.detection-type-badge.evidence-driven { background-color: var(--accent-blue-dim); color: var(--accent-blue); border: 1px solid var(--accent-blue-border); }
+.detection-type-badge.hybrid { background-color: var(--accent-amber-dim); color: var(--accent-amber); border: 1px solid var(--accent-amber-border); }
+.detection-type-badge.sparse { background-color: var(--bg-surface); color: var(--text-tertiary); border: 1px solid var(--border-subtle); }
+
+.detection-evidence-bullets {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detection-evidence-bullets li {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding-left: 14px;
+  position: relative;
+  line-height: 1.4;
+}
+
+.detection-evidence-bullets li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--text-tertiary);
+}
+
+/* Supply Metrics 3-card stack */
+.supply-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.supply-stat-box {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.supply-stat-box .ss-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.supply-stat-box .ss-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.supply-stat-box .ss-val.danger {
+  color: var(--accent-red);
+}
+
+.supply-stat-box .ss-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}

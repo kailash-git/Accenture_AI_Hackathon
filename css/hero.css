@@ -1,0 +1,522 @@
+/* ==========================================================================
+   HERO & EDITORIAL STORYTELLING CSS (David Morgan Composition)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Above-the-Fold Hero Section (Section 0)
+   -------------------------------------------------------------------------- */
+.editorial-hero-wrap {
+  margin-bottom: 48px;
+}
+
+/* Page Header Breadcrumb / Meta Bar (Image 2 style) */
+.hero-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.hero-project-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-id-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+.hero-id-meta {
+  white-space: normal;
+}
+
+/* Reusable treatment for product/item identifiers (SKUs) so they read as a
+   distinct system reference -- monospace, bordered, copyable -- instead of
+   plain prose, wherever they show up (hero header, headline, paragraph).
+   font-size: 1em deliberately tracks the surrounding text's own size (the
+   26px header row, a 34-64px headline, an 18px paragraph) rather than a
+   fixed px value, so the chip always reads as "the same size as" whatever
+   sentence it's embedded in; padding in em keeps it proportional at every
+   size instead of looking cramped when large or oversized when small. */
+.entity-id-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: var(--text-secondary);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.08em 0.4em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+  transition: color var(--dur-fast) var(--ease-standard),
+              border-color var(--dur-fast) var(--ease-standard),
+              background-color var(--dur-fast) var(--ease-standard);
+}
+
+.entity-id-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+  background-color: var(--bg-card-hover);
+}
+
+.entity-id-chip:active {
+  background-color: var(--bg-card-active);
+}
+
+.entity-id-chip.is-copied {
+  color: var(--accent-green);
+  border-color: var(--accent-green-border);
+  background-color: var(--accent-green-dim);
+}
+
+/* Modifier for a chip embedded mid-sentence inside prose (the big hero
+   headline, the narrative paragraph) instead of sitting in its own row.
+   Just a small side margin so it doesn't crowd neighboring words --
+   font-size already tracks the surrounding text via .entity-id-chip's
+   1em rule above, so no size override is needed here. */
+.entity-id-chip-inline {
+  margin: 0 0.08em;
+}
+
+.hero-edit-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.hero-edit-icon:hover {
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+.hero-edit-icon svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.hero-meta-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sub-tabs-pill-group {
+  display: flex;
+  gap: 4px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 3px;
+}
+
+.sub-tab-pill {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.sub-tab-pill.active {
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.date-range-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.date-range-pill svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-tertiary);
+  stroke-width: 2;
+  fill: none;
+  flex-shrink: 0;
+}
+
+/* Pipeline Ribbon (Matching Image 2: Digital / Launching / Analysis) */
+.pipeline-ribbon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.pipeline-stage-card {
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-card);
+  transition: all var(--dur-medium) var(--ease-standard);
+}
+
+.pipeline-stage-card.highlight {
+  background-color: var(--bg-card-active);
+  border-color: var(--accent-green-border);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.pipeline-stage-card.hatched {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--bg-card),
+    var(--bg-card) 10px,
+    var(--bg-card-hover) 10px,
+    var(--bg-card-hover) 20px
+  );
+  border-color: var(--border-medium);
+}
+
+.stage-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stage-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pipeline-stage-card.highlight .stage-icon svg {
+  stroke: var(--accent-green);
+}
+
+.pipeline-stage-card:not(.highlight) .stage-icon svg {
+  stroke: var(--text-secondary);
+}
+
+.stage-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  fill: none;
+}
+
+.stage-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stage-value-pill {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.pipeline-stage-card.highlight .stage-value-pill {
+  background-color: var(--accent-green-dim);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green-border);
+}
+
+.pipeline-stage-card:not(.highlight) .stage-value-pill {
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   Massive Editorial Headline & Executive Callout
+   -------------------------------------------------------------------------- */
+.hero-editorial-statement {
+  background: transparent;
+  border-top: 1px solid var(--border-medium);
+  border-bottom: 1px solid var(--border-medium);
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  padding: 48px 0;
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .hero-editorial-statement {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 48px;
+    align-items: start;
+  }
+}
+
+.hero-kicker-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.kicker-pill {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: var(--radius-xs);
+  background-color: var(--accent-red-glow);
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red-border);
+}
+
+.kicker-context {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  letter-spacing: 0.02em;
+}
+
+.hero-main-title {
+  font-size: var(--font-hero);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  max-width: 920px;
+  transition: font-size var(--dur-fast) var(--ease-standard);
+}
+
+/* Applied by JS (selectScenario in app.js) when the headline text runs long --
+   e.g. abstention headlines ("Abstained: 4% movement detected with no
+   corroborating evidence") or the sparse-history headline are full sentences,
+   not the short punchy "Revenue declined 33.7% in West" this 64px treatment
+   was designed for. At full size a long sentence wraps 4+ lines and reads as
+   an oversized wall of text rather than a headline. */
+.hero-main-title.hero-title-long {
+  font-size: 34px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  max-width: 760px;
+}
+
+.hero-main-title .highlight-drop {
+  color: var(--accent-red);
+}
+
+.hero-narrative-paragraph {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  max-width: 860px;
+  margin-bottom: 32px;
+}
+
+/* Executive Action Banner Inside Hero */
+.hero-action-banner {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.action-banner-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.action-shield-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-green-dim);
+  border: 1px solid var(--accent-green-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-green);
+  flex-shrink: 0;
+}
+
+.action-shield-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.action-label-small {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-green);
+  margin-bottom: 4px;
+}
+
+.action-text-main {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.action-impact-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.action-buttons-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.action-buttons-group button {
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-solid-primary {
+  background-color: var(--accent-green);
+  color: var(--text-inverse);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: var(--radius-xs);
+  border: none;
+  cursor: pointer;
+  transition: all var(--dur-medium) var(--ease-standard);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: none;
+}
+
+.btn-solid-primary:hover {
+  background-color: var(--accent-green-bright);
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-outline-secondary {
+  background-color: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-medium);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--border-prominent);
+}
+
+/* --------------------------------------------------------------------------
+   Story Section Transitions & Spacing
+   -------------------------------------------------------------------------- */
+.story-section {
+  margin-bottom: 64px;
+  position: relative;
+}
+
+.story-section-header {
+  margin-bottom: 24px;
+}
+
+.story-step-indicator {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.story-step-indicator::before {
+  content: '';
+  width: 20px;
+  height: 1.5px;
+  background-color: var(--accent-green);
+}
+
+.story-section-title {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.story-section-description {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 780px;
+}
+
+/* Scroll Animation Reveal Classes */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.55s var(--ease-smooth), transform 0.55s var(--ease-smooth);
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}

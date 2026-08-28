@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KPI Intelligence Engine — Enterprise BI</title>
+
+  <!-- Google Fonts: Inter & SF Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=SF+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js 4.4 Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Modular CSS Architecture -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/hero.css" />
+  <link rel="stylesheet" href="css/charts.css" />
+  <link rel="stylesheet" href="css/evidence.css" />
+  <link rel="stylesheet" href="css/drawer.css" />
+  <link rel="stylesheet" href="css/chat.css" />
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- 1. Leftmost Icon Navigation Bar (David Morgan Style) -->
+    <nav class="icon-nav-bar" aria-label="Global Navigation">
+      <div class="icon-nav-group">
+        <div class="nav-icon-link active" title="Anomaly Overview" onclick="document.getElementById('section-overview').scrollIntoView({behavior:'smooth'})">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+        </div>
+        <div class="nav-icon-link" title="Signal Intelligence & Revenue Timeline" onclick="document.getElementById('section-what-changed').scrollIntoView({behavior:'smooth'})">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="nav-icon-link" title="Data Catalogs & Schema Inspect" onclick="inspectPipelineStage('Enterprise Data Catalog', 'fact_sales_daily')">
+          <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="nav-icon-link" title="Audit Log & Governance" onclick="openAuditLogModal()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+      </div>
+
+      <div class="nav-icon-bottom">
+        <div class="nav-icon-link" title="Toggle Sidebar (Focus Mode)" onclick="toggleSidebarCollapse()">
+          <svg viewBox="0 0 24 24"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 2. Main Sidebar (User Meta & Anomaly Deck) -->
+    <aside class="sidebar-panel">
+      <div class="sidebar-header">
+        <div class="user-profile-row">
+          <div class="user-avatar" onclick="openProfileModal()" title="View Profile & Entitlements">TK</div>
+          <div class="user-meta" onclick="openProfileModal()" title="View Profile & Entitlements">
+            <div class="user-name">Thirukailash K A</div>
+            <div class="user-role-badge" id="sidebarUserRole">VP of Retail Sales</div>
+          </div>
+          <div class="user-actions">
+            <div class="icon-action-btn" title="Settings & Entitlements" onclick="openProfileModal()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+            <div class="icon-action-btn" title="Notifications" onclick="toggleNotificationsDropdown()">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <div class="notification-indicator"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications Dropdown -->
+        <div class="notifications-dropdown" id="notificationsDropdown">
+          <div class="notif-header">
+            <span>System Alerts</span>
+            <span style="cursor: pointer; color: var(--accent-green);" onclick="toggleNotificationsDropdown()">Close</span>
+          </div>
+          <div class="notif-item" onclick="openInvestigationDrawer('supply'); toggleNotificationsDropdown();">
+            <strong style="color: var(--accent-red);">Critical:</strong> Fill rate dropped to 0.78 for FOODS_3_090
+            <div class="notif-time">10 minutes ago · Warehouse WH-1000</div>
+          </div>
+          <div class="notif-item" onclick="openInvestigationDrawer('billing'); toggleNotificationsDropdown();">
+            <strong style="color: var(--accent-amber);">Warning:</strong> Price drift $3.36 detected in TX stores
+            <div class="notif-time">2 hours ago · POS Engine</div>
+          </div>
+          <div class="notif-item" onclick="openAuditLogModal(); toggleNotificationsDropdown();">
+            <strong style="color: var(--accent-green);">Action:</strong> Emergency PO approved for 5,000 units
+            <div class="notif-time">Today 16:32 · Audit #AUD-9081</div>
+          </div>
+        </div>
+
+
+
+        <div class="sidebar-search-box">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="sidebar-search-input" id="sidebarSearchInput" placeholder="Search anomaly or SKU…" />
+          <svg class="search-filter-icon" title="Toggle Filters" onclick="toggleSearchFilterPills()" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+        </div>
+
+        <!-- Filter Chips Row -->
+        <div class="filter-pills-row" id="filterPillsRow" style="display: none;">
+          <div class="filter-chip active" data-filter="all" onclick="setFilterChip('all', this)">All</div>
+          <div class="filter-chip" data-filter="critical" onclick="setFilterChip('critical', this)">Critical</div>
+          <div class="filter-chip" data-filter="warning" onclick="setFilterChip('warning', this)">Warning</div>
+          <div class="filter-chip" data-filter="active" onclick="setFilterChip('active', this)">Active</div>
+        </div>
+      </div>
+
+      <div class="sidebar-deck-scroll">
+        <div class="deck-section-header">
+          <span class="deck-section-title">Anomaly Scenarios</span>
+          <span class="deck-add-btn" title="Create / Inject New Scenario" onclick="openCreateAnomalyModal()">Add +</span>
+        </div>
+
+        <div class="calendar-filter-container" style="padding: 4px 12px 10px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Review Period:</span>
+          <select id="calendarPeriodSelect" onchange="filterAnomaliesByMonth(this.value)" style="flex: 1; font-size: 11px; background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary); border-radius: 4px; padding: 4px 8px; outline: none; cursor: pointer;">
+            <option value="all">All Time</option>
+          </select>
+        </div>
+
+        <!-- Scenario Card 1: Supply Constraint (Active) -->
+        <div class="scenario-card active" data-scenario="supply" data-status="critical" onclick="selectScenario('supply')">
+          <div class="sc-top">
+            <div class="sc-icon"><svg viewBox="0 0 24 24" style="stroke: var(--accent-blue)"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+            <div class="sc-info">
+              <div class="sc-title">Supply Constraint</div>
+              <div class="sc-subtitle">FOODS_3_090 · CA · Nov 2012</div>
+            </div>
+            <div class="sc-actions">
+              <div class="sc-action-btn" title="Tune Parameters" onclick="event.stopPropagation(); openCreateAnomalyModal()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+              <div class="sc-action-btn" title="Inspect Deep Dive" onclick="event.stopPropagation(); openInvestigationDrawer('supply')"><svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><path d="M21 3 9 15"/></svg></div>
+            </div>
+          </div>
+          <div class="sc-grid-stats">
+            <div><div class="stat-label">Type</div><div class="stat-val" style="color: var(--accent-blue)">Multi-Factor</div></div>
+            <div><div class="stat-label">Fill Rate</div><div class="stat-val">0.78</div></div>
+            <div><div class="stat-label">Stockout</div><div class="stat-val">4 days</div></div>
+          </div>
+          <div class="sc-progress-wrap">
+            <span class="sc-status-pill critical">Critical</span>
+            <span class="sc-pct-text">87% conf</span>
+          </div>
+          <div class="sc-bar-track"><div class="sc-bar-fill red" style="width: 87%"></div></div>
+        </div>
+
+        <!-- Scenario Card 2: Billing Bug -->
+        <div class="scenario-card" data-scenario="billing" data-status="warning" onclick="selectScenario('billing')">
+          <div class="sc-top">
+            <div class="sc-icon"><svg viewBox="0 0 24 24" style="stroke: var(--accent-amber)"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="sc-info">
+              <div class="sc-title">Billing Bug</div>
+              <div class="sc-subtitle">FOODS_3_586 · TX · May 2013</div>
+            </div>
+            <div class="sc-actions">
+              <div class="sc-action-btn" title="Tune Parameters" onclick="event.stopPropagation(); openCreateAnomalyModal()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+              <div class="sc-action-btn" title="Inspect Deep Dive" onclick="event.stopPropagation(); openInvestigationDrawer('billing')"><svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><path d="M21 3 9 15"/></svg></div>
+            </div>
+          </div>
+          <div class="sc-grid-stats">
+            <div><div class="stat-label">Type</div><div class="stat-val" style="color: var(--accent-amber)">Conflicting</div></div>
+            <div><div class="stat-label">Price Drift</div><div class="stat-val">×2.0</div></div>
+            <div><div class="stat-label">Confidence</div><div class="stat-val">Low</div></div>
+          </div>
+          <div class="sc-progress-wrap">
+            <span class="sc-status-pill warning">Warning</span>
+            <span class="sc-pct-text">42% conf</span>
+          </div>
+          <div class="sc-bar-track"><div class="sc-bar-fill amber" style="width: 42%"></div></div>
+        </div>
+
+        <!-- Scenario Card 3: Price Cut + Volume -->
+        <div class="scenario-card" data-scenario="pricecut" data-status="active" onclick="selectScenario('pricecut')">
+          <div class="sc-top">
+            <div class="sc-info">
+              <div class="sc-title">Price Cut + Volume</div>
+              <div class="sc-subtitle">FOODS_3_090 · CA · Aug 2013</div>
+            </div>
+          </div>
+          <div class="sc-grid-stats">
+            <div><div class="stat-label">Type</div><div class="stat-val" style="color: var(--accent-green)">PVM</div></div>
+            <div><div class="stat-label">Price Δ</div><div class="stat-val">−25%</div></div>
+            <div><div class="stat-label">Volume Δ</div><div class="stat-val">+42%</div></div>
+          </div>
+          <div class="sc-progress-wrap">
+            <span class="sc-status-pill active">Active</span>
+            <span class="sc-pct-text">91% conf</span>
+          </div>
+        </div>
+
+        <!-- Scenario Card 4: New Product Launch (Sparse History) -->
+        <div class="scenario-card" data-scenario="sparse" data-status="active" onclick="selectScenario('sparse')">
+          <div class="sc-top">
+            <div class="sc-info">
+              <div class="sc-title">New Product Launch</div>
+              <div class="sc-subtitle">HOUSEHOLD_1_020 · TX · Aug 2013</div>
+            </div>
+          </div>
+          <div class="sc-grid-stats">
+            <div><div class="stat-label">Type</div><div class="stat-val" style="color: var(--accent-green)">Sparse History</div></div>
+            <div><div class="stat-label">Active History</div><div class="stat-val">5 days</div></div>
+            <div><div class="stat-label">Z-Score</div><div class="stat-val">2.12</div></div>
+          </div>
+          <div class="sc-progress-wrap">
+            <span class="sc-status-pill active">Active</span>
+            <span class="sc-pct-text">95% conf</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 3. Main Viewport & Scroll Area -->
+    <div class="main-viewport">
+
+      <!-- Topbar (David Morgan Style) -->
+      <header class="main-topbar">
+        <div class="topbar-tabs-group">
+          <button class="topbar-tab active" data-target-section="section-overview">Overview</button>
+          <button class="topbar-tab" data-target-section="section-what-changed">What Changed?</button>
+          <button class="topbar-tab" data-target-section="section-why">PVM Analysis</button>
+          <button class="topbar-tab" data-target-section="section-evidence">Evidence</button>
+          <button class="topbar-tab" data-target-section="section-actions">Actions</button>
+          <button class="topbar-tab" data-target-section="section-telemetry">Telemetry</button>
+        </div>
+
+        <div class="topbar-spacer"></div>
+
+        <div class="topbar-actions-right">
+          <!-- Live Backend Sync Status Indicator -->
+          <div class="backend-sync-pill" id="backendStatusPill" onclick="if(typeof apiClient !== 'undefined') apiClient.checkHealth();" title="Click to refresh SQLite backend connection">
+            <span id="backendStatusDot" style="width: 7px; height: 7px; border-radius: 50%; background-color: var(--accent-green); box-shadow: 0 0 6px var(--accent-green-glow);"></span>
+            <span id="backendStatusText" style="color: var(--text-secondary); font-weight: 600;">Live DB Synced</span>
+          </div>
+
+          <div class="role-toggle-pill">
+            <div class="role-btn active" id="roleBtnVp" onclick="setAppRole('vp_sales')">VP of Sales</div>
+            <div class="role-btn" id="roleBtnPlanner" onclick="setAppRole('supply_planner')">Supply Planner</div>
+            <div class="role-btn role-btn-admin" id="roleBtnAdmin" onclick="setAppRole('admin')">Admin</div>
+          </div>
+
+          <div class="theme-toggle-btn" title="Toggle OLED High Contrast Theme" onclick="toggleThemeMode()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+
+          <div class="meeting-pill-card" title="Join Sprint Sync with Sivasubramanian S" onclick="showAppToast('Launching Google Meet link: meet.google.com/aic-stack-overflowed')">
+            <div class="meeting-avatars-stack">
+              <div class="meeting-avatar-dot">TK</div>
+              <div class="meeting-avatar-dot">SS</div>
+            </div>
+            <div class="meeting-meta">
+              <div class="meeting-title">Sprint Sync</div>
+              <div class="meeting-sub">Google Meet</div>
+            </div>
+            <div class="meeting-call-btn">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Main Content Stream -->
+      <main class="main-scroll-stream" id="mainScrollContainer">
+
+        <!-- =================================================================
+             SECTION 0: ABOVE-THE-FOLD HERO (Editorial Composition)
+             ================================================================= -->
+        <section class="editorial-hero-wrap" id="section-overview">
+          <div class="hero-top-row">
+            <div class="hero-project-tag">
+              <div class="hero-id-title" id="heroProjectTitle">
+                <span class="entity-id-chip" id="heroEntityChip" role="button" tabindex="0" title="Click to copy ID"><span class="entity-id-chip-label" id="heroEntityChipLabel">Loading…</span></span><span class="hero-id-meta" id="heroIdMeta"></span>
+              </div>
+              <div class="hero-edit-icon" title="Rename Scenario or Edit Metadata" onclick="const el = document.getElementById('heroIdMeta'); const n = prompt('Enter new scenario title:', el.textContent); if(n) el.textContent = n;">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </div>
+            </div>
+
+            <div class="hero-meta-controls">
+              <div class="sub-tabs-pill-group">
+                <div class="sub-tab-pill active" onclick="document.getElementById('section-overview').scrollIntoView({behavior:'smooth'})">Overview</div>
+                <div class="sub-tab-pill" onclick="document.getElementById('section-why').scrollIntoView({behavior:'smooth'})">PVM</div>
+                <div class="sub-tab-pill" onclick="document.getElementById('section-evidence').scrollIntoView({behavior:'smooth'})">Signals</div>
+                <div class="sub-tab-pill" onclick="document.getElementById('section-actions').scrollIntoView({behavior:'smooth'})">Resolution</div>
+              </div>
+
+              <div class="date-range-pill" style="cursor: pointer;" title="Anomaly detection period for this scenario">
+                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Massive Editorial Insight Card (David Morgan Hero Philosophy) -->
+          <div class="hero-editorial-statement">
+            <div class="hero-statement-left">
+              <div class="hero-kicker-meta">
+                <span class="kicker-pill">Critical Anomaly</span>
+                <span class="kicker-context" id="heroKickerContext">FOODS_3_090 · NOVEMBER 2012 · SUPPLY CONSTRAINT · 87% CONFIDENCE</span>
+              </div>
+
+              <h1 class="hero-main-title" id="heroMainHeadline">
+                Revenue declined <span class="highlight-drop">12.4% in CA</span>
+              </h1>
+
+              <p class="hero-narrative-paragraph" id="heroNarrativeText">
+                West region revenue dropped from an expected baseline of $28,300 to $24,817 in November 2012. Price-Volume-Mix decomposition reveals volume contraction was the dominant driver (77%), triggered by 4 consecutive stockout days at warehouse WH-1000.
+              </p>
+            </div>
+
+            <div class="hero-action-banner" id="heroActionBanner">
+              <div class="action-banner-content">
+                <div class="action-shield-icon">
+                  <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                  <div class="action-label-small">Recommended Action</div>
+                  <div class="action-text-main">Increase replenishment allocation for FOODS_3_090 in CA.</div>
+                  <div class="action-impact-sub">Expected impact: Recover approximately $8,204/month in run-rate revenue.</div>
+                </div>
+              </div>
+
+              <div class="action-buttons-group">
+                <button class="btn-solid-primary js-approve-action-btn" id="heroApproveBtn" data-anomaly-key="supply" onclick="handleActionApprove('supply', -1, this)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Approve Action
+                </button>
+                <button class="btn-outline-secondary" id="heroInvestigateBtn" onclick="openInvestigationDrawer('supply')">
+                  Investigate
+                </button>
+              </div>
+            </div>
+
+            <!-- Abstention Banner: shown instead of the action banner when the engine withholds a recommendation (REQ-05) -->
+            <div class="hero-action-banner" id="abstentionBanner" style="display:none; border-color: var(--accent-amber, #f59e0b); background: rgba(245,158,11,0.08);">
+              <div class="action-banner-content">
+                <div class="action-shield-icon" style="color: var(--accent-amber, #f59e0b);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div>
+                  <div class="action-label-small" style="color: var(--accent-amber, #f59e0b);">Engine Abstained — No Automated Recommendation</div>
+                  <div class="action-text-main" id="abstentionReasonText">Insufficient or contradictory evidence.</div>
+                  <div class="action-impact-sub">Flagged for manual analyst review instead of a low-confidence guess.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pipeline Ribbon (Appears as user scrolls) -->
+        <div class="pipeline-ribbon-grid scroll-reveal">
+          <div class="pipeline-stage-card highlight" style="cursor: pointer;" onclick="inspectPipelineStage('Daily Point-of-Sale Sales Data', 'fact_sales_daily')" title="Inspect Sales Daily Schema">
+            <div class="stage-left">
+              <div class="stage-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg></div>
+              <div class="stage-name">Sales Data (Daily)</div>
+            </div>
+            <div class="stage-value-pill">$24,817</div>
+          </div>
+
+          <div class="pipeline-stage-card hatched" style="cursor: pointer;" onclick="inspectPipelineStage('Weekly Marketing Spend Feed', 'source_marketing_weekly')" title="Inspect Marketing Weekly Schema">
+            <div class="stage-left">
+              <div class="stage-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <div class="stage-name">Marketing Spend (Weekly)</div>
+            </div>
+            <div class="stage-value-pill">$3,000</div>
+          </div>
+
+          <div class="pipeline-stage-card" style="cursor: pointer;" onclick="inspectPipelineStage('Monthly Warehouse Supply Logistics', 'source_supply_monthly')" title="Inspect Supply Monthly Schema">
+            <div class="stage-left">
+              <div class="stage-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+              <div class="stage-name">Supply Logistics (Monthly)</div>
+            </div>
+            <div class="stage-value-pill">$600</div>
+          </div>
+        </div>
+
+        <!-- =================================================================
+             SECTION 01: WHAT CHANGED? (Large Revenue Visualization)
+             ================================================================= -->
+        <section class="story-section scroll-reveal" id="section-what-changed">
+          <div class="story-section-header">
+            <div class="story-step-indicator">01 / What Changed?</div>
+            <h2 class="story-section-title">Revenue Trajectory & Anomaly Annotations</h2>
+            <p class="story-section-description">
+              Daily point-of-sale telemetry. Click annotated points to launch investigation.
+            </p>
+          </div>
+
+          <div class="large-visualizer-card">
+            <div class="visualizer-top-bar" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 12px;">
+              <div class="viz-title-group">
+                <div class="viz-title-icon"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+                <div class="viz-title-text" id="mainChartTitle">Revenue Trajectory — West Region (CA)</div>
+              </div>
+
+              <div class="viz-time-filters">
+                <div class="viz-filter-btn active" onclick="setChartTimeRange('all', this)">All</div>
+                <div class="viz-filter-btn" onclick="setChartTimeRange('2012', this)">2012</div>
+                <div class="viz-filter-btn" onclick="setChartTimeRange('2013', this)">2013</div>
+              </div>
+            </div>
+
+            <!-- KPI Selection Tabs -->
+            <div style="display: flex; gap: 8px; margin-bottom: 16px; padding: 0 4px;">
+              <button class="topbar-tab active" id="kpiTab-revenue" style="border-radius: 4px; font-size: 11px; padding: 6px 12px;" onclick="switchActiveKPI('revenue', this)">Revenue</button>
+              <button class="topbar-tab" id="kpiTab-margin" style="border-radius: 4px; font-size: 11px; padding: 6px 12px;" onclick="switchActiveKPI('margin', this)">Gross Margin %</button>
+              <button class="topbar-tab" id="kpiTab-turnover" style="border-radius: 4px; font-size: 11px; padding: 6px 12px;" onclick="switchActiveKPI('turnover', this)">Inventory Turnover</button>
+            </div>
+
+            <div class="viz-headline-row">
+              <div class="viz-big-number">
+                <span class="currency-prefix" id="currencyPrefix">$</span><span id="revBigNumber">24,817</span>
+              </div>
+              <div class="viz-delta-badge negative" id="revDeltaBadge">
+                ▼ 12.4% vs Baseline
+              </div>
+            </div>
+
+            <div class="viz-canvas-container">
+              <canvas id="mainRevenueCanvas"></canvas>
+            </div>
+
+            <div class="viz-footer-kpis">
+              <div class="vf-kpi-item">
+                <div class="vf-label">Avg Sell Price</div>
+                <div class="vf-value" id="kpiAvgSellPrice">$1.25</div>
+              </div>
+              <div class="vf-kpi-item rbac-masked">
+                <div class="vf-label">Gross Margin</div>
+                <div class="vf-value highlight" id="kpiGrossMargin">29.6%</div>
+              </div>
+              <div class="vf-kpi-item">
+                <div class="vf-label">Units Sold</div>
+                <div class="vf-value" id="kpiUnitsSold">19,854</div>
+              </div>
+              <div class="vf-kpi-item rbac-masked">
+                <div class="vf-label">COGS Formula</div>
+                <div class="vf-value" style="font-family: 'SF Mono', monospace; font-size: 13px;" id="kpiCogs">units × $0.88</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             SECTION 02: WHAT DROVE IT? (Interactive PVM Decomposition)
+             ================================================================= -->
+        <section class="story-section scroll-reveal" id="section-why">
+          <div class="story-section-header">
+            <div class="story-step-indicator">02 / What Drove It?</div>
+            <h2 class="story-section-title">Price-Volume-Mix Variance Decomposition</h2>
+            <p class="story-section-description">
+              Revenue delta decomposed into Price, Volume, and Mix variance contribution factors.
+            </p>
+          </div>
+
+          <div class="pvm-waterfall-card">
+            <div class="visualizer-top-bar" style="margin-bottom: 24px;">
+              <div class="viz-title-group">
+                <div class="viz-title-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+                <div class="viz-title-text" id="pvmWaterfallTitle">PVM Variance Waterfall</div>
+              </div>
+              <div style="font-size: 12px; color: var(--text-tertiary);">Click any bar for product drill-down</div>
+            </div>
+
+            <div class="pvm-bars-layout" id="pvmBarsContainer">
+              <!-- Dynamically rendered by charts.js -->
+            </div>
+
+            <!-- Expandable Product Drill-down -->
+            <div class="pvm-expanded-panel" id="pvmExpandedPanel">
+              <div class="pvm-expanded-inner">
+                <div class="pvm-panel-title" id="pvmPanelTitle">Volume Variance — Underlying Product Breakdown</div>
+                <div id="pvmDrillList">
+                  <!-- Injected via charts.js -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             SECTION 03: WHY DID VOLUME FALL? (Supply Metrics & Goals)
+             ================================================================= -->
+        <section class="story-section scroll-reveal">
+          <div class="story-section-header">
+            <div class="story-step-indicator">03 / Why Did Volume Fall?</div>
+            <h2 class="story-section-title">Warehouse Constraints & Anomaly Confidence</h2>
+            <p class="story-section-description">
+              Physical supply metrics aligned with statistical Z-score thresholds.
+            </p>
+          </div>
+
+          <!-- Dual Module Grid (Image 2 Marketing Goals + Stats style) -->
+          <div class="dual-module-grid">
+            <!-- Left Module: Supply Health -->
+            <div class="module-card">
+              <div class="module-header">
+                <div class="module-title-wrap">
+                  <div class="viz-title-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+                  <div class="module-title-text" id="logisticsCardTitle">Supply Logistics & Warehouse Metrics</div>
+                </div>
+                <span class="sc-status-pill critical" id="logisticsCardStatus">Disrupted</span>
+              </div>
+
+              <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;" id="logisticsCardDesc">
+                Distribution center WH-1000 suffered acute supply throttling due to inbound port shipment delays, causing retail stockouts across 4 major store clusters in Northern California.
+              </p>
+
+              <div class="supply-metrics-row" id="supplyMetricsRow">
+                <div class="supply-stat-box">
+                  <div class="ss-label" id="logisticsMetricLabel1">Fill Rate Plunge</div>
+                  <div class="ss-val danger" id="logisticsMetricValue1">0.78</div>
+                  <div class="ss-sub" id="logisticsMetricSub1">Baseline: 0.98 (-20.5%)</div>
+                </div>
+                <div class="supply-stat-box">
+                  <div class="ss-label" id="logisticsMetricLabel2">Stockout Days</div>
+                  <div class="ss-val danger" id="logisticsMetricValue2">4 days</div>
+                  <div class="ss-sub" id="logisticsMetricSub2">Consecutive outage</div>
+                </div>
+                <div class="supply-stat-box">
+                  <div class="ss-label" id="logisticsMetricLabel3">Lead Time Delay</div>
+                  <div class="ss-val" id="logisticsMetricValue3">18 days</div>
+                  <div class="ss-sub" id="logisticsMetricSub3">+6 days vs SLA</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Module: Confidence Arc Gauge (Image 2 Marketing Goals) -->
+            <div class="module-card">
+              <div class="module-header">
+                <div class="module-title-wrap">
+                  <div class="viz-title-icon"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                  <div class="module-title-text">Anomaly Confidence Score</div>
+                </div>
+                <span style="font-size: 11px; color: var(--accent-green); font-weight: 600;" id="gaugeConfidenceText">High Certainty</span>
+              </div>
+
+              <div class="gauge-box-center">
+                <div class="gauge-center-badge" id="gaugeCenterBadge">Z-Score: 3.41</div>
+                <div class="gauge-canvas-wrap">
+                  <canvas id="confidenceGaugeCanvas"></canvas>
+                </div>
+                <div class="gauge-score-value">
+                  <div class="gauge-score-num" id="gaugeScoreNum">87<span style="font-size: 20px; font-weight: 400; color: var(--text-tertiary);">%</span></div>
+                  <div class="gauge-score-sub">Statistical Confidence</div>
+                </div>
+              </div>
+
+              <div class="detection-type-panel" id="detectionTypePanel">
+                <span class="detection-type-badge statistical" id="detectionTypeBadge">Detection: STATISTICAL</span>
+                <ul class="detection-evidence-bullets" id="detectionEvidenceBullets"></ul>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- =================================================================
+             SECTION 04: WHAT EVIDENCE SUPPORTS THIS? (GraphRAG Signals)
+             ================================================================= -->
+        <section class="story-section scroll-reveal" id="section-evidence">
+          <div class="story-section-header">
+            <div class="story-step-indicator">04 / What Evidence Supports This?</div>
+            <h2 class="story-section-title">Retrieved Evidence Trail & Knowledge Graph</h2>
+            <p class="story-section-description">
+              GraphRAG correlation between structured sales logs and unstructured feedback.
+            </p>
+          </div>
+
+          <!-- Knowledge Graph Card Header -- static, no collapse/expand: the panel
+               below was already open by default in every case, so the click-to-toggle
+               affordance was dead weight that also duplicated the section description above. -->
+          <div class="kg-card-header">
+            <div class="kg-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="12" y1="7" x2="5" y2="17"/><line x1="12" y1="7" x2="19" y2="17"/><line x1="5" y1="19" x2="19" y2="19"/></svg></div>
+            <div>
+              <div class="kg-title">Interactive Knowledge Graph (GraphRAG Entity Links)</div>
+              <div class="kg-subtitle">Live per anomaly &mdash; explains what evidence backs (or doesn't back) this one.</div>
+            </div>
+          </div>
+
+          <div class="kg-graph-card" id="knowledgeGraphPanel">
+            <div class="kg-graph-main" id="kgGraphWrap">
+              <div class="kg-loading-state"><div class="kg-spinner"></div>Traversing knowledge graph…</div>
+            </div>
+            <div class="kg-detail-panel" id="kgDetailPanel">
+              <div class="kg-detail-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="12" y1="7" x2="5" y2="17"/><line x1="12" y1="7" x2="19" y2="17"/><line x1="5" y1="19" x2="19" y2="19"/></svg>
+                <span>Click any node to inspect the retrieved record behind it.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Evidence Timeline Deck -->
+          <div class="evidence-timeline-deck" id="evidenceTimelineDeck">
+            <!-- Dynamically populated via evidence.js -->
+          </div>
+        </section>
+
+        <!-- =================================================================
+             SECTION 05: ROOT CAUSE SYNTHESIS & REASONING
+             ================================================================= -->
+        <section class="story-section scroll-reveal">
+          <div class="story-section-header">
+            <div class="story-step-indicator">05 / Root Cause Synthesis</div>
+            <h2 class="story-section-title">Automated Root Cause Reasoning</h2>
+            <p class="story-section-description">
+              Causal reasoning synthesized from database records and customer documents.
+            </p>
+          </div>
+
+          <div class="root-cause-synthesis-card high">
+            <!-- Simple Meta Header -->
+            <div class="rc-meta-header">
+              <span>Root Cause Verdict</span>
+              <span>·</span>
+              <span class="rc-confidence-pill high" id="rcConfidencePill">87% Verified Confidence</span>
+            </div>
+
+            <!-- Big Bold Statement -->
+            <h3 class="rc-statement-title" id="rcStatementTitle">
+              Supply constraint at primary California distribution partner throttled retail shelf fill rate to 0.78, causing 84% volume loss for SKU FOODS_3_090.
+            </h3>
+
+            <!-- Synthesis Narrative Body -->
+            <div class="rc-synthesis-body" id="rcSynthesisBody">
+              The 12.4% regional revenue decline in California was not caused by demand erosion or competitor discounting. Price-Volume-Mix decomposition validates that average sell price held steady at $1.25. Concurrently, 3 independent customer complaints and support ticket #ST-4421 confirm widespread empty shelves across Northern California stores during the exact 4-day stockout window recorded in <code>source_supply_monthly</code>.
+            </div>
+
+            <!-- Feedback capture (REQ-07: "mechanism to learn from analyst and
+                 business-user feedback") -- writes a real rating to user_feedback
+                 via /api/feedback; aggregate counts surface in the Telemetry panel. -->
+            <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+              <div id="synthesisFeedbackWrap" style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 12px; color: var(--text-tertiary);">Was this analysis useful?</span>
+                <button class="btn-feedback-vote" onclick="submitSynthesisFeedback(1, this)" title="Useful" aria-label="Useful">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 22V11M2 13v7a2 2 0 0 0 2 2h12.5a2 2 0 0 0 2-1.6l1.4-7A2 2 0 0 0 18 11h-5V5a2.5 2.5 0 0 0-5 0v1.2c0 .7-.3 1.4-.8 1.9L7 8.5"/></svg>
+                </button>
+                <button class="btn-feedback-vote" onclick="submitSynthesisFeedback(-1, this)" title="Not useful" aria-label="Not useful">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2v11M22 11V4a2 2 0 0 0-2-2H7.5a2 2 0 0 0-2 1.6l-1.4 7A2 2 0 0 0 6 13h5v6a2.5 2.5 0 0 0 5 0v-1.2c0-.7.3-1.4.8-1.9l1.2-1.4"/></svg>
+                </button>
+              </div>
+              <button class="btn-copy-reasoning" onclick="copySynthesisReasoning()">Copy Briefing</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             SECTION 06: RECOMMENDED ACTIONS
+             ================================================================= -->
+        <section class="story-section scroll-reveal" id="section-actions">
+          <div class="story-section-header">
+            <div class="story-step-indicator">06 / Recommended Actions</div>
+            <h2 class="story-section-title">Prescriptive Decision Engine</h2>
+            <p class="story-section-description">
+              Operational playbooks mapped to available business levers and decision rights.
+            </p>
+          </div>
+
+          <div class="action-cards-grid" id="actionCardsGrid">
+            <div class="action-module-card" id="actionCard-supply">
+              <div>
+                <div class="action-card-top-num">1</div>
+                <div class="action-card-heading">Expedite Emergency Secondary Reorder</div>
+                <div class="action-card-body">
+                  Issue emergency purchase order to secondary dairy supplier for 5,000 units of FOODS_3_090. Target fill rate recovery to ≥ 0.95 within 14 business days.
+                </div>
+              </div>
+              <div class="action-card-btn-row">
+                <button class="btn-action-primary" id="actionBtn-supply" onclick="handleActionApprove('supply')">Approve Action</button>
+                <button class="btn-action-outline" onclick="handleActionAssign('supply')">Assign</button>
+                <button class="btn-action-outline" onclick="handleActionDismiss('supply')">Dismiss</button>
+              </div>
+            </div>
+
+            <div class="action-module-card" id="actionCard-reallocate">
+              <div>
+                <div class="action-card-top-num">2</div>
+                <div class="action-card-heading">Reallocate Texas Buffer Stock</div>
+                <div class="action-card-body">
+                  Transfer 2,000 units from surplus inventory in Texas warehouse WH-2000 to California distribution center WH-1000 via expedited ground transit.
+                </div>
+              </div>
+              <div class="action-card-btn-row">
+                <button class="btn-action-primary" id="actionBtn-reallocate" onclick="handleActionApprove('reallocate')">Approve Transfer</button>
+                <button class="btn-action-outline" onclick="handleActionAssign('reallocate')">Assign</button>
+                <button class="btn-action-outline" onclick="handleActionDismiss('reallocate')">Dismiss</button>
+              </div>
+            </div>
+
+            <div class="action-module-card" id="actionCard-board">
+              <div>
+                <div class="action-card-top-num">3</div>
+                <div class="action-card-heading">Publish Executive Board Narrative</div>
+                <div class="action-card-body">
+                  Attach AI-generated PVM variance narrative to the Q4 VP of Retail Sales board briefing to formally document supply-driven volume contraction.
+                </div>
+              </div>
+              <div class="action-card-btn-row">
+                <button class="btn-action-primary" id="actionBtn-board" onclick="handleActionApprove('board')">Publish Brief</button>
+                <button class="btn-action-outline" onclick="handleActionAssign('board')">Assign</button>
+                <button class="btn-action-outline" onclick="handleActionDismiss('board')">Dismiss</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             SECTION 07: SYSTEM TELEMETRY (Bottom Section)
+             ================================================================= -->
+        <section class="story-section scroll-reveal" id="section-telemetry">
+          <div class="story-section-header">
+            <div class="story-step-indicator">07 / System Telemetry</div>
+            <h2 class="story-section-title">Engine Health & Pipeline Observability</h2>
+            <p class="story-section-description">
+              Observability metrics for query latency and token economics.
+            </p>
+          </div>
+
+          <div class="telemetry-deck-grid">
+            <div class="telemetry-tile" style="cursor: pointer;" onclick="showTelemetryDetail('sql')" title="View SQL profile">
+              <div class="tele-label">Live SQL Query Latency</div>
+              <div class="tele-val" id="teleSqlVal">—</div>
+              <div class="tele-sub" id="teleSqlSub">Measured on this session's requests</div>
+              <div class="tele-status-pill">Target &lt; 500ms</div>
+            </div>
+
+            <div class="telemetry-tile" style="cursor: pointer;" onclick="showTelemetryDetail('llm')" title="View LLM profile">
+              <div class="tele-label">LLM Calls (Live Request Path)</div>
+              <div class="tele-val" id="teleLlmVal">0</div>
+              <div class="tele-sub" id="teleLlmSub">Deterministic pipeline — narrative pre-generated offline</div>
+              <div class="tele-status-pill">$0 per view</div>
+            </div>
+
+            <div class="telemetry-tile" style="cursor: pointer;" onclick="showTelemetryDetail('cost')" title="View Token Economics">
+              <div class="tele-label">Total Seed-Time LLM Cost</div>
+              <div class="tele-val" id="teleCostVal">$0.00</div>
+              <div class="tele-sub" id="teleCostSub">Across the whole database build</div>
+              <div class="tele-status-pill">Efficient</div>
+            </div>
+
+            <div class="telemetry-tile" style="cursor: pointer;" onclick="showTelemetryDetail('fresh')" title="View Synchronization state">
+              <div class="tele-label">Data Freshness</div>
+              <div class="tele-val" id="teleFreshVal">—</div>
+              <div class="tele-sub" id="teleFreshSub">Time since last database build</div>
+              <div class="tele-status-pill">Real-time</div>
+            </div>
+
+            <div class="telemetry-tile" style="cursor: pointer;" onclick="showTelemetryDetail('feedback')" title="View feedback capture detail">
+              <div class="tele-label">Feedback Captured</div>
+              <div class="tele-val" id="teleFeedbackVal">—</div>
+              <div class="tele-sub" id="teleFeedbackSub">Analyst/business-user ratings logged</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bottom Spacer -->
+        <div style="height: 60px;"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       INVESTIGATION DRAWER (480px Slide-in Panel)
+       ======================================================================= -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeInvestigationDrawer()"></div>
+  <aside class="investigation-drawer-panel" id="investigationDrawer" aria-label="Investigation Drawer">
+    <div class="drawer-top-header">
+      <div>
+        <div class="drawer-kicker" id="drawerKicker">Multi-Factor Variance · Nov 2012</div>
+        <div class="drawer-main-title" id="drawerTitle">Supply Constraint Deep Dive</div>
+      </div>
+      <div class="drawer-close-btn" onclick="closeInvestigationDrawer()" title="Close Drawer (Esc)">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+    </div>
+
+    <div class="drawer-body-stream">
+      <!-- Metadata Grid -->
+      <div class="drawer-meta-grid">
+        <div class="d-meta-box">
+          <div class="dml">Target SKU</div>
+          <div class="dmv" id="dMetaSku" style="font-family: 'SF Mono', monospace;">FOODS_3_090</div>
+        </div>
+        <div class="d-meta-box">
+          <div class="dml">Geographic Region</div>
+          <div class="dmv" id="dMetaRegion">CA (West Region)</div>
+        </div>
+        <div class="d-meta-box">
+          <div class="dml">Warehouse Code</div>
+          <div class="dmv" id="dMetaWarehouse">WH-1000</div>
+        </div>
+        <div class="d-meta-box">
+          <div class="dml">Statistical Z-Score</div>
+          <div class="dmv" id="dMetaZScore" style="color: var(--accent-red);">3.41</div>
+        </div>
+        <div class="d-meta-box full-width">
+          <div class="dml">Confidence & Deviation Index</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+            <span style="font-size: 13px; font-weight: 700; color: var(--accent-red);" id="dMetaDeviation">-20.5% fill rate drop</span>
+            <span style="font-size: 13px; font-weight: 700; color: var(--accent-green);" id="dConfPercentText">87%</span>
+          </div>
+          <div class="d-conf-track">
+            <div class="d-conf-fill" id="dConfFill" style="width: 87%; background-color: var(--accent-green);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini Timeline Chart -->
+      <div class="d-module-section">
+        <div class="d-section-title">Revenue Trajectory</div>
+        <div class="d-canvas-wrap">
+          <canvas id="drawerMiniChartCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Mini PVM Waterfall -->
+      <div class="d-module-section">
+        <div class="d-section-title">PVM Decomposition Breakdown</div>
+        <div class="d-pvm-layout" id="drawerPvmLayout">
+          <!-- Injected via drawer.js -->
+        </div>
+      </div>
+
+      <!-- Retrieved Evidence Signals -->
+      <div class="d-module-section">
+        <div class="d-section-title">Corroborated Evidence Signals</div>
+        <div class="d-evidence-list" id="drawerEvidenceList">
+          <!-- Injected via drawer.js -->
+        </div>
+      </div>
+
+      <!-- Recommended Action Box in Drawer -->
+      <div class="d-module-section">
+        <div class="d-section-title">Prescribed Action</div>
+        <div class="d-meta-box full-width" id="drawerActionContainer" style="background-color: var(--accent-green-dim); border-color: var(--accent-green-border);">
+          <!-- Injected via drawer.js -->
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =======================================================================
+       GENERIC APPLICATION MODALS
+       ======================================================================= -->
+  <!-- 1. Data Catalog Modal -->
+  <div class="modal-overlay" id="dataCatalogModal" onclick="if(event.target===this) closeModal('dataCatalogModal')">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title" id="catalogModalTitle">Enterprise Data Catalog</div>
+        <div class="modal-close-btn" onclick="closeModal('dataCatalogModal')">✕</div>
+      </div>
+      <div class="modal-body" id="catalogModalBody"></div>
+    </div>
+  </div>
+
+  <!-- 2. Audit Log Modal -->
+  <div class="modal-overlay" id="auditModal" onclick="if(event.target===this) closeModal('auditModal')">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title">Audit Log & Compliance Registry</div>
+        <div class="modal-close-btn" onclick="closeModal('auditModal')">✕</div>
+      </div>
+      <div class="modal-body" id="auditModalBody"></div>
+    </div>
+  </div>
+
+  <!-- 3. User Profile Modal -->
+  <div class="modal-overlay" id="profileModal" onclick="if(event.target===this) closeModal('profileModal')">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title">User Profile & Entitlements</div>
+        <div class="modal-close-btn" onclick="closeModal('profileModal')">✕</div>
+      </div>
+      <div class="modal-body" id="profileModalBody"></div>
+    </div>
+  </div>
+
+  <!-- 4. Action Assignment Modal -->
+  <div class="modal-overlay" id="assignmentModal" onclick="if(event.target===this) closeModal('assignmentModal')">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title">Assign Operational Action Item</div>
+        <div class="modal-close-btn" onclick="closeModal('assignmentModal')">✕</div>
+      </div>
+      <div class="modal-body" id="assignModalBody"></div>
+    </div>
+  </div>
+
+  <!-- 5. Create / Inject Custom Anomaly Modal -->
+  <div class="modal-overlay" id="createAnomalyModal" onclick="if(event.target===this) closeModal('createAnomalyModal')">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title">Configure Anomaly Scenario Thresholds</div>
+        <div class="modal-close-btn" onclick="closeModal('createAnomalyModal')">✕</div>
+      </div>
+      <div class="modal-body" id="createAnomalyModalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="app-toast-container" id="appToastContainer"></div>
+
+  <!-- Conversational Assistant (opt-in, grounded Q&A over the active anomaly) -->
+  <button class="chat-launcher" id="chatLauncher" type="button" aria-expanded="false" aria-controls="chatPanel" title="Ask about any KPI movement">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span>Ask the data</span>
+  </button>
+
+  <section class="chat-panel" id="chatPanel" aria-label="Conversational assistant">
+    <div class="chat-header">
+      <div>
+        <div class="chat-header-title">Ask the data</div>
+        <div class="chat-header-sub">Ask about the movement you're viewing or name any month, region or KPI. Figures are computed deterministically; the model only puts them into words, and it respects your role's data access.</div>
+      </div>
+      <button class="chat-close-btn" id="chatCloseBtn" type="button" aria-label="Close assistant">&#10005;</button>
+    </div>
+    <div class="chat-log" id="chatLog">
+      <div class="chat-msg chat-msg-assistant chat-msg-notice">
+        <div class="chat-bubble">Try &ldquo;What drove this?&rdquo;, &ldquo;Why did revenue fall in Texas in Oct 2012?&rdquo;, or &ldquo;How confident are we?&rdquo;. I only use the evidence behind these anomalies &mdash; if your question fits several movements I'll ask which one, and if the evidence isn't enough I'll say so.</div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask about this movement&hellip;"></textarea>
+      <button class="chat-send-btn" id="chatSendBtn" type="button">Send</button>
+    </div>
+  </section>
+
+  <!-- Modular Scripts Architecture -->
+  <script src="js/state.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/drawer.js"></script>
+  <script src="js/evidence.js"></script>
+  <script src="js/actions.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>

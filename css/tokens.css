@@ -1,0 +1,112 @@
+/* ==========================================================================
+   DESIGN TOKENS — Enterprise Dark Aesthetic (David Morgan Refined System)
+   ========================================================================== */
+
+:root {
+  /* Surface & Background Palette (Natural Deep Charcoal & Slate) */
+  --bg-app: #09090b;
+  --bg-sidebar-nav: #000000;
+  --bg-sidebar: #050507;
+  --bg-card: #0c0c0e;
+  --bg-card-hover: #121215;
+  --bg-card-active: #161619;
+  --bg-surface: #09090b;
+  --bg-elevated: #121215;
+  --bg-pill: #121215;
+  --bg-pill-hover: #161619;
+  --bg-modal-backdrop: rgba(0, 0, 0, 0.85);
+
+  /* Accent & Status Colors (Extremely Restrained) */
+  --accent-green: #10b981;
+  --accent-green-bright: #34d399;
+  --accent-green-glow: transparent;
+  --accent-green-border: rgba(16, 185, 129, 0.2);
+  --accent-green-dim: rgba(16, 185, 129, 0.05);
+
+  --accent-blue: #718096;
+  --accent-blue-glow: transparent;
+  --accent-blue-border: rgba(113, 128, 150, 0.2);
+  --accent-blue-dim: rgba(113, 128, 150, 0.05);
+
+  --accent-amber: #f59e0b;
+  --accent-amber-glow: transparent;
+  --accent-amber-border: rgba(245, 158, 11, 0.3);
+  --accent-amber-dim: rgba(245, 158, 11, 0.05);
+
+  --accent-red: #ef4444;
+  --accent-red-glow: transparent;
+  --accent-red-border: rgba(239, 68, 68, 0.3);
+  --accent-red-dim: rgba(239, 68, 68, 0.05);
+
+  --accent-purple: #718096;
+  --accent-purple-glow: transparent;
+  --accent-purple-border: rgba(113, 128, 150, 0.2);
+
+  /* Typography Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-dim: #64748b;
+  --text-inverse: #000000;
+
+  /* Borders & Dividers */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.12);
+  --border-prominent: rgba(255, 255, 255, 0.2);
+
+  /* Dimensions */
+  --icon-nav-width: 60px;
+  --sidebar-width: 290px;
+  --topbar-height: 56px;
+
+  /* Typography Scales (Large & Confident) */
+  --font-hero: 64px;
+  --font-page-title: 42px;
+  --font-h1: 36px;
+  --font-h2: 28px;
+  --font-h3: 20px;
+  --font-body-large: 16px;
+  --font-body: 14px;
+  --font-small: 12px;
+  --font-tiny: 10px;
+
+  /* Radii (Sharp & Flat Surfaces) */
+  --radius-xs: 2px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-full: 9999px;
+
+  /* Shadows (Flat Design) */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+
+  /* Transitions */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms;
+  --dur-medium: 250ms;
+  --dur-slow: 400ms;
+}
+
+/* High Contrast Theme */
+body.theme-high-contrast {
+  --bg-app: #000000;
+  --bg-sidebar-nav: #000000;
+  --bg-sidebar: #000000;
+  --bg-card: #0a0a0a;
+  --bg-card-hover: #121212;
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-medium: rgba(255, 255, 255, 0.22);
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
