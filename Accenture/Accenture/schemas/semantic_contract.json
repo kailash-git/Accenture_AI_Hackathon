@@ -1,0 +1,176 @@
+{
+  "project": "BusinessIntelligence.ai KPI Engine",
+  "version": "1.0.0",
+  "semantic_layer": {
+    "kpis": {
+      "Revenue": {
+        "description": "Total sales revenue derived from units sold * average selling price.",
+        "calculation_type": "additive",
+        "sql_formula": "SUM(revenue)",
+        "source_table": "fact_sales_daily",
+        "dimensions": ["state_id", "cat_id", "dept_id", "item_id", "date"],
+        "granularity": "daily",
+        "drivers": ["volume", "price", "mix", "other"],
+        "driver_method": "Price-Volume-Mix decomposition (src/analytics/pvm_analyzer.py), scoped to the same (item_id, state_id) as the flagged anomaly so the effects sum exactly to that anomaly's own actual-minus-baseline delta.",
+        "lineage": "fact_sales_daily (raw M5 daily sales, KPI-data/01_get_and_build_dataset.py) -> scripts/generate_mock_data.py:seed_sales() -> AnomalyDetector.run_detection(kpi_name='Revenue')"
+      },
+      "GrossMarginPercent": {
+        "description": "Gross profit margin percentage representing profit relative to revenue.",
+        "calculation_type": "non_additive",
+        "sql_formula": "(SUM(revenue) - SUM(cost_of_goods_sold)) / SUM(revenue)",
+        "source_table": "fact_sales_daily",
+        "dimensions": ["state_id", "cat_id", "dept_id", "item_id", "date"],
+        "granularity": "daily",
+        "drivers": ["average_selling_price", "cost_of_goods_sold"],
+        "driver_method": "Detected via the same rolling z-score engine as Revenue (AnomalyDetector.run_detection(kpi_name='GrossMarginPercent')); this prototype does not yet decompose margin movement into a PVM-style sub-driver breakdown -- it is explained via evidence_reconciler retrieval (supply/marketing/feedback), a stated scope limitation rather than a fabricated decomposition.",
+        "lineage": "fact_sales_daily.{revenue, cost_of_goods_sold} -> api_server.py:_monthly_margin_series() / AnomalyDetector"
+      },
+      "InventoryTurnover": {
+        "description": "Indicates the supply chain efficiency in moving products, computed as monthly COGS / average inventory value.",
+        "calculation_type": "non_additive",
+        "sql_formula": "SUM(cost_of_goods_sold) / AVG(inventory_on_hand * supplier_raw_cost)",
+        "source_table": "inventory_logs",
+        "dimensions": ["warehouse_name", "state_id", "date"],
+        "granularity": "daily",
+        "drivers": ["cost_of_goods_sold", "average_inventory_value"],
+        "driver_method": "Detected via the same rolling z-score engine as Revenue (AnomalyDetector.run_detection(kpi_name='InventoryTurnover')); same stated scope limitation as GrossMarginPercent above -- no PVM-style decomposition, explained via evidence retrieval instead.",
+        "lineage": "inventory_logs.inventory_on_hand + sku_lookup.supplier_raw_cost + fact_sales_daily.cost_of_goods_sold -> api_server.py:_monthly_turnover_series() / AnomalyDetector"
+      }
+    },
+    "thresholds": {
+      "anomaly_z_score": {
+        "value": 2.0,
+        "description": "Minimum |z-score| against the trailing 8-period baseline for AnomalyDetector to flag a movement as an anomaly at all (analytics/anomaly_detector.py).",
+        "applies_to": "all KPIs"
+      },
+      "severity_critical_z_score": {
+        "value": 3.0,
+        "description": "|z-score| above which a flagged anomaly is classified CRITICAL rather than WARNING."
+      },
+      "abstention_confidence_floor": {
+        "value": 40.0,
+        "unit": "percent",
+        "description": "Confidence below this threshold forces abstention regardless of evidence (llm/abstention.py CONFIDENCE_THRESHOLD)."
+      },
+      "abstention_materiality_z_score": {
+        "value": 2.0,
+        "description": "An anomaly is treated as material enough to require corroborating evidence (or else abstain as 'insufficient evidence') once |z-score| reaches this bar -- deliberately the detector's own significance threshold, not a separate raw percent-move cutoff, since percent size alone is a poor materiality proxy against a low-variance baseline."
+      },
+      "evidence_relevance_tiers": {
+        "high": ">= 0.6 cosine similarity to the anomaly-type vocabulary",
+        "medium": ">= 0.3 cosine similarity",
+        "low": "< 0.3 cosine similarity -- treated as background context only, not corroborating evidence"
+      },
+      "graph_temporal_window_days": {
+        "before_period_start": 5,
+        "after_period_end": 10,
+        "description": "A feedback record only counts as related to an anomaly if its date falls in this window (retrieval/knowledge_graph.py, retrieval/evidence_reconciler.py) -- kept identical in both modules so 'related to this anomaly' is one consistent policy, not two that can silently disagree."
+      }
+    },
+    "mappings": {
+      "region_to_state": {
+        "West": "CA",
+        "South": "TX"
+      },
+      "state_to_region": {
+        "CA": "West",
+        "TX": "South"
+      }
+    },
+    "entitlements": {
+      "vp_sales": {
+        "role_name": "VP of Retail Sales (Executive)",
+        "allowed_columns": [
+          "fact_sales_daily.date",
+          "fact_sales_daily.state_id",
+          "fact_sales_daily.cat_id",
+          "fact_sales_daily.dept_id",
+          "fact_sales_daily.units",
+          "fact_sales_daily.sell_price",
+          "fact_sales_daily.revenue",
+          "fact_sales_daily.cost_of_goods_sold",
+          "fact_sales_daily.gross_margin_percent",
+          "source_marketing_weekly.week_start_monday",
+          "source_marketing_weekly.region_name",
+          "source_marketing_weekly.channel",
+          "source_marketing_weekly.marketing_spend"
+        ],
+        "restricted_columns": [
+          "sku_lookup.warehouse_sku",
+          "sku_lookup.supplier_raw_cost",
+          "source_supply_monthly.warehouse_sku",
+          "source_supply_monthly.fill_rate",
+          "source_supply_monthly.stockout_days"
+        ],
+        "masking_actions": {
+          "sku_lookup.warehouse_sku": "MASK_RESTRICTED",
+          "sku_lookup.supplier_raw_cost": "MASK_NULL",
+          "source_supply_monthly.warehouse_sku": "MASK_RESTRICTED",
+          "source_supply_monthly.fill_rate": "MASK_NULL",
+          "source_supply_monthly.stockout_days": "MASK_NULL"
+        }
+      },
+      "supply_planner": {
+        "role_name": "Regional Supply Chain Planner (Analyst)",
+        "allowed_columns": [
+          "fact_sales_daily.date",
+          "fact_sales_daily.state_id",
+          "fact_sales_daily.cat_id",
+          "fact_sales_daily.dept_id",
+          "fact_sales_daily.units",
+          "fact_sales_daily.sell_price",
+          "sku_lookup.item_id",
+          "sku_lookup.warehouse_sku",
+          "source_supply_monthly.warehouse_sku",
+          "source_supply_monthly.state_id",
+          "source_supply_monthly.month",
+          "source_supply_monthly.fill_rate",
+          "source_supply_monthly.stockout_days"
+        ],
+        "restricted_columns": [
+          "fact_sales_daily.revenue",
+          "fact_sales_daily.cost_of_goods_sold",
+          "fact_sales_daily.gross_margin_percent",
+          "sku_lookup.supplier_raw_cost",
+          "source_marketing_weekly.marketing_spend"
+        ],
+        "masking_actions": {
+          "fact_sales_daily.revenue": "MASK_NULL",
+          "fact_sales_daily.cost_of_goods_sold": "MASK_NULL",
+          "fact_sales_daily.gross_margin_percent": "MASK_NULL",
+          "sku_lookup.supplier_raw_cost": "MASK_NULL",
+          "source_marketing_weekly.marketing_spend": "MASK_NULL"
+        }
+      },
+      "admin": {
+        "role_name": "Data Governance & Compliance Admin",
+        "description": "Full-access oversight role for audit and governance review -- deliberately granted every column both other roles are scoped to, rather than bypassing the entitlements model. Used to verify masking behaves as specified for vp_sales/supply_planner by comparing against the unredacted ground truth.",
+        "allowed_columns": [
+          "fact_sales_daily.date",
+          "fact_sales_daily.state_id",
+          "fact_sales_daily.cat_id",
+          "fact_sales_daily.dept_id",
+          "fact_sales_daily.units",
+          "fact_sales_daily.sell_price",
+          "fact_sales_daily.revenue",
+          "fact_sales_daily.cost_of_goods_sold",
+          "fact_sales_daily.gross_margin_percent",
+          "sku_lookup.item_id",
+          "sku_lookup.warehouse_sku",
+          "sku_lookup.supplier_raw_cost",
+          "source_marketing_weekly.week_start_monday",
+          "source_marketing_weekly.region_name",
+          "source_marketing_weekly.channel",
+          "source_marketing_weekly.marketing_spend",
+          "source_supply_monthly.warehouse_sku",
+          "source_supply_monthly.state_id",
+          "source_supply_monthly.month",
+          "source_supply_monthly.fill_rate",
+          "source_supply_monthly.stockout_days"
+        ],
+        "restricted_columns": [],
+        "masking_actions": {}
+      }
+    }
+  }
+}
