@@ -1256,6 +1256,7 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
         connected KPIs across two or three data sources with different grains").
         """
         empty = {"labels": [], "values": [], "valueLabel": "", "anomalyIndex": None,
+                 "anomalies": [], "focusIndex": None, "focusKey": None, "focusKpi": "",
                  "anomalyColor": "#ef4444", "headlineDelta": "", "isNegative": False}
         if not os.path.exists(DB_PATH):
             self._send_json(empty)
@@ -1269,6 +1270,8 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
                 return
             item_id = detail_row["item_id"]
             state_id = detail_row["state_id"]
+            series_anomalies = []
+            _ANOM_KPI_NAME = {'revenue': 'Revenue', 'margin': 'GrossMarginPercent', 'turnover': 'InventoryTurnover'}
 
             if metric == 'margin':
                 # gross_margin_percent is explicitly restricted for supply_planner in
@@ -1297,6 +1300,16 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
                     ORDER BY m ASC
                 """, (item_id, state_id))
                 months = [(r[0], float(r[1]) if r[1] is not None else 0.0) for r in rows]
+
+            # Every anomaly on this same (item_id, state_id) series for the KPI
+            # being charted -- returned so the chart can plot them all as dots the
+            # analyst can click through to, not just the one currently open.
+            anom_rows, _ = _timed_query(conn, """
+                SELECT scenario_key, anomaly_id, period_start, direction, severity
+                FROM anomalies
+                WHERE item_id = ? AND state_id = ? AND kpi_name = ?
+            """, (item_id, state_id, _ANOM_KPI_NAME.get(metric, 'Revenue')))
+            series_anomalies = [dict(r) for r in anom_rows]
         finally:
             conn.close()
 
@@ -1309,24 +1322,55 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
             labels.append(f"{calendar.month_abbr[month_num]} {year}")
             values.append(v)
 
+        anomalies_out = []
+        month_to_idx = {m: i for i, (m, _) in enumerate(months)}
+        selected_key = detail_row["scenario_key"] or detail_row["anomaly_id"]
+        for a in series_anomalies:
+            mi = month_to_idx.get((a["period_start"] or "")[:7])
+            if mi is None:
+                continue
+            akey = a["scenario_key"] or a["anomaly_id"]
+            anomalies_out.append({
+                "monthIndex": mi,
+                "key": akey,
+                "label": f'{(a["severity"] or "").title() or "KPI"} anomaly',
+                "severity": a["severity"],
+                "direction": a["direction"],
+                "selected": akey == selected_key,
+            })
+
+        deviation_pct = detail_row["deviation_pct"] or 0.0
         if metric == 'revenue':
-            anomaly_month = detail_row["period_start"][:7]
-            anomaly_idx = next((i for i, (m, _) in enumerate(months) if m == anomaly_month), None)
-            deviation_pct = detail_row["deviation_pct"] or 0.0
+            anomaly_idx = month_to_idx.get(detail_row["period_start"][:7])
             is_negative = deviation_pct < 0
             headline_delta = f"{deviation_pct * 100:+.1f}%"
         else:
-            # margin/turnover have no seeded anomaly row of their own -- flag the last
-            # point using the same rolling z-score convention AnomalyDetector.run_detection
-            # uses (window=8, threshold=2.0), so "anomalous" means the same thing here as
-            # everywhere else in this engine, not a separately-invented rule.
-            anomaly_idx, is_negative, headline_delta = self._flag_last_point_if_anomalous(values)
+            # If the open anomaly is itself on this KPI series, anchor the headline
+            # to its own month; otherwise fall back to the rolling z-score last-point
+            # check (window=8, threshold=2.0 -- the same convention AnomalyDetector uses).
+            sel = next((x for x in anomalies_out if x["selected"]), None)
+            if sel is not None:
+                anomaly_idx = sel["monthIndex"]
+                is_negative = deviation_pct < 0
+                headline_delta = f"{deviation_pct * 100:+.1f}%"
+            else:
+                anomaly_idx, is_negative, headline_delta = self._flag_last_point_if_anomalous(values)
+
+        # The month of the anomaly currently under investigation, regardless of
+        # whether it belongs to the KPI being charted -- lets the chart always
+        # mark "you are looking into this point in time" even on a KPI tab where
+        # that anomaly has no dot of its own.
+        focus_idx = month_to_idx.get((detail_row["period_start"] or "")[:7])
 
         self._send_json({
             "labels": labels,
             "values": values,
             "valueLabel": value_label,
             "anomalyIndex": anomaly_idx,
+            "anomalies": anomalies_out,
+            "focusIndex": focus_idx,
+            "focusKey": selected_key,
+            "focusKpi": value_label,
             "anomalyColor": "#ef4444" if is_negative else "#10b981",
             "headlineDelta": headline_delta,
             "isNegative": is_negative,
