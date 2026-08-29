@@ -82,6 +82,35 @@
   font-weight: 600;
 }
 
+/* Live-stream pause/resume control -- sits in the same pill group as the time
+   filters but acts on the streaming window (js/charts.js). */
+.viz-replay-btn {
+  color: var(--accent-green);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.viz-replay-btn.is-streaming {
+  color: var(--accent-amber);
+}
+
+.viz-replay-btn.is-streaming::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: var(--accent-amber);
+  vertical-align: middle;
+  animation: vizReplayPulse 1s ease-in-out infinite;
+}
+
+@keyframes vizReplayPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
 /* Metric Big Headline */
 .viz-headline-row {
   display: flex;
