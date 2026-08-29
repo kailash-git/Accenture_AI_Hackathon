@@ -162,29 +162,40 @@ class TestServerSideEntitlements(unittest.TestCase):
         self.assertIn("redacted", fb_evidence["fullText"].lower())
 
     def test_graph_endpoint_masking_redacts_revenue_and_identity(self):
-        graph_ctx = {
-            "hops": [{
-                "feedback_id": 4, "hops": 1, "date": "2013-05-16", "source": "support ticket",
-                "temporal_role": "concurrent_or_aftermath",
-                "text": "Register is overcharging by double. It shows high dollar revenue in our logs.",
-            }],
-            "node_count": 2,
-            "graph": {
-                "nodes": [
-                    {"id": "item:FOODS_3_586", "type": "item", "label": "FOODS_3_586", "hops": 0},
-                    {"id": "warehouse_sku:WH-1001", "type": "warehouse", "label": "WH-1001", "hops": 1},
-                    {"id": "region:TX", "type": "region", "label": "TX", "hops": 0},
-                ],
-                "edges": [],
-            },
+        # New evidence-graph subgraph shape: {nodes:[{id,kind,label,layer,...}], edges, node_count, focal}
+        subgraph = {
+            "focal": "revenue_anom_FOODS_3_586_TX_2013-05-16",
+            "node_count": 5,
+            "nodes": [
+                {"id": "revenue_anom_FOODS_3_586_TX_2013-05-16", "kind": "sales_anomaly",
+                 "label": "revenue · 2013-05-16", "layer": 0, "column": "revenue",
+                 "value": 5100.1, "baseline_mean": 10200.0, "volume_effect": -4900.0},
+                {"id": "item_FOODS_3_586", "kind": "item_entity", "label": "FOODS_3_586", "layer": 1},
+                {"id": "state_TX", "kind": "state_entity", "label": "TX", "layer": 1},
+                {"id": "warehouse_WH-1001", "kind": "warehouse_entity", "label": "WH-1001", "layer": 1},
+                {"id": "mkt_anom_TV_TX_2013-05-13", "kind": "marketing_anomaly",
+                 "label": "TV spend · 2013-05-13", "layer": 2, "value": 812.0, "region": "South"},
+            ],
+            "edges": [
+                {"source": "revenue_anom_FOODS_3_586_TX_2013-05-16", "target": "units_anom_FOODS_3_586_TX_2013-05-16",
+                 "relation": "explains", "driver": "volume", "dollar_effect": -4900.0, "weight": 1.0},
+            ],
         }
-        planner_masked = self.api_server._mask_graph_for_role(graph_ctx, "supply_planner")
-        self.assertNotIn("revenue", planner_masked["hops"][0]["text"].lower())
 
-        vp_masked = self.api_server._mask_graph_for_role(graph_ctx, "vp_sales")
-        item_node = [n for n in vp_masked["graph"]["nodes"] if n["type"] == "item"][0]
-        wh_node = [n for n in vp_masked["graph"]["nodes"] if n["type"] == "warehouse"][0]
-        region_node = [n for n in vp_masked["graph"]["nodes"] if n["type"] == "region"][0]
+        planner_masked = self.api_server._mask_graph_for_role(subgraph, "supply_planner")
+        sales_node = [n for n in planner_masked["nodes"] if n["kind"] == "sales_anomaly"][0]
+        self.assertIsNone(sales_node["value"])
+        self.assertIsNone(sales_node["baseline_mean"])
+        self.assertIsNone(sales_node["volume_effect"])
+        self.assertTrue(sales_node["restricted"])
+        mkt_node = [n for n in planner_masked["nodes"] if n["kind"] == "marketing_anomaly"][0]
+        self.assertEqual(mkt_node["label"], "RESTRICTED")
+        self.assertIsNone(planner_masked["edges"][0]["dollar_effect"])
+
+        vp_masked = self.api_server._mask_graph_for_role(subgraph, "vp_sales")
+        item_node = [n for n in vp_masked["nodes"] if n["kind"] == "item_entity"][0]
+        wh_node = [n for n in vp_masked["nodes"] if n["kind"] == "warehouse_entity"][0]
+        region_node = [n for n in vp_masked["nodes"] if n["kind"] == "state_entity"][0]
         self.assertEqual(item_node["label"], "RESTRICTED")
         self.assertEqual(wh_node["label"], "RESTRICTED")
         self.assertEqual(region_node["label"], "TX")  # region is not restricted for this role

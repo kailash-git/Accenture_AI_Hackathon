@@ -39,6 +39,15 @@ DB_PATH = os.path.join(ACCENTURE_DIR, 'data', 'business_bi.db')
 CONTRACT_PATH = os.path.join(ACCENTURE_DIR, 'schemas', 'semantic_contract.json')
 SEED_SCRIPT_PATH = os.path.join(ACCENTURE_DIR, 'scripts', 'generate_mock_data.py')
 
+# The anomaly-centric evidence graph (analytics.graph_builder) is built + pickled
+# at seed time; this server loads it once at startup and serves per-anomaly
+# subgraphs live (analytics.graph_subgraph.anomaly_subgraph). networkx is the
+# only new runtime dependency this adds -- graph_query / graph_store / graph_subgraph
+# are otherwise stdlib.
+sys.path.insert(0, os.path.join(ACCENTURE_DIR, 'src'))
+GRAPH_PATH = os.path.join(ACCENTURE_DIR, 'data', 'evidence_graph.gpickle')
+GRAPH = None  # populated by _load_evidence_graph() in run_server()
+
 VALID_ROLES = ("vp_sales", "supply_planner", "admin")
 DEFAULT_ROLE = "vp_sales"
 
@@ -418,6 +427,57 @@ def _timed_query(conn, sql, params=()):
     return rows, elapsed_ms
 
 
+def _load_evidence_graph():
+    """Load the pickled evidence graph once at startup. Any failure leaves
+    GRAPH as None and every graph surface degrades to empty rather than 500."""
+    global GRAPH
+    try:
+        from analytics.graph_store import load_graph, save_graph
+        if not os.path.exists(GRAPH_PATH) and os.path.exists(DB_PATH):
+            # DB seeded by an older checkout that predates the evidence graph --
+            # build it once now rather than serving empty panels.
+            print(f"  evidence graph missing -- building it from {DB_PATH} ...")
+            from analytics.graph_builder import build_graph as _bg
+            save_graph(_bg(DB_PATH), GRAPH_PATH)
+        if not os.path.exists(GRAPH_PATH):
+            print(f"  evidence graph not found at {GRAPH_PATH} -- graph panel will be empty "
+                  f"until 'python scripts/build_graph.py' is run.")
+            return
+        GRAPH = load_graph(GRAPH_PATH)
+        print(f"  evidence graph loaded: {GRAPH.number_of_nodes()} nodes / "
+              f"{GRAPH.number_of_edges()} edges from {GRAPH_PATH}")
+    except Exception as e:  # noqa: BLE001 -- never let graph load break the server
+        GRAPH = None
+        print(f"  WARNING: could not load evidence graph ({type(e).__name__}: {e}); "
+              f"graph endpoints will return empty.")
+
+
+_EMPTY_GRAPH_CTX = {"nodes": [], "edges": [], "node_count": 0, "focal": None}
+
+
+def _anomaly_subgraph_for_row(r):
+    """Per-anomaly subgraph from the live evidence graph for a DB row `r`
+    (sqlite3.Row from the `anomalies` table). Falls back to the seed-time
+    snapshot stored in graph_context_json if the live graph is unavailable."""
+    if GRAPH is not None:
+        try:
+            from analytics.graph_subgraph import anomaly_subgraph
+            return anomaly_subgraph(
+                GRAPH, r["kpi_name"], r["item_id"], r["state_id"],
+                r["period_start"], r["period_end"],
+            )
+        except Exception as e:  # noqa: BLE001
+            print(f"  WARNING: anomaly_subgraph failed for {r['anomaly_id']}: "
+                  f"{type(e).__name__}: {e}")
+    try:
+        stored = json.loads(r["graph_context_json"]) if r["graph_context_json"] else None
+        if isinstance(stored, dict) and "nodes" in stored:
+            return stored
+    except Exception:
+        pass
+    return dict(_EMPTY_GRAPH_CTX)
+
+
 def _row_to_anomaly_dict(r):
     return {
         "id": r["anomaly_id"],
@@ -446,7 +506,7 @@ def _row_to_anomaly_dict(r):
         "products": json.loads(r["products_json"]),
         "evidence": json.loads(r["evidence_json"]),
         "logistics": json.loads(r["logistics_json"]),
-        "graph_context": json.loads(r["graph_context_json"]) if r["graph_context_json"] else {"hops": [], "node_count": 0},
+        "graph_context": _anomaly_subgraph_for_row(r),
         "generation_telemetry": json.loads(r["generation_telemetry_json"]) if r["generation_telemetry_json"] else {},
         "narratives": json.loads(r["narratives_json"]) if r["narratives_json"] else {},
     }
@@ -491,26 +551,56 @@ def _redact_financial_disclosure(text, role):
     return " ".join(redacted)
 
 
+_VP_WAREHOUSE_KINDS = ("warehouse_entity", "supply_anomaly", "inventory_anomaly")
+_PLANNER_FINANCIAL_ATTRS = ("value", "baseline_mean", "price_effect", "volume_effect",
+                            "interaction_effect", "total_decomposed", "actual_delta")
+
+
 def _mask_graph_for_role(graph_ctx, role):
     """
-    Real server-side masking for the /graph (GraphRAG) endpoint, mirroring
-    _apply_entitlements below -- the knowledge-graph panel is a first-class
-    surface of the semantic contract, not an unmasked side channel around it.
+    Real server-side masking for the /graph endpoint and the anomaly-detail
+    payload's embedded graph_context, mirroring _apply_entitlements -- the
+    evidence-graph panel is a first-class surface of the semantic contract,
+    not an unmasked side channel around it.
+
+    The subgraph shape is {nodes:[{id,kind,label,layer,...attrs}], edges:[...],
+    node_count, focal} (see analytics.graph_subgraph.anomaly_subgraph).
+    "admin" falls through unmodified -- the contract's full-access role.
     """
-    d = copy.deepcopy(graph_ctx) if graph_ctx else {"hops": [], "node_count": 0, "graph": {"nodes": [], "edges": []}}
+    d = copy.deepcopy(graph_ctx) if graph_ctx else dict(_EMPTY_GRAPH_CTX)
+    nodes = d.get("nodes", [])
 
-    for h in d.get("hops", []):
-        h["text"] = _redact_financial_disclosure(h.get("text", ""), role)
-
-    graph = d.get("graph")
-    if graph and role == "vp_sales":
-        # SKU/warehouse-level identity is restricted for the VP role everywhere else
-        # in the payload (item_id, products[].sku, logistics.*) -- the graph's item
-        # and warehouse nodes must not become the one place that detail still leaks.
-        for n in graph.get("nodes", []):
-            if n.get("type") in ("item", "warehouse"):
+    if role == "vp_sales":
+        # SKU / warehouse-level identity is restricted for the VP everywhere else
+        # (item_id, products[].sku, logistics.*) -- don't let the graph be the leak.
+        for n in nodes:
+            if n.get("kind") in ("item_entity",):
                 n["label"] = "RESTRICTED"
                 n["restricted"] = True
+            if n.get("kind") in _VP_WAREHOUSE_KINDS:
+                n["restricted"] = True
+                if n.get("kind") == "warehouse_entity":
+                    n["label"] = "RESTRICTED"
+                n.pop("warehouse_sku", None)
+                n.pop("inventory_on_hand", None)
+
+    elif role == "supply_planner":
+        # Revenue / margin / marketing-spend figures are restricted for this role.
+        for n in nodes:
+            kind = n.get("kind")
+            if kind == "sales_anomaly":
+                for attr in _PLANNER_FINANCIAL_ATTRS:
+                    if attr in n:
+                        n[attr] = None
+                n["restricted"] = True
+            elif kind == "marketing_anomaly":
+                n["label"] = "RESTRICTED"
+                n["restricted"] = True
+                n.pop("value", None)
+                n.pop("region", None)
+        for e in d.get("edges", []):
+            if "dollar_effect" in e:
+                e["dollar_effect"] = None
 
     return d
 
@@ -540,7 +630,11 @@ def _apply_entitlements(anomaly, role):
         if d.get("pvm"):
             for k in ("volume", "price", "mix", "other"):
                 if k in d["pvm"]:
-                    d["pvm"][k] = {"val": None, "pct": "RESTRICTED", "expl": "Financial figures restricted for this role."}
+                    d["pvm"][k] = {"val": None, "pct": "RESTRICTED", "share_of_change": "RESTRICTED",
+                                   "direction": d["pvm"][k].get("direction", "none"),
+                                   "expl": "Financial figures restricted for this role."}
+            if "driver_summary" in d["pvm"]:
+                d["pvm"]["driver_summary"] = "RESTRICTED"
         for p in d.get("products", []):
             p["revenueImpact"] = "RESTRICTED"
         for e in d.get("evidence", []):
@@ -835,6 +929,10 @@ def _chat_anomaly_context(key, role, message=None, focus=False):
         "summary": a.get("summary"),
         "synthesis": a.get("synthesis"),
         "price_volume_mix": a.get("pvm"),
+        # Authored-once, correctly-signed driver sentence -- the model should use
+        # this phrasing rather than re-deriving percentages from pvm.*.val.
+        "revenue_driver_summary": (a.get("pvm") or {}).get("driver_summary"),
+        "drivers_opposing": (a.get("pvm") or {}).get("drivers_opposing"),
         "products": a.get("products"),
         "recommended_action": a.get("recommendedAction"),
         "evidence": _compact_evidence(a.get("evidence")),
@@ -1125,7 +1223,7 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
         self._send_json(a)
 
     def _handle_graph(self, key, role):
-        empty = {"hops": [], "node_count": 0, "graph": {"nodes": [], "edges": []}}
+        empty = dict(_EMPTY_GRAPH_CTX)
         if not os.path.exists(DB_PATH):
             self._send_json(empty)
             return
@@ -1138,7 +1236,10 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
         if not r:
             self._send_json(empty)
             return
-        graph_ctx = json.loads(r["graph_context_json"]) if r["graph_context_json"] else empty
+        # Extract this anomaly's subgraph live from the loaded evidence graph
+        # (falls back to the seed-time snapshot in graph_context_json), then
+        # apply role-based entitlement masking.
+        graph_ctx = _anomaly_subgraph_for_row(r)
         self._send_json(_mask_graph_for_role(graph_ctx, role))
 
     def _handle_timeline(self, key, role, metric='revenue'):
@@ -1416,6 +1517,7 @@ class ThreadingHTTPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 def run_server():
     os.chdir(BASE_DIR)
     _ensure_db_seeded()
+    _load_evidence_graph()
     with ThreadingHTTPServer(("", PORT), ApiRequestHandler) as httpd:
         print("============================================================")
         print(f"  KPI Intelligence API Server Running on http://127.0.0.1:{PORT}")
