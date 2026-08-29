@@ -1,32 +1,23 @@
 # KPI Intelligence-to-Action Engine
 
-**Accenture Innovation Challenge 2026 · Round 2 · Track 3 — BusinessIntelligence.ai**
-Team **Stack Overflowed** — IIT Madras
+Accenture Innovation Challenge 2026 — Round 2, Track 3 (BusinessIntelligence.ai)
+Team Stack Overflowed, IIT Madras
 
-<p>
-<img alt="runtime" src="https://img.shields.io/badge/live%20runtime-Python%20stdlib%20%2B%20networkx-3776AB">
-<img alt="live LLM calls" src="https://img.shields.io/badge/LLM%20calls%20on%20analytics%20path-0-brightgreen">
-<img alt="cost per load" src="https://img.shields.io/badge/cost%20per%20dashboard%20load-%240.00-brightgreen">
-<img alt="KPIs" src="https://img.shields.io/badge/connected%20KPIs-3-blue">
-<img alt="sources" src="https://img.shields.io/badge/sources-3%20grains%20%2B%20unstructured-blue">
-<img alt="movements" src="https://img.shields.io/badge/movements%20detected-57-blue">
-<img alt="license" src="https://img.shields.io/badge/license-MIT-lightgrey">
-</p>
-
-> An engine that turns a **KPI movement** into a **persona-specific, evidence-cited action** — it detects
-> material movements, ranks their drivers, explains them in plain language, communicates uncertainty
-> (or abstains), and recommends the next step. **Every quantitative claim is produced by deterministic
-> analytics; the LLM only words the narrative**, and every response shows which parts were which.
+The engine turns a KPI movement into a persona-specific, evidence-cited action. It detects material
+movements, ranks their drivers, explains them in plain language, communicates uncertainty or abstains,
+and recommends the next step. Every quantitative claim is produced by deterministic analytics; the LLM
+only words the narrative, and every response records which parts were which.
 
 ---
 
 ## 1. Demo video
 
-▶️ **Prototype walkthrough:** `<add public link — YouTube / Drive — before submission>`
+Prototype walkthrough: `<add public link — YouTube / Drive — before submission>`
 
-Covered in the video: scenario load → trajectory chart with all series anomalies → evidence trail +
-anomaly-centric knowledge graph → live role switch (masking visibly changes) → conversational assistant
-(grounded answer, clarification, abstention) → approve / assign an action → runtime telemetry.
+The walkthrough covers: scenario load, the revenue trajectory chart with all series anomalies annotated,
+the evidence trail and anomaly-centric knowledge graph, a live role switch that visibly changes masking,
+the conversational assistant (grounded answer, clarification, and abstention), approving and assigning an
+action, and the runtime telemetry panel.
 
 ---
 
@@ -50,7 +41,7 @@ traditional ML, retrieval or LLMs — and why."* This engine is built around tha
 | Stage | Engine |
 |---|---|
 | Detect movements, rank drivers (PVM), score confidence, decide abstention | **Deterministic** — `src/analytics/*`, `src/llm/abstention.py` |
-| Reconcile structured ↔ unstructured evidence, build & query the evidence graph | **Deterministic** — `src/retrieval/evidence_reconciler.py`, `src/analytics/graph_*` |
+| Reconcile structured and unstructured evidence, build & query the evidence graph | **Deterministic** — `src/retrieval/evidence_reconciler.py`, `src/analytics/graph_*` |
 | Enforce row/column data access | **Deterministic** — `_apply_entitlements` / `_mask_graph_for_role` in `api_server.py`, driven by the semantic contract |
 | Seed-time narrative pre-generation | **Deterministic templates**, optionally polished by **one cached `OPENAI_API_KEY` call per curated scenario** (`src/llm/llm_client.py`) — fully works with no key |
 | Live conversational answer wording | **LLM** — Groq `openai/gpt-oss-120b` by default, Anthropic `claude-haiku-4-5` as fallback, **one call per question** |
@@ -94,8 +85,8 @@ flowchart TB
       B1["AnomalyDetector<br/>rolling z-score · 3 KPIs"]
       B2["evidence_signal<br/>independent evidence discovery"]
       B3["PvmAnalyzer<br/>price / volume / mix split"]
-      B4["EvidenceReconciler<br/>structured ↔ unstructured · cosine tiers"]
-      B5["graph_builder<br/>evidence graph → .gpickle"]
+      B4["EvidenceReconciler<br/>structured and unstructured · cosine tiers"]
+      B5["graph_builder<br/>evidence graph -> .gpickle"]
       B6["abstention gate + NarrativeGenerator<br/>optional 1 cached LLM polish / curated scenario"]
     end
 
@@ -134,7 +125,7 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    ST["STATISTICAL signal<br/>|z| ≥ 2.0 vs trailing 8-period baseline<br/>anomaly_detector.py"] --> MG{"Merge on<br/>(kpi, item, state, period)"}
+    ST["STATISTICAL signal<br/>|z| >= 2.0 vs trailing 8-period baseline<br/>anomaly_detector.py"] --> MG{"Merge on<br/>(kpi, item, state, period)"}
     EVD["EVIDENCE-DRIVEN signal<br/>cluster unstructured feedback,<br/>score & classify strong / moderate<br/>evidence_signal.py"] --> MG
     MG -->|both agree| H["HYBRID · 7"]
     MG -->|z-score only| SS["STATISTICAL · 41"]
@@ -230,8 +221,8 @@ flag but declines to assert a cause it cannot support. That is the intended beha
 ### Movements by KPI / by severity
 
 ```
-InventoryTurnover  21  ██████████████████████████████████████████        |z| ≥ 3  CRITICAL   20
-Revenue            20  ████████████████████████████████████████          |z| ≥ 2  WARNING    29
+InventoryTurnover  21  ██████████████████████████████████████████        |z| >= 3  CRITICAL   20
+Revenue            20  ████████████████████████████████████████          |z| >= 2  WARNING    29
 GrossMarginPercent 16  ████████████████████████████████                  other    ACTIVE      8
 ```
 
@@ -331,7 +322,7 @@ The prototype runs **fully without any key**. Keys unlock the live conversationa
 | `ANTHROPIC_API_KEY` | Fallback provider for the assistant if `GROQ_API_KEY` is unset (model `claude-haiku-4-5`). |
 | `OPENAI_API_KEY` | **Offline seed only** — one cached call per curated scenario to polish narrative prose. |
 
-Copy `.env.example` → `.env` and fill in what you need.
+Copy `.env.example` to `.env` and fill in what you need.
 
 ---
 
@@ -391,8 +382,8 @@ In the *"Ask the data"* panel (needs `GROQ_API_KEY` or `ANTHROPIC_API_KEY`):
 | Ask | What it demonstrates |
 |---|---|
 | `Why did revenue fall in CA in Nov 2012?` | grounded answer with PVM split + confidence |
-| `why did revenue change?` | ambiguous → asks *which movement* (**no model call**) |
-| `what happened to margin in March 2020?` | no anomaly there → says so, then gives the most material one |
+| `why did revenue change?` | ambiguous -> asks *which movement* (**no model call**) |
+| `what happened to margin in March 2020?` | no anomaly there -> says so, then gives the most material one |
 | `How confident are we?` on the `sparse` scenario | **abstains** — figures returned, root cause declined |
 | Switch role to **Supply Planner** and re-ask a revenue question | revenue / margin figures are **masked server-side** |
 
@@ -415,7 +406,7 @@ python -m pytest Accenture/Accenture/tests -q
 | `GET` | `/api/telemetry` | SQL latency, detection counts, feedback stats, seed + live-chat LLM telemetry |
 | `GET` | `/api/entitlements` | The caller role's contract entitlements |
 | `POST` | `/api/chat` | Grounded conversational answer — `{message, role, anomaly_key?, focus?}` |
-| `POST` | `/api/feedback` | 👍/👎 on a narrative — `{anomaly_id, rating, user_comments}` |
+| `POST` | `/api/feedback` | Thumbs-up / thumbs-down rating on a narrative — `{anomaly_id, rating, user_comments}` |
 | `POST` | `/api/actions/<key>/approve` · `/assign` | Record an action decision + audit id (both persist to `user_feedback`) |
 
 Role is taken from the `X-User-Role` header or `?role=` query param
@@ -425,12 +416,12 @@ Role is taken from the `X-User-Role` header or `?role=` query param
 
 | Field / column | `vp_sales` | `supply_planner` | `admin` |
 |---|---|---|---|
-| Revenue, Gross Margin %, COGS, PVM $ effects, product revenue impact | ✅ visible | ❌ `MASK_NULL` / `RESTRICTED` | ✅ |
-| Marketing spend & marketing-sourced evidence | ✅ | ❌ `RESTRICTED` | ✅ |
-| `item_id` / SKU, warehouse identity, logistics card | ❌ `RESTRICTED` | ✅ visible | ✅ |
-| Supply fill rate / stockout days | ❌ | ✅ | ✅ |
-| Free-text evidence that *narrates* a dollar figure | ✅ | ❌ disclosing clause redacted | ✅ |
-| Evidence-graph nodes/edges carrying the above | masked | masked | full |
+| Revenue, Gross Margin %, COGS, PVM dollar effects, product revenue impact | Visible | Masked (`MASK_NULL` / `RESTRICTED`) | Visible |
+| Marketing spend and marketing-sourced evidence | Visible | Masked (`RESTRICTED`) | Visible |
+| `item_id` / SKU, warehouse identity, logistics card | Masked (`RESTRICTED`) | Visible | Visible |
+| Supply fill rate / stockout days | Masked | Visible | Visible |
+| Free-text evidence that narrates a dollar figure | Visible | Disclosing clause redacted | Visible |
+| Evidence-graph nodes and edges carrying any of the above | Masked | Masked | Full |
 
 Enforced in `_apply_entitlements`, `_mask_graph_for_role`, and `_redact_financial_disclosure` in
 `api_server.py` — restricted fields are **removed from the JSON server-side** before the response
@@ -443,7 +434,7 @@ leaves the API *and* before the chat model ever sees them.
 - **Jurisdiction / data:** illustrative FMCG data — real M5 / Walmart daily sales for 3 items × 2 states
   (CA, TX), Jan 2011 – Apr 2016, reconciled with two synthetic companion sources (marketing, supply)
   sized against the real backbone's measured volatility. No real proprietary data. Elasticity figures
-  (e.g. the −1.68 unit price elasticity in the `pricecut` scenario) are **stated assumptions, not fitted
+  (e.g. the -1.68 unit price elasticity in the `pricecut` scenario) are **stated assumptions, not fitted
   values**. See [`KPI-data/README.md`](KPI-data/README.md) for provenance and the 6 integrity checks.
 - **Scenario impacts are a stated simulation assumption.** `generate_mock_data.py` projects three
   synthetic source-system anomalies (supply constraint, billing bug, price cut) back onto
@@ -470,9 +461,9 @@ leaves the API *and* before the chat model ever sees them.
 |---|---|
 | 3–5 connected KPIs across 2–3 sources, different grains | 3 KPIs · daily + weekly + monthly + unstructured |
 | Lightweight KPI / semantic contract (definitions, calcs, drivers, thresholds, lineage, access) | `schemas/semantic_contract.json` |
-| ≥ 2 personas with different narratives / actions | `vp_sales`, `supply_planner` (+ `admin` governance) |
+| At least two personas with different narratives / actions | `vp_sales`, `supply_planner` (+ `admin` governance) |
 | One multi-factor movement with known drivers | `supply` — stockout + demand + price, Nov 2012 |
-| One low-confidence scenario — clarify or abstain | `sparse`; ambiguous chat → clarification, 0 tokens |
+| One low-confidence scenario — clarify or abstain | `sparse`; ambiguous chat -> clarification, 0 tokens |
 | One sparse-history / newly launched KPI | `sparse` — HOUSEHOLD_1_020, TX, Oct 2015 launch |
 | One role-based security / entitlement scenario | live role switch; server-side masking table above |
 | Evidence: freshness, method, contribution, confidence, lineage | evidence trail + graph + `/api/telemetry` + contract `lineage` |
