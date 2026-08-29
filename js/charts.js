@@ -75,10 +75,16 @@ function _filterTimelineByYear(data, rangeKey) {
   const labels = keepIdx.map(i => data.labels[i]);
   const values = keepIdx.map(i => data.values[i]);
   const anomalyIndex = keepIdx.includes(data.anomalyIndex) ? keepIdx.indexOf(data.anomalyIndex) : null;
+  // Keep only the anomaly dots whose month survived the year filter, and
+  // renumber their monthIndex into the filtered label space.
+  const anomalies = (data.anomalies || [])
+    .filter(a => keepIdx.includes(a.monthIndex))
+    .map(a => ({ ...a, monthIndex: keepIdx.indexOf(a.monthIndex) }));
+  const focusIndex = keepIdx.includes(data.focusIndex) ? keepIdx.indexOf(data.focusIndex) : null;
   const first = values[0], last = values[values.length - 1];
   const deltaPct = first ? (last - first) / Math.abs(first) : 0;
   return {
-    ...data, labels, values, anomalyIndex,
+    ...data, labels, values, anomalyIndex, anomalies, focusIndex,
     headlineValue: undefined, // let the big-number formatter recompute from the filtered `last`
     headlineDelta: `${deltaPct * 100 >= 0 ? '+' : ''}${(deltaPct * 100).toFixed(1)}%`,
     isNegative: deltaPct < 0,
@@ -94,25 +100,70 @@ function initRevenueChart(rangeKey = 'all') {
 
   if (window.customTimelineData) {
     dataset = _filterTimelineByYear(window.customTimelineData, rangeKey);
-    if (dataset.anomalyIndex !== null && dataset.anomalyIndex !== undefined) {
+    const list = dataset.anomalies || [];
+    if (list.length) {
+      // Every anomaly on this series: the one currently open is drawn large,
+      // the rest as small dots you can click to jump to.
+      list.forEach(a => {
+        anomalyMap[a.monthIndex] = {
+          key: a.key,
+          label: a.label || 'KPI Anomaly',
+          selected: !!a.selected,
+          color: a.selected
+            ? (dataset.anomalyColor || '#ef4444')
+            : (a.direction === 'UP' ? 'rgba(16, 185, 129, 0.65)' : 'rgba(239, 68, 68, 0.6)')
+        };
+      });
+    } else if (dataset.anomalyIndex !== null && dataset.anomalyIndex !== undefined) {
       anomalyMap[dataset.anomalyIndex] = {
         color: dataset.anomalyColor || '#ef4444',
-        label: dataset.anomalyLabel || 'KPI Anomaly'
+        label: dataset.anomalyLabel || 'KPI Anomaly',
+        selected: true
+      };
+    }
+
+    // If the anomaly under investigation has no dot of its own on this KPI
+    // (e.g. you opened a Gross Margin anomaly but are viewing the Revenue tab),
+    // still mark its month so you can see where in time it sits.
+    const _hasSelected = Object.values(anomalyMap).some(a => a && a.selected);
+    if (!_hasSelected && dataset.focusIndex !== null && dataset.focusIndex !== undefined) {
+      anomalyMap[dataset.focusIndex] = {
+        key: dataset.focusKey,
+        label: `Investigating · ${dataset.focusKpi || 'anomaly'}`,
+        selected: true,
+        focus: true,
+        color: '#f59e0b'
       };
     }
   } else {
     dataset = REVENUE_TIMELINE_DATA[rangeKey] || REVENUE_TIMELINE_DATA['all'];
     anomalyMap = dataset.anomalies || {};
+    // Offline fallback dots have no `selected` flag -- treat each as its own
+    // focus so they keep the current large-dot look.
+    Object.values(anomalyMap).forEach(a => { if (a && a.selected === undefined) a.selected = true; });
   }
 
-  // Point radii and color arrays
-  const pointBgColors = dataset.values.map((_, i) => anomalyMap[i] ? anomalyMap[i].color : 'transparent');
-  const pointBorderColors = dataset.values.map((_, i) => anomalyMap[i] ? '#ffffff' : 'transparent');
-  const pointRadii = dataset.values.map((_, i) => anomalyMap[i] ? 7 : 2);
-  const pointHoverRadii = dataset.values.map((_, i) => anomalyMap[i] ? 10 : 6);
+  // Point styling: selected anomaly = large ringed dot; other anomalies =
+  // small dot; everything else = faint baseline point.
+  const _isAnom = (i) => !!anomalyMap[i];
+  const _isSel = (i) => anomalyMap[i] && anomalyMap[i].selected;
+  const pointBgColors = dataset.values.map((_, i) => _isAnom(i) ? anomalyMap[i].color : 'transparent');
+  const pointBorderColors = dataset.values.map((_, i) => _isSel(i) ? '#ffffff' : (_isAnom(i) ? 'rgba(255, 255, 255, 0.45)' : 'transparent'));
+  const pointRadii = dataset.values.map((_, i) => _isSel(i) ? 7 : (_isAnom(i) ? 3.5 : 2));
+  const pointHoverRadii = dataset.values.map((_, i) => _isSel(i) ? 10 : (_isAnom(i) ? 7 : 6));
 
   if (mainRevChartInstance) {
     mainRevChartInstance.destroy();
+  }
+
+  // Horizontal scroll: give the canvas host a width proportional to the point
+  // count so a long series (e.g. "All") scrolls instead of cramming; a
+  // year-filtered view stays at container width and doesn't scroll.
+  const scrollHost = document.getElementById('revCanvasScroll');
+  if (scrollHost) {
+    const containerW = (scrollHost.parentElement && scrollHost.parentElement.clientWidth) || 0;
+    const needW = dataset.labels.length * 22;
+    scrollHost.style.width = Math.max(containerW, needW) + 'px';
   }
 
   const ctx = canvas.getContext('2d');
@@ -196,9 +247,15 @@ function initRevenueChart(rangeKey = 'all') {
       },
       onClick(evt, elements) {
         if (!elements || !elements.length) return;
-        const idx = elements[0].index;
-        const anom = anomalyMap[idx];
-        if (anom && anom.key) {
+        const anom = anomalyMap[elements[0].index];
+        if (!anom || !anom.key) return;
+        if (anom.selected) {
+          // Already the focused anomaly -- open its deep-dive drawer.
+          if (typeof openInvestigationDrawer === 'function') openInvestigationDrawer(anom.key);
+        } else if (typeof selectScenario === 'function') {
+          // A secondary dot -- re-scope the whole dashboard to that anomaly.
+          selectScenario(anom.key);
+        } else if (typeof openInvestigationDrawer === 'function') {
           openInvestigationDrawer(anom.key);
         }
       }

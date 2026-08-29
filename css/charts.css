@@ -133,6 +133,25 @@
   width: 100%;
   position: relative;
   margin-bottom: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Inner host whose width js/charts.js sets from the point count -- wider than
+   the container makes .viz-canvas-container scroll horizontally. */
+.viz-canvas-scroll {
+  position: relative;
+  height: 100%;
+  min-width: 100%;
+}
+
+.viz-canvas-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.viz-canvas-container::-webkit-scrollbar-thumb {
+  background: var(--border-prominent, rgba(255, 255, 255, 0.18));
+  border-radius: 3px;
 }
 
 /* Footer KPIs under Chart */
