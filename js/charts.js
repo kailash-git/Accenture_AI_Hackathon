@@ -5,6 +5,27 @@
 let mainRevChartInstance = null;
 let gaugeChartInstance = null;
 
+/* --------------------------------------------------------------------------
+   Live streaming window (mirrors the KPI reference repo's appendLiveRecord).
+   The chart starts on a small seed of the series, then every tick one more
+   record is appended on the right; once the line reaches `maxPoints` the
+   oldest record is shift()ed off the left, so the window physically scrolls
+   and keeps going (wraps back to the start when `loop` is set). Purely
+   client-side: the whole series is already fetched by selectScenario() /
+   switchActiveKPI(), this only controls how fast it is fed onto the chart,
+   so it also works against the offline demo fallback.
+   -------------------------------------------------------------------------- */
+const LIVE_STREAM_CONFIG = {
+  enabled: true,
+  tickMs: 1000,   // fixed gap between records
+  maxPoints: 16,  // records visible at once -- older ones scroll off the left
+  seed: 1,        // records shown before the stream starts appending
+  loop: true      // when the last record lands, wrap to the start and keep scrolling
+};
+let _liveStreamTimer = null;
+let _liveStreamFull = null;   // stashed full series for the current chart
+let _liveStreamCursor = 0;
+
 const REVENUE_TIMELINE_DATA = {
   all: {
     labels: ['Jan 12', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov 12', 'Dec', 'Jan 13', 'Feb', 'Mar', 'Apr', 'May 13', 'Jun', 'Jul', 'Aug 13'],
@@ -111,6 +132,21 @@ function initRevenueChart(rangeKey = 'all') {
   const pointRadii = dataset.values.map((_, i) => anomalyMap[i] ? 7 : 2);
   const pointHoverRadii = dataset.values.map((_, i) => anomalyMap[i] ? 10 : 6);
 
+  // Per-point metadata carried alongside the plotted arrays. The tooltip and
+  // click handler read this (via chart.$live.meta) instead of closing over a
+  // fixed index into `anomalyMap`/`dataset`, so it stays correct when the live
+  // stream shift()s points off the front of the window.
+  const liveMeta = dataset.values.map((_, i) => ({
+    label: dataset.labels[i],
+    anomKey: anomalyMap[i] ? anomalyMap[i].key : null,
+    anomLabel: anomalyMap[i] ? anomalyMap[i].label : null
+  }));
+
+  // Kill any in-flight stream timer before the old chart is destroyed, so a
+  // stray tick never calls .update() on a torn-down Chart.js instance during
+  // rapid scenario switching.
+  _stopLiveStream();
+
   if (mainRevChartInstance) {
     mainRevChartInstance.destroy();
   }
@@ -166,12 +202,13 @@ function initRevenueChart(rangeKey = 'all') {
           bodyColor: '#9ca3af',
           callbacks: {
             title(items) {
-              const idx = items[0].dataIndex;
-              const anom = anomalyMap[idx];
-              return anom ? `${dataset.labels[idx]}  •  ${anom.label}` : dataset.labels[idx];
+              const ch = items[0].chart;
+              const m = ch.$live && ch.$live.meta[items[0].dataIndex];
+              const lbl = m ? m.label : ch.data.labels[items[0].dataIndex];
+              return (m && m.anomLabel) ? `${lbl}  •  ${m.anomLabel}` : lbl;
             },
             label(item) {
-              const vl = dataset.valueLabel || 'Revenue';
+              const vl = (item.chart.$live && item.chart.$live.valueLabel) || dataset.valueLabel || 'Revenue';
               return `  ${vl}:  ${_formatKpiAxisValue(vl, item.raw)}`;
             }
           }
@@ -194,16 +231,19 @@ function initRevenueChart(rangeKey = 'all') {
           }
         }
       },
-      onClick(evt, elements) {
+      onClick(evt, elements, chart) {
         if (!elements || !elements.length) return;
-        const idx = elements[0].index;
-        const anom = anomalyMap[idx];
-        if (anom && anom.key) {
-          openInvestigationDrawer(anom.key);
+        const m = chart.$live && chart.$live.meta[elements[0].index];
+        if (m && m.anomKey) {
+          openInvestigationDrawer(m.anomKey);
         }
       }
     }
   });
+
+  // Attach the live metadata + value label so the tooltip/click callbacks and
+  // the streaming ticker share one source of truth for each visible point.
+  mainRevChartInstance.$live = { meta: liveMeta, valueLabel: dataset.valueLabel || 'Revenue' };
 
   // Update big number display. The "$" is the static #currencyPrefix span next to
   // #revBigNumber in the HTML, not part of this text -- it must be toggled off for
@@ -235,6 +275,148 @@ function initRevenueChart(rangeKey = 'all') {
     deltaEl.textContent = dataset.headlineDelta || '';
     deltaEl.className = `viz-delta-badge ${dataset.isNegative ? 'negative' : 'positive'}`;
   }
+
+  // Hand the freshly built series to the live streaming window, or leave it
+  // fully painted if streaming is disabled / the series is too short.
+  if (LIVE_STREAM_CONFIG.enabled) _startLiveStream();
+  else _syncStreamBtn(false);
+}
+
+/* Stops the streaming interval, if one is running. */
+function _stopLiveStream() {
+  if (_liveStreamTimer) {
+    clearInterval(_liveStreamTimer);
+    _liveStreamTimer = null;
+  }
+}
+
+/* Stashes the freshly built series, trims the chart down to the seed, then
+   starts appending one record per tick with a shift()ing window. */
+function _startLiveStream() {
+  _stopLiveStream();
+  const chart = mainRevChartInstance;
+  if (!chart) return;
+  const ds = chart.data.datasets[0];
+  const n = chart.data.labels.length;
+
+  // Nothing to stream (RESTRICTED / empty / trivially short series).
+  if (n <= LIVE_STREAM_CONFIG.seed + 1) { _liveStreamFull = null; _syncStreamBtn(false); return; }
+
+  _liveStreamFull = {
+    labels: chart.data.labels.slice(),
+    data: (ds.data || []).slice(),
+    pbg: Array.isArray(ds.pointBackgroundColor) ? ds.pointBackgroundColor.slice() : null,
+    pbc: Array.isArray(ds.pointBorderColor) ? ds.pointBorderColor.slice() : null,
+    pr: Array.isArray(ds.pointRadius) ? ds.pointRadius.slice() : null,
+    phr: Array.isArray(ds.pointHoverRadius) ? ds.pointHoverRadius.slice() : null,
+    meta: (chart.$live && chart.$live.meta) ? chart.$live.meta.slice() : []
+  };
+
+  const seed = Math.max(1, Math.min(LIVE_STREAM_CONFIG.seed, n - 1));
+  chart.data.labels = _liveStreamFull.labels.slice(0, seed);
+  ds.data = _liveStreamFull.data.slice(0, seed);
+  if (_liveStreamFull.pbg) ds.pointBackgroundColor = _liveStreamFull.pbg.slice(0, seed);
+  if (_liveStreamFull.pbc) ds.pointBorderColor = _liveStreamFull.pbc.slice(0, seed);
+  if (_liveStreamFull.pr) ds.pointRadius = _liveStreamFull.pr.slice(0, seed);
+  if (_liveStreamFull.phr) ds.pointHoverRadius = _liveStreamFull.phr.slice(0, seed);
+  if (chart.$live) chart.$live.meta = _liveStreamFull.meta.slice(0, seed);
+  chart.update('none');
+
+  _liveStreamCursor = seed;
+  _syncStreamBtn(true);
+  _liveStreamTimer = setInterval(_liveStreamTick, LIVE_STREAM_CONFIG.tickMs);
+}
+
+/* One tick: append the next record on the right; drop the oldest off the left
+   once the window is full; wrap to the start (or stop) at the end. */
+function _liveStreamTick() {
+  const chart = mainRevChartInstance;
+  const full = _liveStreamFull;
+  if (!chart || !chart.data || !full) { _stopLiveStream(); return; }
+  const ds = chart.data.datasets[0];
+
+  let i = _liveStreamCursor;
+  if (i >= full.labels.length) {
+    if (LIVE_STREAM_CONFIG.loop) { i = 0; }
+    else { _stopLiveStream(); _syncStreamBtn(false); return; }
+  }
+
+  try {
+    chart.data.labels.push(full.labels[i]);
+    ds.data.push(full.data[i]);
+    if (full.pbg) ds.pointBackgroundColor.push(full.pbg[i]);
+    if (full.pbc) ds.pointBorderColor.push(full.pbc[i]);
+    if (full.pr) ds.pointRadius.push(full.pr[i]);
+    if (full.phr) ds.pointHoverRadius.push(full.phr[i]);
+    if (chart.$live) chart.$live.meta.push(full.meta[i]);
+
+    if (chart.data.labels.length > LIVE_STREAM_CONFIG.maxPoints) {
+      chart.data.labels.shift();
+      ds.data.shift();
+      if (full.pbg) ds.pointBackgroundColor.shift();
+      if (full.pbc) ds.pointBorderColor.shift();
+      if (full.pr) ds.pointRadius.shift();
+      if (full.phr) ds.pointHoverRadius.shift();
+      if (chart.$live) chart.$live.meta.shift();
+    }
+
+    chart.update('none');
+  } catch (err) {
+    _stopLiveStream();
+    return;
+  }
+
+  _liveStreamCursor = i + 1;
+  _updateHeadlineFromStream(ds.data, (chart.$live && chart.$live.valueLabel) || 'Revenue');
+}
+
+/* Keeps the big-number + delta badge tracking the newest point in the visible
+   window, mirroring initRevenueChart()'s own headline formatting. */
+function _updateHeadlineFromStream(vals, valueLabel) {
+  const numEl = document.getElementById('revBigNumber');
+  const deltaEl = document.getElementById('revDeltaBadge');
+  const clean = vals.filter(v => typeof v === 'number');
+  if (!clean.length) return;
+  const last = clean[clean.length - 1];
+  const first = clean[0];
+
+  if (numEl) {
+    if (valueLabel === 'Gross Margin %') numEl.textContent = `${last.toFixed(1)}%`;
+    else if (valueLabel === 'Inventory Turnover') numEl.textContent = `${last.toFixed(2)}x`;
+    else numEl.textContent = Math.round(last).toLocaleString();
+  }
+  if (deltaEl && clean.length > 1 && first) {
+    const pct = ((last - first) / Math.abs(first)) * 100;
+    const neg = pct < 0;
+    deltaEl.textContent = `${neg ? '▼' : '▲'} ${Math.abs(pct).toFixed(1)}%`;
+    deltaEl.className = `viz-delta-badge ${neg ? 'negative' : 'positive'}`;
+  }
+}
+
+/* Reflects stream state on the header button. */
+function _syncStreamBtn(running) {
+  const btn = document.getElementById('chartReplayBtn');
+  if (!btn) return;
+  btn.classList.toggle('is-streaming', !!running);
+  btn.textContent = running ? '⏸ Pause' : '▶ Resume';
+}
+
+/* Header button: pause the stream where it is, or resume it from there. */
+function chartReplayClicked() {
+  if (_liveStreamTimer) {
+    _stopLiveStream();
+    _syncStreamBtn(false);
+  } else if (_liveStreamFull) {
+    _syncStreamBtn(true);
+    _liveStreamTimer = setInterval(_liveStreamTick, LIVE_STREAM_CONFIG.tickMs);
+  } else {
+    replayRevenueStream();
+  }
+}
+
+/* Rebuilds the chart from the current range/timeline, restarting the stream. */
+function replayRevenueStream() {
+  initRevenueChart(APP_STATE.activeTimeRange || 'all');
 }
 
 function setChartTimeRange(rangeKey, btnElement) {
