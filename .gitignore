@@ -19,3 +19,7 @@ test_write.txt
 # --- OS ---
 .DS_Store
 Thumbs.db
+
+# --- evidence graph (rebuilt at seed time) ---
+Accenture/Accenture/data/evidence_graph.gpickle
+*.gpickle

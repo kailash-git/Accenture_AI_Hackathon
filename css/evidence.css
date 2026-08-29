@@ -372,6 +372,45 @@
   line-height: 1.6;
 }
 
+.kg-detail-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.kg-detail-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kg-detail-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.kg-detail-row span {
+  color: var(--text-tertiary);
+}
+
+.kg-detail-row strong {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.kg-edge.kg-edge-explains line {
+  stroke: var(--accent-green, #34d399);
+  opacity: 0.85;
+}
+
 /* --------------------------------------------------------------------------
    Evidence Investigation Timeline
    -------------------------------------------------------------------------- */

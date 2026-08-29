@@ -492,3 +492,18 @@ body.role-planner .rbac-masked {
   color: var(--text-secondary);
   margin-top: 2px;
 }
+
+/* PVM driver summary -- authored-once, correctly-signed one-liner under the waterfall */
+.pvm-driver-summary {
+  margin-top: 18px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface-2, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.pvm-driver-summary.pvm-summary-opposing {
+  border-left: 3px solid var(--accent-amber, #f59e0b);
+}

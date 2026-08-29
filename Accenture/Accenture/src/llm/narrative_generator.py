@@ -373,20 +373,28 @@ class NarrativeGenerator:
         headline = f"Revenue {direction_word} {abs(deviation_pct):.1f}% in {region}"
 
         effects = {k: pvm_results[k]["val"] for k in ("volume", "price", "mix")}
-        dominant = max(effects, key=lambda k: abs(effects[k]))
+        dominant = pvm_results.get("dominant_driver") or max(effects, key=lambda k: abs(effects[k]))
+        opposing = bool(pvm_results.get("drivers_opposing"))
 
+        if opposing:
+            driver_clause = (f"Volume and price moved in opposite directions; the {dominant} effect "
+                             f"({_fmt_money(effects.get(dominant, 0.0))}) was the larger force.")
+        else:
+            driver_clause = (f"{dominant.capitalize()} effect ({pvm_results[dominant]['pct']} of baseline) "
+                             f"is the dominant driver.")
         summary = (
             f"{region} revenue moved from {_fmt_money_abs(anomaly['baseline_value'])} baseline to "
             f"{_fmt_money_abs(anomaly['actual_value'])} ({abs(deviation_pct):.1f}% "
             f"{'growth' if deviation_pct >= 0 else 'decline'}, z={anomaly['z_score']:.2f}). "
-            f"{dominant.capitalize()} effect ({pvm_results[dominant]['pct']}) is the dominant driver."
+            f"{driver_clause}"
         )
 
         synthesis_title = f"{dominant.capitalize()}-driven {'growth' if deviation_pct >= 0 else 'decline'} in {region}: {pvm_results[dominant]['expl']}"
 
         body_parts = [
-            f"Price-Volume-Mix decomposition attributes {pvm_results['volume']['pct']} to volume, "
-            f"{pvm_results['price']['pct']} to price, and {pvm_results['mix']['pct']} to mix."
+            pvm_results.get("driver_summary")
+            or (f"Price-Volume-Mix decomposition: volume {pvm_results['volume']['pct']}, "
+                f"price {pvm_results['price']['pct']}, mix {pvm_results['mix']['pct']} of baseline revenue.")
         ]
         marketing_total = evidence_results.get("marketing_total", 0.0)
         if marketing_total > 0:
@@ -556,7 +564,11 @@ class NarrativeGenerator:
                 "deviation_pct": round(anomaly["deviation_pct"] * 100, 1),
                 "z_score": round(anomaly["z_score"], 2),
                 "confidence": anomaly["confidence"],
-                "pvm": {k: {"pct": pvm_results[k]["pct"]} for k in ("volume", "price", "mix")},
+                "pvm": {k: {"pct_of_baseline": pvm_results[k]["pct"],
+                            "share_of_change": pvm_results[k].get("share_of_change")}
+                        for k in ("volume", "price", "mix")},
+                "drivers_opposing": bool(pvm_results.get("drivers_opposing")),
+                "driver_summary": pvm_results.get("driver_summary", ""),
                 "marketing_spend_note": "present" if evidence_results.get("marketing_total", 0.0) > 0 else "none",
                 "corroborating_records": len(
                     [e for e in evidence_results.get("evidence", []) if str(e.get("source", "")).startswith("unstructured_feedback")]

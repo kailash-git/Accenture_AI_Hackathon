@@ -646,14 +646,24 @@ async function selectScenario(scenarioKey) {
    actual interactive SVG graph: no static decoration, no alert() popups.
    ========================================================================== */
 
+/* Node styling keyed on the evidence graph's `kind` (analytics.graph_builder).
+   The focal anomaly node is drawn largest; entity nodes mid; corroborating
+   anomaly/event nodes smallest. */
 const KG_NODE_STYLE = {
-  item:            { fill: 'var(--accent-green)',  text: '#04150c', r: 22, group: 'Anchor Product' },
-  region:          { fill: 'var(--accent-blue)',   text: '#04101f', r: 18, group: 'Region' },
-  category:        { fill: '#8b5cf6',              text: '#100a1f', r: 16, group: 'Category' },
-  warehouse:       { fill: 'var(--accent-amber)',  text: '#1f1503', r: 16, group: 'Warehouse SKU' },
-  warehouse_site:  { fill: '#f97316',              text: '#1f1103', r: 16, group: 'Warehouse Site' },
-  feedback:        { fill: 'var(--accent-red)',    text: '#1f0505', r: 14, group: 'Feedback Record' },
+  sales_anomaly:      { fill: 'var(--accent-green)',  text: '#04150c', r: 20, group: 'Sales / Revenue Anomaly' },
+  inventory_anomaly:  { fill: '#14b8a6',              text: '#04150c', r: 18, group: 'Inventory Turnover Anomaly' },
+  marketing_anomaly:  { fill: '#8b5cf6',              text: '#100a1f', r: 16, group: 'Marketing Spend Anomaly' },
+  supply_anomaly:     { fill: 'var(--accent-amber)',  text: '#1f1503', r: 16, group: 'Supply / Fill-Rate Anomaly' },
+  review_shift:       { fill: 'var(--accent-red)',    text: '#1f0505', r: 15, group: 'Review Sentiment Shift' },
+  event:              { fill: '#f97316',              text: '#1f1103', r: 14, group: 'Calendar Event' },
+  item_entity:        { fill: 'var(--accent-blue)',   text: '#04101f', r: 17, group: 'Product' },
+  state_entity:       { fill: '#3b82f6',              text: '#04101f', r: 15, group: 'Region' },
+  warehouse_entity:   { fill: '#eab308',              text: '#1f1503', r: 14, group: 'Warehouse SKU' },
+  channel_entity:     { fill: '#a855f7',              text: '#100a1f', r: 13, group: 'Marketing Channel' },
+  store_entity:       { fill: '#60a5fa',              text: '#04101f', r: 12, group: 'Store' },
+  eventname_entity:   { fill: '#fb923c',              text: '#1f1103', r: 12, group: 'Event Type' },
 };
+const KG_DEFAULT_STYLE = { fill: 'var(--text-secondary)', text: '#fff', r: 14, group: 'Node' };
 
 function renderKnowledgeGraphLoading() {
   const wrap = document.getElementById('kgGraphWrap');
@@ -661,12 +671,13 @@ function renderKnowledgeGraphLoading() {
   wrap.innerHTML = `<div class="kg-loading-state"><div class="kg-spinner"></div>Traversing knowledge graph…</div>`;
 }
 
-/* Simple deterministic radial layout by hop distance -- no physics simulation
-   needed at this graph's scale, and it keeps re-renders stable/non-jittery. */
+/* Simple deterministic radial layout by graph layer (0 = focal anomaly node,
+   1 = its entity chain + PVM drivers, 2 = corroborating anomaly/event nodes) --
+   no physics simulation needed at this scale, and it keeps re-renders stable. */
 function _layoutGraphNodes(nodes) {
   const byHop = {};
   nodes.forEach(n => {
-    const h = n.hops || 0;
+    const h = n.layer || 0;
     (byHop[h] = byHop[h] || []).push(n);
   });
   const maxHop = Math.max(0, ...Object.keys(byHop).map(Number));
@@ -722,11 +733,12 @@ function _kgExplainerHtml() {
     <svg class="kg-explainer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
     <div>
       <div class="kg-explainer-label">How this works</div>
-      <div class="kg-explainer-text">Traverses outward from this anomaly's item and region nodes (bold ring)
-        up to 3 hops across the property graph (category, warehouse, feedback). A feedback node only counts as
-        related if its date falls within 5 days before the anomaly's period start through 10 days after its
-        period end -- the same temporal window the evidence reconciler uses, so a different month's real event
-        can't be pulled in as if it explained this one.</div>
+      <div class="kg-explainer-text">This anomaly is one node in a graph of every detected KPI movement.
+        The centre node (bold ring) is the most material day this KPI moved in the period. Ring 1 is its
+        <em>belongs_to</em> entity chain (product, region, warehouse) and its <em>explains</em> PVM drivers
+        (units / price). Ring 2 is corroborating movement in the same window -- supply, marketing or review
+        anomalies and same-day calendar events -- trimmed by an entity filter to this product/region so an
+        unrelated item's movement can't be pulled in. Every node is role-masked server-side.</div>
     </div>
   </div>`;
 }
@@ -743,86 +755,64 @@ function _fmtShortDate(iso) {
   } catch (e) { return iso; }
 }
 
-/* The search window this traversal actually applied, spelled out in real
-   calendar dates rather than left as the abstract "-5/+10 days" rule -- computed
-   from this anomaly's own period_start/period_end, matching
-   knowledge_graph.get_related_context's defaults exactly (see _kgExplainerHtml). */
-function _kgWindowRangeText(anom) {
-  if (!anom || !anom.period_start || !anom.period_end) return '';
-  const lo = new Date(`${anom.period_start}T00:00:00`);
-  lo.setDate(lo.getDate() - 5);
-  const hi = new Date(`${anom.period_end}T00:00:00`);
-  hi.setDate(hi.getDate() + 10);
-  return `${_fmtShortDate(lo.toISOString().slice(0, 10))} &ndash; ${_fmtShortDate(hi.toISOString().slice(0, 10))}`;
-}
-
-/* Counts non-anchor nodes reached by type, for a one-clause "what the traversal
-   actually touched" aside -- e.g. "by way of 1 category and 1 warehouse node".
-   Computed from the real exported graph, not restated as a separate claim. */
-const _KG_TYPE_LABEL = {
-  item: ['sibling product', 'sibling products'],
-  region: ['region', 'regions'],
-  category: ['category', 'categories'],
-  warehouse: ['warehouse SKU', 'warehouse SKUs'],
-  warehouse_site: ['warehouse site', 'warehouse sites'],
+/* One-clause aside naming the corroborating (ring-2) node kinds actually
+   present -- e.g. "corroborated by 1 supply and 2 marketing anomalies".
+   Computed from the real subgraph, not restated as a separate claim. */
+const _KG_KIND_LABEL = {
+  supply_anomaly: ['supply anomaly', 'supply anomalies'],
+  marketing_anomaly: ['marketing anomaly', 'marketing anomalies'],
+  review_shift: ['review-sentiment shift', 'review-sentiment shifts'],
+  event: ['calendar event', 'calendar events'],
+  sales_anomaly: ['co-moving sales anomaly', 'co-moving sales anomalies'],
+  inventory_anomaly: ['inventory anomaly', 'inventory anomalies'],
 };
 
-function _kgPathAsideText(graphData) {
-  const nodes = ((graphData && graphData.graph && graphData.graph.nodes) || []).filter(n => n.hops > 0 && n.type !== 'feedback');
+function _kgCorroborationAside(graphData) {
+  const nodes = ((graphData && graphData.nodes) || []).filter(n => n.layer === 2);
   if (!nodes.length) return '';
   const counts = {};
-  nodes.forEach(n => { counts[n.type] = (counts[n.type] || 0) + 1; });
-  const parts = Object.entries(counts).map(([type, n]) => {
-    const [singular, plural] = _KG_TYPE_LABEL[type] || [type, `${type}s`];
+  nodes.forEach(n => { counts[n.kind] = (counts[n.kind] || 0) + 1; });
+  const parts = Object.entries(counts).map(([kind, n]) => {
+    const [singular, plural] = _KG_KIND_LABEL[kind] || [kind, `${kind}s`];
     return `${n} ${n > 1 ? plural : singular}`;
   });
-  return ` (reached by way of ${parts.join(', ')})`;
+  return ` corroborated by ${parts.join(', ')}`;
 }
 
 function _kgAnomalySummaryHtml(anom, graphData) {
   const item = (anom && anom.sku) || 'this item';
   const region = (anom && (STATE_TO_REGION[anom.region] || anom.region)) || '';
   const period = (anom && anom.date) ? anom.date.toUpperCase() : '';
-  const hops = (graphData && graphData.hops) || [];
-  const windowText = _kgWindowRangeText(anom);
+  const nodes = (graphData && graphData.nodes) || [];
+  const edges = (graphData && graphData.edges) || [];
+  const focal = nodes.find(n => n.layer === 0);
+  const drivers = edges.filter(e => e.relation === 'explains');
+  const ring2 = nodes.filter(n => n.layer === 2);
 
   let verdict;
-  if (hops.length > 0) {
-    const maxHop = Math.max(...hops.map(h => h.hops));
-    const before = hops.filter(h => h.temporal_role === 'preceding_cause').length;
-    const after = hops.length - before;
-    const roleParts = [];
-    if (before) roleParts.push(`${before} dated before the anomaly's period start (a possible cause)`);
-    if (after) roleParts.push(`${after} dated during/after it (corroborating aftermath)`);
-    const examples = hops.slice(0, 2).map(h => `a ${h.source} on ${h.date}`).join(' and ');
-    const pathAside = _kgPathAsideText(graphData);
-
+  if (!focal) {
+    verdict = `No graph anomaly node resolved for ${_escapeHtml(item)}/${_escapeHtml(region)} in this KPI/period `
+      + `&mdash; the diagram below shows the structural entity context only.`;
+  } else {
+    const driverText = drivers.length
+      ? `PVM decomposition attributes the move to <strong>${drivers.map(d => _escapeHtml(d.driver)).join(' + ')}</strong>`
+        + (drivers.some(d => d.weight != null)
+            ? ` (` + drivers.map(d => `${_escapeHtml(d.driver)} ${Math.round((d.weight || 0) * 100)}%`).join(', ') + `)`
+            : '')
+      : `no independent price/volume driver node crossed its own threshold that day`;
+    const aside = _kgCorroborationAside(graphData);
     let tieIn;
     if (anom && anom.abstained) {
-      tieIn = ` Despite this evidence existing, the engine still abstained -- see the reason above (usually a direct contradiction, not an absence of evidence).`;
+      tieIn = ` Despite this, the engine abstained &mdash; see the reason above (usually a direct contradiction, not missing evidence).`;
     } else if (anom && anom.recommendedAction && anom.recommendedAction.driver) {
-      tieIn = ` This is the evidence backing the recommended driver: <em>${_escapeHtml(anom.recommendedAction.driver)}</em>.`;
+      tieIn = ` This backs the recommended driver: <em>${_escapeHtml(anom.recommendedAction.driver)}</em>.`;
     } else {
       tieIn = '';
     }
-
-    verdict = `Searched ${windowText ? `<strong>${windowText}</strong>` : 'the temporal window'} around this anomaly and found `
-      + `<strong>${hops.length} related record(s)</strong> within <strong>${maxHop} hop(s)</strong> of ${_escapeHtml(item)}/${_escapeHtml(region)}${pathAside}`
-      + (roleParts.length ? ` &mdash; ${roleParts.join(', ')}.` : '.')
-      + (examples ? ` For example: ${_escapeHtml(examples)}.` : '')
+    verdict = `Centred on the <strong>${_escapeHtml(focal.column || focal.kind)}</strong> movement of ${_escapeHtml(item)}/${_escapeHtml(region)} `
+      + `on <strong>${_escapeHtml(focal.date || period)}</strong>. ${driverText}`
+      + (ring2.length ? `,${aside}.` : `. No entity-relevant corroborating movement in the same window.`)
       + tieIn;
-  } else if (anom && anom.abstained) {
-    verdict = `Searched ${windowText ? `<strong>${windowText}</strong>` : 'the temporal window'} around this anomaly and found `
-      + `<strong>no related records</strong> for ${_escapeHtml(item)}/${_escapeHtml(region)} &mdash; consistent with the `
-      + `abstention above.`;
-  } else if (APP_STATE.activeAnomalyKey === 'sparse') {
-    verdict = `Searched ${windowText ? `<strong>${windowText}</strong>` : 'the temporal window'} and found <strong>no related records</strong> `
-      + `for ${_escapeHtml(item)}/${_escapeHtml(region)} &mdash; expected for a new launch, since this item's sales history itself `
-      + `is too short to have generated any feedback yet. The recommendation below is to establish a baseline, not to act on a signal.`;
-  } else {
-    verdict = `Searched ${windowText ? `<strong>${windowText}</strong>` : 'the temporal window'} around this anomaly and found `
-      + `<strong>no related feedback records</strong> for ${_escapeHtml(item)}/${_escapeHtml(region)}. Structural links `
-      + `(category/warehouse) may still appear in the diagram below, but nothing in that window ties directly to this anomaly.`;
   }
 
   const abstainedClass = (anom && anom.abstained) ? ' kg-anomaly-summary-abstained' : '';
@@ -846,13 +836,13 @@ function renderKnowledgeGraphPanel(graphData, itemId, anom) {
     <span>Click any node to inspect the retrieved record behind it.</span>
   </div>`;
 
-  const graph = (graphData && graphData.graph) || { nodes: [], edges: [] };
-  const hopsByNode = {};
-  ((graphData && graphData.hops) || []).forEach(h => { hopsByNode[`feedback:${h.feedback_id}`] = h; });
+  // /api/anomalies/{key}/graph now returns the subgraph directly:
+  // { nodes:[{id,kind,label,layer,...attrs}], edges:[{source,target,relation,...}], node_count, focal }
+  const graph = graphData && graphData.nodes ? graphData : { nodes: [], edges: [] };
 
   if (!graph.nodes || graph.nodes.length === 0) {
     wrap.innerHTML = `${_kgAnomalySummaryHtml(anom, graphData)}${_kgExplainerHtml()}
-      <div class="kg-empty-state">No linked structured or unstructured records found within 3 hops of <strong>${_escapeHtml(itemId || 'this item')}</strong>.</div>`;
+      <div class="kg-empty-state">No evidence-graph node resolved for <strong>${_escapeHtml(itemId || 'this anomaly')}</strong> in this KPI/period.</div>`;
     return;
   }
 
@@ -863,37 +853,29 @@ function renderKnowledgeGraphPanel(graphData, itemId, anom) {
   const edgeSvg = (graph.edges || []).map(e => {
     const a = pos[e.source], b = pos[e.target];
     if (!a || !b) return '';
-    // Relation labels only appear on hover (via <title>) -- a fully-labeled hub
-    // graph at this density is unreadable, so a hairline + hover tooltip beats
-    // permanent overlapping text at the center.
-    return `<g class="kg-edge">
-      <title>${_escapeHtml((e.relation || '').replace(/_/g, ' '))}</title>
-      <line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" />
+    const isExplains = e.relation === 'explains';
+    // Relation labels only appear on hover -- a fully-labeled graph at this
+    // density is unreadable. `explains` (PVM driver) edges get a heavier stroke.
+    const w = e.weight != null ? ` · ${Math.round((e.weight || 0) * 100)}%` : '';
+    return `<g class="kg-edge${isExplains ? ' kg-edge-explains' : ''}">
+      <title>${_escapeHtml((e.relation || '').replace(/_/g, ' ') + (e.driver ? ` (${e.driver}${w})` : ''))}</title>
+      <line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke-width="${isExplains ? 2.4 : 1}" />
     </g>`;
   }).join('');
 
   const nodeSvg = graph.nodes.map((n, i) => {
     const p = pos[n.id];
     if (!p) return '';
-    const style = KG_NODE_STYLE[n.type] || KG_NODE_STYLE.item;
-    const isOrigin = n.hops === 0;
+    const style = KG_NODE_STYLE[n.kind] || KG_DEFAULT_STYLE;
+    const isOrigin = n.layer === 0;
     const restricted = !!n.restricted;
-    // Restricted nodes used to repeat the literal word "RESTRICTED" under every
-    // masked node -- fine once, but a graph with several masked nodes turned into
-    // a wall of shouting red text. The node's *identity* is masked, not its type,
-    // so the label now shows the (public) group name with a small lock glyph on
-    // the node itself; the full explanation is still one click away.
+    // The node's *identity* is masked, not its kind -- show the (public) group
+    // name with a lock glyph; the full explanation is one click away.
     const label = restricted ? style.group : _truncateLabel(n.label);
-    const fb = hopsByNode[n.id];
-    const tooltip = fb
-      ? `${fb.source} · ${fb.date} · ${fb.temporal_role === 'preceding_cause' ? 'before anomaly' : 'concurrent/after'}\n${fb.text}`
-      : restricted
-        ? `${style.group}: identity restricted for your current role${n.hops ? ` (${n.hops}-hop)` : ''}`
-        : `${style.group}: ${n.label}${n.hops ? ` (${n.hops}-hop)` : ' (anchor)'}`;
-    // Same-hop nodes sit on the same ring at similar heights, so their labels can
-    // collide when several land close together (e.g. two hop-3 nodes side by side);
-    // staggering the label offset by index parity keeps adjacent labels from running
-    // into each other without a full collision-avoidance layout at this graph's scale.
+    const tooltip = restricted
+      ? `${style.group}: restricted for your current role (ring ${n.layer})`
+      : `${style.group}: ${n.label}${isOrigin ? ' (focal)' : ` (ring ${n.layer})`}`;
+    // Stagger label offset by index parity so adjacent same-ring labels don't collide.
     const labelDy = style.r + (i % 2 === 0 ? 14 : 26);
     const lockGlyph = restricted
       ? `<text x="${p.x}" y="${p.y + 4}" text-anchor="middle" font-size="${style.r}" pointer-events="none">🔒</text>`
@@ -908,9 +890,9 @@ function renderKnowledgeGraphPanel(graphData, itemId, anom) {
     </g>`;
   }).join('');
 
-  const legendGroups = [...new Set(graph.nodes.map(n => n.type))];
-  const legendHtml = legendGroups.map(t => {
-    const style = KG_NODE_STYLE[t] || KG_NODE_STYLE.item;
+  const legendGroups = [...new Set(graph.nodes.map(n => n.kind))];
+  const legendHtml = legendGroups.map(k => {
+    const style = KG_NODE_STYLE[k] || KG_DEFAULT_STYLE;
     return `<div class="kg-legend-item"><span class="kg-legend-dot" style="background:${style.fill}"></span>${style.group}</div>`;
   }).join('');
 
@@ -920,7 +902,7 @@ function renderKnowledgeGraphPanel(graphData, itemId, anom) {
     <div class="kg-graph-meta">
       <span class="kg-meta-chip">${graph.nodes.length} nodes</span>
       <span class="kg-meta-chip">${(graph.edges || []).length} edges</span>
-      <span class="kg-meta-chip">3-hop max</span>
+      <span class="kg-meta-chip">${(graph.edges || []).filter(e => e.relation === 'explains').length} PVM driver link(s)</span>
       <span class="kg-meta-chip">Server-masked per role</span>
     </div>
     <svg class="kg-graph-svg" viewBox="0 0 ${boxSize} ${boxSize}" preserveAspectRatio="xMidYMid meet">
@@ -934,6 +916,59 @@ function renderKnowledgeGraphPanel(graphData, itemId, anom) {
   window._kgGraphIndex = { graphData, nodeById };
 }
 
+/* Human-readable attribute rows for a clicked node, per kind. */
+function _kgNodeDetailRows(node) {
+  const rows = [];
+  const add = (k, v) => { if (v !== undefined && v !== null && v !== '') rows.push([k, v]); };
+  const num = v => (typeof v === 'number' ? (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(3)) : v);
+  switch (node.kind) {
+    case 'sales_anomaly':
+      add('Metric', node.column);
+      add('Date', node.date);
+      add('Value', num(node.value));
+      add('Baseline mean', num(node.baseline_mean));
+      add('z / score', num(node.score != null ? node.score : node.z));
+      add('Price effect', num(node.price_effect));
+      add('Volume effect', num(node.volume_effect));
+      add('Interaction effect', num(node.interaction_effect));
+      break;
+    case 'inventory_anomaly':
+      add('Date', node.date);
+      add('Turnover ratio', num(node.turnover_ratio));
+      add('Inventory on hand', node.inventory_on_hand);
+      add('Warehouse SKU', node.warehouse_sku);
+      add('z', num(node.z));
+      break;
+    case 'supply_anomaly':
+      add('Month', node.month);
+      add('Fill rate', node.fill_rate);
+      add('Stockout days', node.stockout_days);
+      add('Warehouse SKU', node.warehouse_sku);
+      break;
+    case 'marketing_anomaly':
+      add('Channel', node.channel);
+      add('Week', node.week_start);
+      add('Spend', num(node.value));
+      add('Region', node.region);
+      add('z', num(node.z));
+      break;
+    case 'review_shift':
+      add('Month', node.month);
+      add('Direction', node.direction);
+      add('Mean sentiment', num(node.mean_sentiment));
+      add('Review count', node.review_count);
+      break;
+    case 'event':
+      add('Date', node.date);
+      add('Event', node.event_name);
+      add('Type', node.event_type);
+      break;
+    default:
+      add('Entity', node.label);
+  }
+  return rows;
+}
+
 function handleKgNodeClick(nodeId) {
   const idx = window._kgGraphIndex;
   const detail = document.getElementById('kgDetailPanel');
@@ -943,26 +978,31 @@ function handleKgNodeClick(nodeId) {
 
   document.querySelectorAll('.kg-node').forEach(el => el.classList.toggle('kg-node-selected', el.dataset.nodeId === nodeId));
 
-  if (node.type === 'feedback') {
-    const hop = (idx.graphData.hops || []).find(h => `feedback:${h.feedback_id}` === nodeId);
-    if (hop) {
-      detail.innerHTML = `
-        <div class="kg-detail-header">
-          <span class="kg-detail-source">${_escapeHtml(hop.source)}</span>
-          <span class="kg-detail-badge">${hop.hops}-hop · ${hop.temporal_role === 'preceding_cause' ? 'before anomaly' : 'concurrent / after'}</span>
-        </div>
-        <div class="kg-detail-date">${_escapeHtml(hop.date)}</div>
-        <div class="kg-detail-text">${_escapeHtml(hop.text)}</div>
-      `;
-      highlightEvidenceCardForFeedback(hop.feedback_id);
-      return;
-    }
+  const style = KG_NODE_STYLE[node.kind] || KG_DEFAULT_STYLE;
+  const layerLabel = node.layer === 0 ? 'focal node' : `ring ${node.layer}`;
+
+  if (node.restricted && node.label === 'RESTRICTED') {
+    detail.innerHTML = `
+      <div class="kg-detail-header">
+        <span class="kg-detail-source">${_escapeHtml(style.group)}</span>
+        <span class="kg-detail-badge">${_escapeHtml(layerLabel)}</span>
+      </div>
+      <div class="kg-detail-text">This node's identity is restricted for your current role. Its kind and
+        graph position are shown; the SKU / financial detail behind it is masked server-side.</div>`;
+    return;
   }
 
-  const style = KG_NODE_STYLE[node.type] || KG_NODE_STYLE.item;
+  const rows = _kgNodeDetailRows(node)
+    .map(([k, v]) => `<div class="kg-detail-row"><span>${_escapeHtml(k)}</span><strong>${_escapeHtml(String(v))}</strong></div>`)
+    .join('');
+
   detail.innerHTML = `
-    <div class="kg-detail-header"><span class="kg-detail-source">${_escapeHtml(style.group)}</span></div>
-    <div class="kg-detail-text">${node.restricted ? 'This node\'s identity is restricted for your current role.' : `Entity: <strong>${_escapeHtml(node.label)}</strong>`}</div>
+    <div class="kg-detail-header">
+      <span class="kg-detail-source">${_escapeHtml(style.group)}</span>
+      <span class="kg-detail-badge">${_escapeHtml(layerLabel)}</span>
+    </div>
+    <div class="kg-detail-title">${_escapeHtml(node.label)}</div>
+    <div class="kg-detail-rows">${rows}</div>
   `;
 }
 

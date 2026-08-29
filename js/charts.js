@@ -387,6 +387,21 @@ function renderPvmWaterfall(anomalyKey = 'supply') {
       </div>
     `;
   }).join('');
+
+  // Authored-once, correctly-signed one-liner. Percentages on the bars are share
+  // of *baseline revenue* (additive to the deviation); when volume and price
+  // oppose each other this sentence says so instead of implying one "explains 84%".
+  const summary = anom.pvm.driver_summary;
+  if (summary) {
+    const opposing = anom.pvm.drivers_opposing ? ' pvm-summary-opposing' : '';
+    container.insertAdjacentHTML('afterend',
+      `<div class="pvm-driver-summary${opposing}" id="pvmDriverSummary">${_escapeHtml(summary)}</div>`);
+    // insertAdjacentHTML on re-render would stack copies -- de-dupe.
+    const all = document.querySelectorAll('#pvmDriverSummary');
+    for (let i = 0; i < all.length - 1; i++) all[i].remove();
+  } else {
+    document.querySelectorAll('#pvmDriverSummary').forEach(el => el.remove());
+  }
 }
 
 function togglePvmProductDrill(factorKey) {

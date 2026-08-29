@@ -368,7 +368,9 @@ def run_and_seed_anomalies():
     from analytics.evidence_signal import discover_evidence_candidates
     from analytics.pvm_analyzer import PvmAnalyzer
     from retrieval.evidence_reconciler import EvidenceReconciler
-    from retrieval.knowledge_graph import build_graph, get_related_context
+    from analytics.graph_builder import build_graph as build_evidence_graph
+    from analytics.graph_store import save_graph
+    from analytics.graph_narrative_adapter import legacy_graph_results
     from llm.narrative_generator import NarrativeGenerator
     from llm import llm_client
 
@@ -377,7 +379,22 @@ def run_and_seed_anomalies():
     detector = AnomalyDetector(DB_PATH)
     pvm_analyzer = PvmAnalyzer(DB_PATH)
     reconciler = EvidenceReconciler(DB_PATH)
-    kg = build_graph(DB_PATH)
+
+    # Evidence graph: anomaly-centric networkx DiGraph (entity layer + one node
+    # per detected anomaly at native grain + event / review_shift nodes, wired
+    # by belongs_to / explains / co_occurs_same_day / same_week / same_month).
+    # Built once here against the fully-seeded DB, persisted for api_server to
+    # load at startup and serve per-anomaly subgraphs (analytics.graph_subgraph).
+    evidence_graph = build_evidence_graph(DB_PATH)
+    GRAPH_PATH = os.path.join(DATA_DIR, 'evidence_graph.gpickle')
+    save_graph(evidence_graph, GRAPH_PATH)
+    _kinds = {}
+    for _n, _a in evidence_graph.nodes(data=True):
+        _kinds[_a['kind']] = _kinds.get(_a['kind'], 0) + 1
+    print(f"Evidence graph: {evidence_graph.number_of_nodes()} nodes / "
+          f"{evidence_graph.number_of_edges()} edges "
+          f"(pvm_mismatches={evidence_graph.graph.get('pvm_mismatches')}) -> {GRAPH_PATH}")
+    print("  " + "  ".join(f"{k}={v}" for k, v in sorted(_kinds.items())))
 
     # LLM polish is only attempted for the curated, demo-featured core scenarios --
     # this caps external API calls at a small, predictable number regardless of how
@@ -573,7 +590,10 @@ def run_and_seed_anomalies():
             anomaly_type_key=key
         )
 
-        graph_res = get_related_context(kg, item_id, state_id, period_start, period_end=period_end, max_hops=3)
+        graph_res = legacy_graph_results(
+            evidence_graph, found.get("kpi_name", "Revenue"),
+            item_id, state_id, period_start, period_end,
+        )
         sql_query_durations.append(time.perf_counter() - step_start)
 
         # LLM prose polish is attempted only for the curated core scenarios to keep
@@ -647,7 +667,7 @@ def run_and_seed_anomalies():
             json.dumps({"vp_sales": bundle["vp_sales"], "supply_planner": bundle["supply_planner"]}),
             1 if abstained else 0,
             vp["abstention"]["reason"] if abstained else None,
-            json.dumps(graph_res),
+            json.dumps(graph_res.get("graph", {})),
             json.dumps(tel),
             found["detection_type"],
             found.get("evidence_score"),

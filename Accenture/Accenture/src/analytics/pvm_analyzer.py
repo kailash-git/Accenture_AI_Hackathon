@@ -148,14 +148,77 @@ class PvmAnalyzer:
         # We can capture any floating-point/rounding residual in 'other'
         other_effect_total = delta_rev - sum_effects
         
-        # Formulate percentage contributions
-        total_abs = abs(price_effect_total) + abs(volume_effect_total) + abs(mix_effect_total) + abs(other_effect_total)
-        if total_abs == 0:
-            total_abs = 1.0
-            
+        # ------------------------------------------------------------------ #
+        # Contribution framing.
+        #
+        # `pct` is now the SIGNED share of *baseline revenue* -- it is always
+        # additive (volume% + price% + mix% + other% == deviation%) and never
+        # misleads when drivers oppose each other. The old convention,
+        # |effect| / sum(|effects|), reported "84% volume / 16% price" even when
+        # a +$13.3k volume gain was nearly cancelled by a -$9.9k price drop,
+        # which reads as "volume drove 84% of the move" when the net move was
+        # tiny. `share_of_change` keeps the "which driver dominates" signal
+        # (signed share of the NET delta -- can exceed 100% / go negative when
+        # drivers fight), and `driver_summary` states it correctly in one line.
+        # ------------------------------------------------------------------ #
+        gross_abs = (abs(price_effect_total) + abs(volume_effect_total)
+                     + abs(mix_effect_total) + abs(other_effect_total)) or 1.0
+
+        def _signed_money(val):
+            return f"{'+' if val >= 0 else '-'}${abs(round(val)):,}"
+
+        def pct_of_baseline(val):
+            if R_0 == 0:
+                return "0%"
+            p = val / R_0 * 100.0
+            return "0%" if abs(p) < 0.5 else f"{'+' if p >= 0 else '-'}{abs(p):.0f}%"
+
+        def share_of_change(val):
+            if abs(delta_rev) < 1e-9:
+                return "0%"
+            s = val / delta_rev * 100.0
+            return f"{'+' if s >= 0 else '-'}{abs(s):.0f}%"
+
+        def is_material(val):
+            return abs(val) / gross_abs >= 0.01
+
+        def direction_of(val):
+            return "none" if not is_material(val) else ("increase" if val > 0 else "decrease")
+
+        # Keep the legacy signature working (a couple of call sites still call
+        # pct_str) -- but it now returns the honest signed-of-baseline figure.
         def pct_str(val):
-            return f"{round(abs(val) / total_abs * 100)}%"
-            
+            return pct_of_baseline(val)
+
+        _effects = {
+            "volume": volume_effect_total, "price": price_effect_total,
+            "mix": mix_effect_total, "other": other_effect_total,
+        }
+        drivers_opposing = len({(1 if v >= 0 else -1) for v in _effects.values() if is_material(v)}) > 1
+        dominant_driver = max(_effects, key=lambda k: abs(_effects[k]))
+
+        _dev_pct = (delta_rev / R_0 * 100.0) if R_0 else 0.0
+        _head = (f"Revenue {'rose' if delta_rev >= 0 else 'fell'} {abs(_dev_pct):.1f}% "
+                 f"(${abs(round(R_0)):,} → ${abs(round(R_1)):,}).")
+        _named = [k for k in ("volume", "price", "mix") if is_material(_effects[k])]
+        _named.sort(key=lambda k: -abs(_effects[k]))
+        if not _named:
+            driver_summary = _head + " No single price/volume/mix driver was material."
+        elif drivers_opposing:
+            driver_summary = (
+                _head + " The drivers pulled in opposite directions: "
+                + "; ".join(f"{k} {_signed_money(_effects[k])}" for k in _named)
+                + f", for a net {_signed_money(delta_rev)}. "
+                + f"{dominant_driver.capitalize()} was the larger force."
+            )
+        else:
+            driver_summary = (
+                _head + " "
+                + "; ".join(f"{k.capitalize()} {_signed_money(_effects[k])} "
+                            f"({pct_of_baseline(_effects[k])} of baseline)" for k in _named)
+                + f". {dominant_driver.capitalize()} is the dominant driver."
+            )
+
         # Generate item breakdown
         products_breakdown = []
         for idx, row in m.iterrows():
@@ -178,38 +241,57 @@ class PvmAnalyzer:
                 "status": status
             })
             
-        # Explanations
-        vol_expl = f"Volume changes explain {pct_str(volume_effect_total)} of total revenue variance."
-        if volume_effect_total < 0:
-            vol_expl = f"Volume contraction explains {pct_str(volume_effect_total)} of total revenue decline."
-            
-        price_expl = f"Pricing modifications explain {pct_str(price_effect_total)} of total revenue variance."
-        if price_effect_total < 0:
-            price_expl = f"Average selling price softened due to promotional markdowns."
-        elif price_effect_total > 0:
-            price_expl = f"Average selling price appreciated, contributing positively."
-            
-        mix_expl = f"Quantity shift between products explains {pct_str(mix_effect_total)} of the change."
-        if mix_effect_total < 0:
-            mix_expl = f"Unfavorable shift toward lower-margin or lower-priced items."
-            
+        # Per-effect explanations -- state the signed contribution, don't claim a
+        # driver "explains X% of the decline" (false when another driver offsets it).
+        def _effect_expl(name, val, extra_when_negative="", extra_when_positive=""):
+            if not is_material(val):
+                return f"{name.capitalize()} had no material effect this period."
+            verb = "added" if val > 0 else "reduced revenue by"
+            base = (f"{name.capitalize()} {verb} {_signed_money(val)} "
+                    f"({pct_of_baseline(val)} of baseline revenue).")
+            tail = extra_when_positive if val > 0 else extra_when_negative
+            return f"{base} {tail}".strip()
+
+        vol_expl = _effect_expl("volume", volume_effect_total)
+        price_expl = _effect_expl(
+            "price", price_effect_total,
+            extra_when_negative="Average selling price softened, consistent with promotional markdowns.",
+            extra_when_positive="Average selling price appreciated.",
+        )
+        mix_expl = _effect_expl("mix", mix_effect_total,
+                                extra_when_negative="Shift toward lower-priced items.")
+
+        def _leg(val, expl):
+            return {
+                "val": float(val),
+                "pct": pct_of_baseline(val),          # signed, additive to deviation%
+                "share_of_change": share_of_change(val),  # signed share of the NET delta
+                "direction": direction_of(val),
+                "expl": expl,
+            }
+
         return {
-            "volume": {"val": float(volume_effect_total), "pct": pct_str(volume_effect_total), "expl": vol_expl},
-            "price": {"val": float(price_effect_total), "pct": pct_str(price_effect_total), "expl": price_expl},
-            "mix": {"val": float(mix_effect_total), "pct": pct_str(mix_effect_total), "expl": mix_expl},
-            "other": {"val": float(other_effect_total), "pct": pct_str(other_effect_total), "expl": "Minor residual rounding effect."},
+            "volume": _leg(volume_effect_total, vol_expl),
+            "price": _leg(price_effect_total, price_expl),
+            "mix": _leg(mix_effect_total, mix_expl),
+            "other": _leg(other_effect_total, "Minor residual / rounding effect."),
             "products": products_breakdown,
             "baseline_revenue": float(R_0),
-            "actual_revenue": float(R_1)
+            "actual_revenue": float(R_1),
+            "dominant_driver": dominant_driver,
+            "drivers_opposing": bool(drivers_opposing),
+            "driver_summary": driver_summary,
         }
 
     def _empty_pvm_result(self):
+        _leg = lambda: {"val": 0.0, "pct": "0%", "share_of_change": "0%",
+                        "direction": "none", "expl": "Not computed for this KPI/period."}
         return {
-            "volume": {"val": 0.0, "pct": "0%", "expl": "No volume variance computed."},
-            "price": {"val": 0.0, "pct": "0%", "expl": "No price variance computed."},
-            "mix": {"val": 0.0, "pct": "0%", "expl": "No mix variance computed."},
-            "other": {"val": 0.0, "pct": "0%", "expl": "No other variance computed."},
+            "volume": _leg(), "price": _leg(), "mix": _leg(), "other": _leg(),
             "products": [],
             "baseline_revenue": 0.0,
-            "actual_revenue": 0.0
+            "actual_revenue": 0.0,
+            "dominant_driver": None,
+            "drivers_opposing": False,
+            "driver_summary": "",
         }
