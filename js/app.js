@@ -855,11 +855,23 @@ function renderKnowledgeGraphPanel(graphData, itemId, anom) {
     if (!a || !b) return '';
     const isExplains = e.relation === 'explains';
     // Relation labels only appear on hover -- a fully-labeled graph at this
-    // density is unreadable. `explains` (PVM driver) edges get a heavier stroke.
+    // density is unreadable. `explains` (PVM driver) edges get a heavier stroke;
+    // temporal edges are drawn more prominently the more recent they are.
     const w = e.weight != null ? ` · ${Math.round((e.weight || 0) * 100)}%` : '';
+    let temporal = '';
+    if (typeof e.day_diff === 'number' && e.day_diff !== 0) {
+      const n = Math.abs(e.day_diff);
+      temporal = ` · ${n} day${n === 1 ? '' : 's'} ${e.day_diff < 0 ? 'before' : 'after'}`;
+    }
+    const rw = typeof e.recency_weight === 'number' ? e.recency_weight : null;
+    const strokeW = isExplains ? 2.4 : (rw != null ? (0.6 + rw * 1.8).toFixed(2) : 1);
+    const strokeO = rw != null ? ` stroke-opacity="${(0.3 + rw * 0.6).toFixed(2)}"` : '';
+    const title = (e.relation || '').replace(/_/g, ' ')
+      + (e.driver ? ` (${e.driver}${w})` : '') + temporal
+      + (rw != null ? ` · recency ${rw.toFixed(2)}` : '');
     return `<g class="kg-edge${isExplains ? ' kg-edge-explains' : ''}">
-      <title>${_escapeHtml((e.relation || '').replace(/_/g, ' ') + (e.driver ? ` (${e.driver}${w})` : ''))}</title>
-      <line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke-width="${isExplains ? 2.4 : 1}" />
+      <title>${_escapeHtml(title)}</title>
+      <line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke-width="${strokeW}"${strokeO} />
     </g>`;
   }).join('');
 
@@ -966,6 +978,12 @@ function _kgNodeDetailRows(node) {
     default:
       add('Entity', node.label);
   }
+  if (typeof node.days_from_focal === 'number') {
+    const n = Math.abs(node.days_from_focal);
+    add('Timing', node.days_from_focal === 0 ? 'same day as anomaly'
+      : `${n} day${n === 1 ? '' : 's'} ${node.days_from_focal < 0 ? 'before' : 'after'} anomaly`);
+  }
+  if (typeof node.recency_weight === 'number') add('Recency weight', node.recency_weight.toFixed(2));
   return rows;
 }
 

@@ -91,6 +91,36 @@ class TestEvidenceGraph(unittest.TestCase):
         # the Aug-2013 price cut should surface a price/volume explains driver
         self.assertTrue(any(e["relation"] == "explains" for e in sub["edges"]))
 
+    def test_subgraph_edges_carry_day_diff_and_recency(self):
+        sub = anomaly_subgraph(self.graph, "Revenue", "FOODS_3_090", "CA",
+                               "2012-11-01", "2012-11-30")
+        focal = sub["focal"]
+        anom_kinds = {"sales_anomaly", "inventory_anomaly", "marketing_anomaly",
+                      "supply_anomaly", "review_shift", "event"}
+        by_id = {n["id"]: n for n in sub["nodes"]}
+        temporal = [e for e in sub["edges"]
+                    if by_id.get(e["source"], {}).get("kind") in anom_kinds
+                    and by_id.get(e["target"], {}).get("kind") in anom_kinds]
+        self.assertTrue(temporal, "expected at least one anomaly<->anomaly edge")
+        for e in temporal:
+            self.assertIn("day_diff", e)
+            self.assertIsInstance(e["day_diff"], int)
+            if focal in (e["source"], e["target"]):
+                self.assertIn("recency_weight", e)
+                self.assertGreater(e["recency_weight"], 0.0)
+                self.assertLessEqual(e["recency_weight"], 1.0)
+        # a same-day (explains) edge weights 1.0; an older corroborator weights less
+        same_day = [e for e in temporal if e.get("days_from_focal") == 0]
+        older = [e for e in temporal if (e.get("days_from_focal") or 0) < 0]
+        if same_day and older:
+            self.assertGreater(max(e["recency_weight"] for e in same_day),
+                               max(e["recency_weight"] for e in older))
+        # layer-2 nodes carry the recency fields too
+        for n in sub["nodes"]:
+            if n["layer"] == 2 and n["kind"] in anom_kinds:
+                self.assertIn("recency_weight", n)
+                self.assertIn("days_from_focal", n)
+
     def test_subgraph_capped_for_legibility(self):
         sub = anomaly_subgraph(self.graph, "GrossMarginPercent", "FOODS_3_090", "CA",
                                "2012-10-01", "2012-10-31")

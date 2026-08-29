@@ -63,7 +63,13 @@ def legacy_graph_results(graph, kpi_name, item_id, state_id, period_start, perio
             "source": n.get("kind", "graph_node"),
             "date": d,
             "feedback_id": None,
+            "recency_weight": n.get("recency_weight"),
             "text": _synth_text(n),
         })
+
+    # Most recent / temporally closest corroboration first, so downstream prose
+    # (which samples the first few hops) leads with the most relevant.
+    hops.sort(key=lambda h: (h.get("recency_weight") if h.get("recency_weight") is not None else 0.0),
+              reverse=True)
 
     return {"hops": hops, "node_count": sub["node_count"], "graph": sub}
