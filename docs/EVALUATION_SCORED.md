@@ -28,6 +28,8 @@ transcript here populates on the next clean `run_eval.py` pass.
 |---|---|---|
 | Anomaly detection | recall = TP / (TP + FN) on the 4 injected events | **100** (4/4; 57 flagged, 44 abstained, 13 actioned) |
 | PVM decomposition | \|Σ effects − (actual − baseline)\| < \$0.01 | **100** (20/20 series, max error **\$0.00**) |
+| Driver-cause attribution | dominant-driver top-1 accuracy; PVM effect-sign accuracy | **100** (4/4; 4/4) |
+| Ablation / causal consistency | abstention flips when the injected cause is removed | **100** (2/2) |
 | Abstention gate | accuracy = (TP + TN) / N on the canonical set | **100** (billing abstains; supply / pricecut / sparse don't) |
 | RBAC — generated narratives | clean % = 100 · (1 − leaked/checked) | **100** (0 leaks / 114 narratives) |
 | Semantic contract | valid JSON, required keys, 3 KPIs defined | **pass** |
@@ -98,6 +100,9 @@ now **fixed** — see § 4.
 | accuracy | (TP + TN) / N |
 | leak rate | leaked_items / items_checked  ·  clean % = 100 · (1 − leak rate) |
 | PVM reconciliation error | \| (v_effect + p_effect + m_effect + o_effect) − (actual_revenue − baseline_revenue) \|, per Revenue series. Pass if < \$0.01; report max and mean. (An accounting identity, not an ML metric.) |
+| dominant-driver top-1 accuracy | ( scenarios where `argmax_f \|PVM effect_f\|` = the labelled cause, or the engine correctly abstains where the label says to ) / labelled scenarios |
+| effect-sign accuracy | ( PVM effects whose sign matches the labelled expected sign ) / labelled effects |
+| ablation / causal consistency | ( scenarios where deleting the injected corroborating records — on a throwaway DB copy — flips the abstention decision the expected way ) / ablated scenarios. Expected: `supply` not-abstain → abstain (insufficient evidence); `billing` abstain (contradictory) → not-abstain. |
 
 For **detection**, "positive" = a labelled injected event; TP = injected event
 that was flagged, FN = injected event missed. For **abstention**, "positive" =
@@ -126,16 +131,13 @@ Per turn, each applicable check is a 0/1:
 - **strict pass rate** = ( turns where every applicable check passed ) / turns
 - provider-error turns are excluded from every denominator
 
-### 5.4 RAGAS
+### 5.4 Why not RAGAS
 
-RAGAS applies only to the chat surface (a real RAG pipeline). `eval/ragas_eval.py`
-wires **Faithfulness** and **ResponseGroundedness** (both LLM-judged, no
-embeddings) with a Groq judge. In this environment the run is currently blocked
-by: ragas 0.4.3 vs. langchain 1.x (needs a shim for `langchain_community`'s
-removed `vertexai` module), the Groq free-tier daily token cap, and no embedding
-provider for `answer_relevancy`. The rule-based `faithfulness` above is the
-reported number; run `python eval/ragas_eval.py` for the RAGAS cross-check once a
-judge with token headroom (OpenAI key, or Groq after reset) is available.
+RAGAS only applies to the chat surface (a real RAG pipeline). Its **faithfulness**
+and **answer relevancy** are what the rule-based `faithfulness` / `relevancy`
+checks above stand in for — deterministically, with no LLM judge. RAGAS is itself
+LLM-judged (extra dependency, cost, run-to-run variance), so we do not use it.
+Full reasoning: `docs/EVALUATION_REPORT.md` § 7.
 
 ---
 
