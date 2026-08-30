@@ -1,5 +1,17 @@
-# Optional -- only needed for `python eval/run_eval.py --ragas`.
-# The rule-based metrics in run_eval.py need none of this.
-ragas>=0.2
+# Optional -- only for the RAGAS cross-check (eval/ragas_eval.py,
+# eval/run_eval.py --ragas). The rule-based metrics in run_eval.py need none of this.
+#
+# Known issue: ragas 0.4.x imports langchain_community.chat_models.vertexai,
+# which langchain 1.x removed. If you hit
+#   ModuleNotFoundError: No module named 'langchain_community.chat_models.vertexai'
+# add a shim (we don't use Vertex AI):
+#   printf 'class ChatVertexAI:\n    def __init__(self,*a,**k): raise RuntimeError("shimmed")\n' \
+#     > "$(python -c 'import langchain_community,os;print(os.path.dirname(langchain_community.__file__))')/chat_models/vertexai.py"
+#
+# RAGAS also needs an LLM judge. ragas_eval.py points ChatOpenAI at Groq's
+# OpenAI-compatible endpoint (GROQ_API_KEY in .env); an OPENAI_API_KEY works too.
+# Faithfulness / ResponseGroundedness need no embeddings; answer_relevancy does.
+
+ragas>=0.4,<0.5
 datasets>=2.16
-langchain-openai>=0.1
+langchain-openai>=0.2

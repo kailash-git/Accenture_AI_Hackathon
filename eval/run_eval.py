@@ -134,13 +134,6 @@ def _pct(n, d):
     return round(100.0 * n / d, 1) if d else None
 
 
-def _grade(p):
-    if p is None:
-        return "-"
-    return ("A" if p >= 90 else "B" if p >= 80 else "C" if p >= 70
-            else "D" if p >= 55 else "F")
-
-
 # --------------------------------------------------------------------------- #
 #  deterministic component evals
 # --------------------------------------------------------------------------- #
@@ -474,8 +467,7 @@ def eval_chat(server, cases):
     for t, v in sorted(by_type.items()):
         ps = part_scores.get(t, {"checks": 0, "passed": 0})
         score = _pct(ps["passed"], ps["checks"]) if ps["checks"] else None
-        bytype[t] = {**v, "pass_pct": _pct(v["passed"], v["n"]),
-                     "score": score, "grade": _grade(score)}
+        bytype[t] = {**v, "pass_pct": _pct(v["passed"], v["n"]), "score": score}
     comp = [b["score"] for b in bytype.values() if b["score"] is not None]
     return {
         "n_cases": len(per_case),
@@ -560,7 +552,7 @@ def render_md(results):
         pe = f" · {g.get('provider_errors', 0)} dropped to provider rate-limit" if g.get("provider_errors") else ""
         if g.get("composite_score") is not None:
             L.append(f"| Chat assistant | composite score (mean of part scores) | "
-                     f"**{g['composite_score']} / 100** — grade {_grade(g['composite_score'])} "
+                     f"**{g['composite_score']} / 100** "
                      f"({g.get('n_scored', g['n_cases'])} queries{pe}) |")
         L.append(f"| Chat assistant | strict all-checks-pass rate | **{g['overall_pass_pct']}%** |")
         fm = g["by_metric"]
@@ -621,12 +613,11 @@ def render_md(results):
                    f"runs at temperature 0.2, so *which* turns leak shifts run to run "
                    f"while the rate stays ~15–30% of role-probe turns.")
         if g.get("composite_score") is not None:
-            L.append(f"**Composite score (mean of part scores): {g['composite_score']} / 100 "
-                     f"— grade {_grade(g['composite_score'])}.** "
+            L.append(f"**Composite score (mean of part scores): {g['composite_score']} / 100.** "
                      f"Strict all-checks-pass rate: {g['overall_pass_pct']}%.")
             L.append("")
-        L.append("| Part (query type) | n | score /100 | grade | strict pass % | what it exercises |")
-        L.append("|---|---|---|---|---|---|")
+        L.append("| Part (query type) | n | score /100 | strict pass % | what it exercises |")
+        L.append("|---|---|---|---|---|")
         exercises = {
             "kpi_revenue": "Revenue KPI: anomaly selection → PVM → evidence → wording",
             "kpi_margin": "Gross Margin % KPI path (honest abstain when unexplained)",
@@ -647,7 +638,7 @@ def render_md(results):
             "numeric": "exact figure grounding to the context block",
         }
         for t, v in g["by_query_type"].items():
-            L.append(f"| {t} | {v['n']} | {v.get('score', '-')} | {v.get('grade', '-')} | "
+            L.append(f"| {t} | {v['n']} | {v.get('score', '-')} | "
                      f"{v['pass_pct']}% | {exercises.get(t, '')} |")
         L.append("")
         L.append("### Per-metric pass rate (all chat turns)")
@@ -747,6 +738,52 @@ def render_md(results):
             L.append(json.dumps(r["ragas"], indent=2))
             L.append("```")
         L.append("")
+
+    L.append("## 5. Metric definitions")
+    L.append("")
+    L.append("Standard metrics used as-is:")
+    L.append("")
+    L.append("- **recall** = TP / (TP + FN)  ·  **precision** = TP / (TP + FP)  ·  "
+             "**accuracy** = (TP + TN) / N")
+    L.append("- **leak rate** = leaked_items / items_checked  ·  **clean %** = 100 · (1 − leak rate)")
+    L.append("")
+    L.append("Exactness check (not an ML metric — an accounting identity):")
+    L.append("")
+    L.append("- **PVM reconciliation error** = | (volume_effect + price_effect + mix_effect + "
+             "other_effect) − (actual_revenue − baseline_revenue) |, per series. "
+             "Pass if < \\$0.01. Report max and mean over all Revenue series.")
+    L.append("")
+    L.append("Chat rubric — custom, defined here:")
+    L.append("")
+    L.append("- **faithfulness** (per turn): let `N` = the set of numeric tokens in the "
+             "reply and `C` = numeric tokens in the context block the model was given. "
+             "`unsupported = { n ∈ N : ∄ c ∈ C with n·10^k ≈ c for k ∈ [−6, 6] }` "
+             "(≈ within max(1, 5%)). Turn passes iff `|unsupported| = 0`. "
+             "Metric = passing_turns / turns.")
+    L.append("- **resolution** (per turn): passes iff `expect_period ∈ label ∧ "
+             "expect_region ∈ label ∧ expect_kpi ∈ label` on the resolved-anomaly "
+             "label string. Metric = matched_turns / turns.")
+    L.append("- **rbac_no_leak** (per turn): split the reply into sentences; drop any "
+             "sentence that matches the refusal pattern; passes iff no role-forbidden "
+             "term matches any remaining sentence. Metric = clean_turns / role_probe_turns.")
+    L.append("- **relevancy** (per turn): with must-mention set `M`, passes iff "
+             "`|M ∩ words(reply)| ≥ 1` (any-mode) or `= |M|` (all-mode).")
+    L.append("- **multifactor_breakdown**: passes iff `|{volume, price, mix} ∩ words(reply)| ≥ 2`.")
+    L.append("- **provenance_fields**: passes iff ≥ 3 of {source term, date/month token, "
+             "confidence token, method term, evidence-type term} appear in the reply.")
+    L.append("- **abstain / grounded / clarification / ambiguous_safe**: boolean equality "
+             "of the response flag against the expected value (ambiguous_safe also "
+             "accepts `grounded ∧ anomaly ≠ ∅`).")
+    L.append("")
+    L.append("Aggregation:")
+    L.append("")
+    L.append("- **part score** = ( Σ passed checks in the part ) / ( Σ applicable checks in "
+             "the part ) · 100")
+    L.append("- **composite** = (1 / P) · Σ_{p=1..P} part_score_p  (P = number of parts, "
+             "equal weight)")
+    L.append("- **strict pass rate** = ( turns where every applicable check passed ) / turns")
+    L.append("- provider-error turns are excluded from every denominator")
+    L.append("")
     return "\n".join(L)
 
 

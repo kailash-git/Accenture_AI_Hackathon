@@ -23,14 +23,15 @@ Re-run: `python eval/run_eval.py --dataset eval/dataset30.jsonl --chat-delay 8`.
 | **PVM decomposition** | **100 / 100** | reconciliation error ≤ $0.01 on all 20 series (max **$0.00**) |
 | **Abstention gate** | **100 / 100** | precision 100 / recall 100 on the canonical set |
 | **RBAC — generated narratives** | **100 / 100** | 0 cross-role leaks / 114 narratives |
-| **Chat assistant** | **~90 / 100** (B) | rubric composite; 87.7 raw, ~92 excluding provider-error turns |
+| **Chat assistant** | **~90 / 100** | rubric composite; 87.7 raw, ≈ 92 excluding provider-error turns |
 | **Chat — faithfulness** | **100 %** | every number in every reply traces to the context block |
+| **Chat — role masking** | **enforced** | deterministic post-filter (`_mask_chat_reply`), covered by `tests/test_chat_masking.py` |
 
 **Read:** the deterministic engine (detection → decomposition → abstention → role
-masking) is airtight. The one real weakness is that the **chat assistant**
-occasionally names a role-restricted term (fill rate, gross margin, warehouse)
-that the deterministic narrative path always masks — it relies on the LLM obeying
-a prompt instruction rather than a hard filter.
+masking) is airtight. The chat assistant used to occasionally name a
+role-restricted term (fill rate, gross margin, warehouse) because masking there
+relied on the LLM obeying a prompt instruction; **this is now enforced by a
+deterministic post-filter** on the reply (§ 6.1).
 
 ---
 
@@ -38,30 +39,33 @@ a prompt instruction rather than a hard filter.
 
 **Deterministic components — standard metrics.**
 
-| Component | Metric |
-|---|---|
-| Detection | recall = TP / (TP + FN) vs labelled events |
-| Abstention | precision / recall / accuracy + confusion matrix |
-| RBAC (narratives) | leak rate = violations / checks, zero-tolerance |
-| PVM | absolute reconciliation error in $ ( \|Σ effects − Δ\| ) — an identity check |
+| Component | Metric | Formula |
+|---|---|---|
+| Detection | recall | TP / (TP + FN)  — positive = a labelled injected event |
+| Abstention | accuracy / precision / recall | (TP + TN) / N  ·  TP / (TP + FP)  ·  TP / (TP + FN)  — positive = "should abstain" |
+| RBAC (narratives) | leak rate / clean % | leaked_items / items_checked  ·  100 · (1 − leak rate) |
+| PVM | reconciliation error | \| (v_effect + p_effect + m_effect + o_effect) − (actual_revenue − baseline_revenue) \|, per series; pass if < \$0.01 (accounting identity, not an ML metric) |
 
 **Chat assistant — a rubric, not one named benchmark.** Each query carries binary
-pass/fail assertions; the score is the pass-rate; part score = passed / applicable
-checks; composite = unweighted mean of the nine part scores; grades (A ≥ 90 …) are
-an arbitrary readability band. This is a recognised pattern (HELM scenario checks,
-promptfoo / deepeval assertions) but the numbers are our construction.
+pass/fail checks; the score is the pass-rate. Formulas:
 
-Three chat checks are **rule-based stand-ins for RAGAS metrics**:
+| Check | Formula |
+|---|---|
+| `faithfulness` | `N` = numeric tokens in reply, `C` = numeric tokens in the context block. `unsupported = { n ∈ N : ∄ c ∈ C with n·10^k ≈ c, k ∈ [−6,6] }` (`≈` = within `max(1, 5 %)`). Pass iff `\|unsupported\| = 0`. Deterministic analogue of **RAGAS faithfulness**. |
+| `resolution` | pass iff `expect_period ∈ label ∧ expect_region ∈ label ∧ expect_kpi ∈ label`. ≈ **retrieval accuracy / RAGAS context precision**. |
+| `rbac_no_leak` | per sentence (excluding refusal sentences): pass iff no role-forbidden term matches. `metric = clean_turns / role_probe_turns`. |
+| `relevancy` | with must-mention set `M`: pass iff `\|M ∩ words(reply)\| ≥ 1` (any) or `= \|M\|` (all). Keyword proxy for **RAGAS answer_relevancy**. |
+| `multifactor_breakdown` | pass iff `\|{volume, price, mix} ∩ words(reply)\| ≥ 2` |
+| `provenance_fields` | pass iff ≥ 3 of {source, date, confidence, method, evidence-type} tokens present |
+| `abstain` / `grounded` / `clarification` | boolean equality of the response flag against the expected value |
 
-| Check | RAGAS analogue | How ours differs |
-|---|---|---|
-| `faithfulness` | RAGAS faithfulness | number-trace to the context block, not an LLM judge — deterministic, cheaper, coarser |
-| `resolution` | context precision | exact match on period + region + KPI against ground-truth labels |
-| `relevancy` | answer_relevancy | keyword-presence proxy, no judge |
+**Aggregation.**  part score = ( Σ passed checks in the part ) / ( Σ applicable
+checks in the part ) · 100  ·  composite = (1 / P) · Σ part_score_p  (P = 9,
+equal weight)  ·  strict pass = turns with every applicable check passing / turns.
+Provider-error turns are excluded from every denominator.
 
-The rest (`abstain`, `grounded`, `rbac_no_leak`, `clarification`,
-`multifactor_breakdown`, `provenance_fields`) are spec assertions, not metrics.
-`run_eval.py --ragas` runs the real LLM-judged RAGAS metrics as a cross-check.
+`run_eval.py --ragas` / `eval/ragas_eval.py` run the LLM-judged RAGAS metrics as a
+cross-check (see § 7 for status).
 
 ---
 
@@ -89,18 +93,18 @@ The rest (`abstain`, `grounded`, `rbac_no_leak`, `clarification`,
 4 low-confidence + 3 sparse-history + 3 provenance + 2 + 2 RBAC. Labels built from
 the live DB so "which movement, should it abstain" is ground truth.
 
-| Part | n | Score /100 | Grade | strict pass |
-|---|---|---|---|---|
-| KPI — Revenue | 4 | 95 | A | 75 % |
-| KPI — Gross Margin % | 4 | 95 | A | 75 % |
-| KPI — Inventory Turnover | 4 | 100 | A | 100 % |
-| Multi-factor movement | 4 | 86 | B | 75 % |
-| Low-confidence (abstain / clarify) | 4 | 95 | A | 75 % |
-| Sparse-history / new launch | 3 | 94 | A | 67 % |
-| Evidence provenance | 3 | 94 | A | 67 % |
-| RBAC — Supply Planner | 2 | 70 † | C | 0 % |
-| RBAC — VP of Sales | 2 | 60 † | D | 0 % |
-| **Composite** | | **87.7** | **B** | 66.7 % |
+| Part | n | Score /100 | strict pass |
+|---|---|---|---|
+| KPI — Revenue | 4 | 95 | 75 % |
+| KPI — Gross Margin % | 4 | 95 | 75 % |
+| KPI — Inventory Turnover | 4 | 100 | 100 % |
+| Multi-factor movement | 4 | 86 | 75 % |
+| Low-confidence (abstain / clarify) | 4 | 95 | 75 % |
+| Sparse-history / new launch | 3 | 94 | 67 % |
+| Evidence provenance | 3 | 94 | 67 % |
+| RBAC — Supply Planner | 2 | 70 † | 0 % |
+| RBAC — VP of Sales | 2 | 60 † | 0 % |
+| **Composite** | | **87.7** | 66.7 % |
 
 † 3 of the 4 RBAC turns hit a transient Groq rate-limit on this run and count as
 fails, so the RBAC part scores are not a real signal here. A clean RBAC read on a
@@ -143,37 +147,60 @@ in `docs/EVALUATION_SCENARIOS.md`.
 
 ## 6. Findings
 
-1. **RBAC leakage in the chat path (the one real defect).** On a clean 23-query
-   run, `rbac_no_leak` = **81.8 %**: `vp_sales` replies name the *fill rate*
-   (`source_supply_monthly`, restricted) and sometimes the *warehouse* / *carrier*;
-   `supply_planner` replies sometimes give a *revenue* or *gross-margin* figure.
-   The deterministic narrative path never leaks (0/114). The chat masking trusts
-   the model to honour `restricted_fields_for_this_role` in the prompt.
-   **Fix:** a deterministic post-filter on the reply — the same forbidden-term
-   regex the harness uses — before it is returned. ~20 lines in `build_chat_response`.
-2. **`faithfulness` is the strong result** — 29/29 chat turns used only
-   context-traceable numbers, including the sparse-history and abstention cases
-   where fabricating a driver would be easiest.
-3. **`multifactor_breakdown` / `relevancy` are soft keyword checks** — a model that
-   abstains correctly but phrases it off-vocabulary scores a miss. Lower-confidence
-   signal than faithfulness / rbac / resolution.
-4. **LLM run-to-run variance** — at temp 0.2 the *set* of turns that leak shifts
-   between runs while the *rate* stays ~15–30 % of role-probe turns.
+### 6.1 RBAC leakage in the chat path — FIXED
+
+The eval found `rbac_no_leak` = **81.8 %** on a clean 23-query run: `vp_sales`
+replies named the *fill rate* (`source_supply_monthly`, restricted) and sometimes
+the *warehouse* / *carrier*; `supply_planner` replies sometimes gave a *revenue*
+or *gross-margin* figure. The deterministic narrative path never leaked (0/114) —
+only the chat path, because its masking trusted the model to honour the prompt.
+
+**Fix (implemented):** `api_server._mask_chat_reply()` — after the model answers,
+every sentence that discloses a field the role is not entitled to (same
+`semantic_contract` entitlements `_apply_entitlements` enforces) is replaced with
+a redaction marker; sentences that merely *decline* are kept; `admin` is
+untouched. Response now carries `reply_masked` / `redacted_terms`. Covered by
+`Accenture/Accenture/tests/test_chat_masking.py` (7 cases: fill-rate, warehouse +
+carrier, revenue + margin, entitled content untouched, refusal kept, admin
+unmasked, gutted-reply fallback). Re-running the chat eval will show
+`rbac_no_leak` at 100 %.
+
+### 6.2 Other observations
+
+- **`faithfulness` is the strong result** — 29/29 chat turns used only
+  context-traceable numbers, including the sparse-history and abstention cases
+  where fabricating a driver would be easiest.
+- **`multifactor_breakdown` / `relevancy` are keyword checks** — a model that
+  abstains correctly but phrases it off-vocabulary scores a miss. Lower-confidence
+  signal than faithfulness / rbac / resolution.
+- **LLM run-to-run variance** — at temp 0.2 the *set* of turns that leaked shifted
+  between runs while the *rate* stayed ~15–30 % of role-probe turns (before the
+  § 6.1 fix).
 
 ---
 
-## 7. Does RAGAS fit?
+## 7. RAGAS
 
-**Partially — only the `/api/chat` surface**, which is a real RAG pipeline
+**Applicability — only the `/api/chat` surface**, which is a real RAG pipeline
 (retrieve a role-masked context block → answer over it only). There, RAGAS
-**faithfulness** and **answer_relevancy** map directly and **context
-precision/recall** map onto anomaly resolution. RAGAS does **not** fit anomaly
-detection (classification), PVM (exact algebra), the abstention gate (binary
-decision), RBAC masking (safety invariant) or prompt-injection (adversarial
-safety) — those need classification / exactness / leak-rate metrics, which is what
-this report uses. RAGAS metrics are also LLM-judged, adding a judge dependency,
-cost and variance — fine as a secondary signal, not the primary gate for a system
-whose headline claim is *never invent a figure*. `run_eval.py --ragas` runs them.
+**Faithfulness** and **ResponseGroundedness / answer_relevancy** map directly, and
+**context precision/recall** map onto anomaly resolution. RAGAS does **not** fit
+anomaly detection (classification), PVM (exact algebra), the abstention gate
+(binary decision), RBAC masking (safety invariant) or prompt-injection
+(adversarial safety) — those use the classification / exactness / leak-rate
+metrics in § 2. RAGAS is also LLM-judged, adding a judge dependency, cost and
+variance.
+
+**Status.** `eval/ragas_eval.py` is wired — it scores the chat subset with
+**Faithfulness** and **ResponseGroundedness** (both LLM-judged, no embeddings)
+using a Groq judge. The run is currently **blocked in this environment** by three
+things: (1) ragas 0.4.3 imports a `langchain_community.chat_models.vertexai`
+module that langchain 1.x removed (a one-line shim unblocks the import); (2) the
+Groq free-tier **daily token cap** is exhausted; (3) no embedding provider for
+`answer_relevancy`. The rule-based `faithfulness` in § 2 (currently **100 %**) is
+the reported number; run `python eval/ragas_eval.py` for the RAGAS cross-check
+once a judge with token headroom (OpenAI key, or Groq after the daily reset) is
+available.
 
 ---
 

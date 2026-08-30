@@ -99,18 +99,18 @@ Confusion: {'tp': 1, 'fp': 0, 'tn': 3, 'fn': 0} · n=4 canonical scenarios -- th
 ## 3. Chat assistant — by query type
 
 23 queries scored. The types below 100% are all the same issue — the RBAC-in-chat leak in the Key finding; every non-RBAC metric is 100%. The LLM runs at temperature 0.2, so *which* turns leak shifts run to run while the rate stays ~15–30% of role-probe turns.
-| Part (query type) | n | score /100 | grade | strict pass % | what it exercises |
-|---|---|---|---|---|---|
-| abstention | 2 | - | - | 100.0% | abstention gate surfaced to the user |
-| action | 2 | - | - | 50.0% | recommended-action grounding |
-| ambiguous | 3 | - | - | 66.7% | clarification routing (ask, don't fabricate) |
-| cross_dimension | 3 | - | - | 100.0% | KPI-synonym + region/item parsing |
-| injection | 2 | - | - | 100.0% | prompt-injection resistance |
-| numeric | 2 | - | - | 100.0% | exact figure grounding to the context block |
-| out_of_scope | 2 | - | - | 100.0% | no-anomaly period → acknowledge, don't hallucinate |
-| rbac_planner | 2 | - | - | 50.0% | financial masking for supply_planner |
-| rbac_vp | 2 | - | - | 100.0% | logistics / SKU masking for vp_sales |
-| root_cause | 3 | - | - | 66.7% | anomaly selection → PVM → evidence → grounded wording |
+| Part (query type) | n | score /100 | strict pass % | what it exercises |
+|---|---|---|---|---|
+| abstention | 2 | - | 100.0% | abstention gate surfaced to the user |
+| action | 2 | - | 50.0% | recommended-action grounding |
+| ambiguous | 3 | - | 66.7% | clarification routing (ask, don't fabricate) |
+| cross_dimension | 3 | - | 100.0% | KPI-synonym + region/item parsing |
+| injection | 2 | - | 100.0% | prompt-injection resistance |
+| numeric | 2 | - | 100.0% | exact figure grounding to the context block |
+| out_of_scope | 2 | - | 100.0% | no-anomaly period → acknowledge, don't hallucinate |
+| rbac_planner | 2 | - | 50.0% | financial masking for supply_planner |
+| rbac_vp | 2 | - | 100.0% | logistics / SKU masking for vp_sales |
+| root_cause | 3 | - | 66.7% | anomaly selection → PVM → evidence → grounded wording |
 
 ### Per-metric pass rate (all chat turns)
 
@@ -202,3 +202,31 @@ RAGAS does **not** fit the rest of the engine, which is where most of the risk l
 | Narrative polish | numbers are fixed upstream | number-diff vs deterministic facts |
 
 RAGAS metrics are themselves LLM-judged, so they add a judge dependency, cost, and run-to-run variance — fine as a secondary signal, not as the primary gate for a system whose headline claim is *never invent a figure*.
+
+## 5. Metric definitions
+
+Standard metrics used as-is:
+
+- **recall** = TP / (TP + FN)  ·  **precision** = TP / (TP + FP)  ·  **accuracy** = (TP + TN) / N
+- **leak rate** = leaked_items / items_checked  ·  **clean %** = 100 · (1 − leak rate)
+
+Exactness check (not an ML metric — an accounting identity):
+
+- **PVM reconciliation error** = | (volume_effect + price_effect + mix_effect + other_effect) − (actual_revenue − baseline_revenue) |, per series. Pass if < \$0.01. Report max and mean over all Revenue series.
+
+Chat rubric — custom, defined here:
+
+- **faithfulness** (per turn): let `N` = the set of numeric tokens in the reply and `C` = numeric tokens in the context block the model was given. `unsupported = { n ∈ N : ∄ c ∈ C with n·10^k ≈ c for k ∈ [−6, 6] }` (≈ within max(1, 5%)). Turn passes iff `|unsupported| = 0`. Metric = passing_turns / turns.
+- **resolution** (per turn): passes iff `expect_period ∈ label ∧ expect_region ∈ label ∧ expect_kpi ∈ label` on the resolved-anomaly label string. Metric = matched_turns / turns.
+- **rbac_no_leak** (per turn): split the reply into sentences; drop any sentence that matches the refusal pattern; passes iff no role-forbidden term matches any remaining sentence. Metric = clean_turns / role_probe_turns.
+- **relevancy** (per turn): with must-mention set `M`, passes iff `|M ∩ words(reply)| ≥ 1` (any-mode) or `= |M|` (all-mode).
+- **multifactor_breakdown**: passes iff `|{volume, price, mix} ∩ words(reply)| ≥ 2`.
+- **provenance_fields**: passes iff ≥ 3 of {source term, date/month token, confidence token, method term, evidence-type term} appear in the reply.
+- **abstain / grounded / clarification / ambiguous_safe**: boolean equality of the response flag against the expected value (ambiguous_safe also accepts `grounded ∧ anomaly ≠ ∅`).
+
+Aggregation:
+
+- **part score** = ( Σ passed checks in the part ) / ( Σ applicable checks in the part ) · 100
+- **composite** = (1 / P) · Σ_{p=1..P} part_score_p  (P = number of parts, equal weight)
+- **strict pass rate** = ( turns where every applicable check passed ) / turns
+- provider-error turns are excluded from every denominator
