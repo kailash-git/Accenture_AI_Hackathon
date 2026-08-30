@@ -58,16 +58,17 @@ python eval/run_eval.py --ragas             # also run RAGAS (needs the extra de
 each row declares what it expects (`expect_scenario`, `expect_abstain`,
 `forbid_terms`, `expect_figures`, …).
 
-## RAGAS (optional)
+## RAGAS (optional cross-check)
 
 ```bash
-pip install -r eval/requirements-eval.txt
-export OPENAI_API_KEY=...        # RAGAS needs a judge model
-python eval/run_eval.py --ragas
+pip install -r eval/requirements-eval.txt      # see that file for a langchain 1.x shim note
+python eval/ragas_eval.py                       # Faithfulness + ResponseGroundedness on the chat subset
+python eval/ragas_eval.py --all                 # all 30 (uses more judge tokens)
 ```
 
 RAGAS only applies to the `/api/chat` surface (it's a real RAG pipeline). The
 harness already computes rule-based equivalents of faithfulness / relevancy /
-context-precision, so the core numbers don't need a judge model — `--ragas` is a
-cross-check. See section 5 of `docs/EVALUATION.md` for the full "does RAGAS fit"
-discussion.
+context-precision, so the core numbers don't need a judge model. `ragas_eval.py`
+uses the Groq judge from `.env`; `--all` or `answer_relevancy` need more tokens /
+an embedding provider. See `docs/EVALUATION_REPORT.md` § 7 for status and the
+"does RAGAS fit" discussion.

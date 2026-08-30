@@ -571,6 +571,58 @@ def _redact_financial_disclosure(text, role):
     return " ".join(redacted)
 
 
+# --- Deterministic role masking of the chat reply -------------------------- #
+# The chat system prompt tells the model to withhold restricted fields, but a
+# generative model does not obey that reliably (see docs/EVALUATION_REPORT.md
+# section 6). This is the hard enforcement: after the model answers, every
+# sentence that discloses a field the role is not entitled to (per the same
+# semantic_contract entitlements _apply_entitlements enforces) is replaced with a
+# redaction marker. Sentences that merely *decline* to give a detail are kept.
+_CHAT_MASK_PATTERNS = {
+    "supply_planner": re.compile(
+        r"\b(revenues?|gross[-\s]?margins?|margin percent(?:age)?|profit margins?|"
+        r"cost of goods(?: sold)?|COGS|marketing spend|campaign roi|supplier (?:raw )?cost)\b",
+        re.I),
+    "vp_sales": re.compile(
+        r"\b(warehouses?|WH-\d+|carriers?|bay\s*\d+|lead[-\s]?times?|fill[-\s]?rates?|"
+        r"stock[-\s]?outs?|SKUs?|warehouse_sku|distribution cent(?:er|re))\b",
+        re.I),
+}
+_CHAT_REFUSAL_RE = re.compile(
+    r"restricted (?:\w+ )?(?:for|to) (?:your|this)|not available (?:for|to)|isn'?t available|"
+    r"can'?t (?:share|provide|give|disclose|show)|cannot (?:share|provide|give|disclose)|"
+    r"withheld|not (?:shown|disclosed|provided|visible) (?:for|to)|masked (?:for|out)|"
+    r"unable to (?:share|provide|disclose)", re.I)
+_CHAT_REDACTION_MARKER = "[A detail here is restricted for your role and has been withheld.]"
+
+
+def _mask_chat_reply(text, role):
+    """Redact any sentence of the model's reply that discloses a field `role` is
+    not entitled to. Returns (masked_text, sorted_list_of_redacted_terms)."""
+    pat = _CHAT_MASK_PATTERNS.get(role)
+    if not pat or not text:
+        return text, []
+    out, hits = [], []
+    for s in re.split(r"(?<=[.!?])\s+", text):
+        if _CHAT_REFUSAL_RE.search(s):
+            out.append(s)
+            continue
+        m = pat.search(s)
+        if m:
+            hits.append(m.group(0).lower().replace("  ", " "))
+            if not (out and out[-1] == _CHAT_REDACTION_MARKER):
+                out.append(_CHAT_REDACTION_MARKER)
+        else:
+            out.append(s)
+    masked = " ".join(out).strip()
+    # If masking gutted the whole answer, return one clean line instead of a
+    # string of markers.
+    if hits and len(masked.replace(_CHAT_REDACTION_MARKER, "").strip()) < 25:
+        masked = ("The engine has an analysis for this movement, but the detail "
+                  "that answers your question is restricted for your role.")
+    return masked, sorted(set(hits))
+
+
 _VP_WAREHOUSE_KINDS = ("warehouse_entity", "supply_anomaly", "inventory_anomaly")
 _PLANNER_FINANCIAL_ATTRS = ("value", "baseline_mean", "price_effect", "volume_effect",
                             "interaction_effect", "total_decomposed", "actual_delta")
@@ -1041,8 +1093,12 @@ def build_chat_response(message, role=DEFAULT_ROLE, anomaly_key=None, focus=Fals
             "error": res["error"], "processing": _chat_processing_breakdown(True),
         }
 
+    # Hard role masking: the model was told to withhold restricted fields; this
+    # enforces it deterministically on the way out (see _mask_chat_reply).
+    reply_text, redacted_terms = _mask_chat_reply(res["text"], role)
+
     return {
-        "reply": res["text"],
+        "reply": reply_text,
         "grounded": True,
         "abstained": bool(context.get("analysis_abstained")),
         "anomaly": label,
@@ -1051,6 +1107,8 @@ def build_chat_response(message, role=DEFAULT_ROLE, anomaly_key=None, focus=Fals
         "llm_used": True,
         "model": res["model"],
         "restricted_fields": context.get("restricted_fields_for_this_role", []),
+        "reply_masked": bool(redacted_terms),
+        "redacted_terms": redacted_terms,
         "processing": _chat_processing_breakdown(True),
         "telemetry": {
             "tokens_in": res["tokens_in"],
