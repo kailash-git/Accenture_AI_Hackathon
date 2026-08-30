@@ -181,7 +181,6 @@ of questions asked, not with the number of dashboards rendered.
 | Enforce row-level, column-level, and domain-level data access | Deterministic: contract-driven field removal | `_apply_entitlements`, `_mask_graph_for_role`, `_redact_financial_disclosure` in `api_server.py` |
 | Seed-time narrative pre-generation | Deterministic templates, optionally polished by one cached model call per curated scenario when `OPENAI_API_KEY` is set; fully functional with no key | `src/llm/narrative_generator.py`, `src/llm/llm_client.py` |
 | Live conversational answer wording | Language model: Groq `openai/gpt-oss-120b` by default, Anthropic `claude-haiku-4-5` as fallback; one call per question | `build_chat_response` in `api_server.py` |
-| Definitional questions such as "what is the evidence graph" | Deterministic: fixed descriptions, no model call | `api_server.py` |
 
 Of the five stages in a conversational turn, four are deterministic and only the phrasing stage uses
 the model:
