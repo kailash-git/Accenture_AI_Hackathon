@@ -27,7 +27,7 @@ One query per required scenario type, the answer the engine returns, and the gro
 - **Row 8**: the reply discloses a *gross-margin* figure (–16.3%) to `supply_planner`, for whom `GrossMarginPercent` is restricted. It correctly refuses the revenue figure but not the margin one.
 - **Row 9**: the reply names the *warehouse* (“Seattle”) and the *carrier* (“LogiTrans”) to `vp_sales`, both restricted for that role; it refuses only the SKU.
 - **Row 4**: figures are right but mis-scaled in wording (“$4.1 M” for $4,079). Numbers come from the context block; the unit label is the model's.
-- Root cause: chat masking relies on the model honouring the prompt's `restricted_fields_for_this_role`. Fix in `docs/EVALUATION.md` § Key finding — a deterministic post-filter on the reply before it is returned.
+- Root cause: chat masking *relied* on the model honouring the prompt's `restricted_fields_for_this_role`. **Fixed** — `api_server._mask_chat_reply()` now redacts, server-side, any reply sentence that discloses a field the role is not entitled to, keeping sentences that merely decline (regression-tested in `Accenture/Accenture/tests/test_chat_masking.py`). This table was generated *before* that fix landed; re-run `python eval/scenario_table.py` against a live server to refresh rows 8–9.
 
 ## Provenance detail — Evidence provenance (freshness, method, contribution, confidence, lineage)
 
