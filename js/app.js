@@ -457,9 +457,21 @@ async function selectScenario(scenarioKey) {
   } else {
     if (abstentionBanner) abstentionBanner.style.display = 'none';
     if (heroBanner) heroBanner.style.display = '';
-    if (heroActionText && anom.recommendedAction) heroActionText.textContent = anom.recommendedAction.title;
+    // If an expert has corrected the action for this or a similar anomaly, the
+    // learned correction becomes the headline recommendation (the engine's
+    // original still shows in the Actions section below).
+    const corr = anom.actionCorrection;
+    if (heroActionText && anom.recommendedAction) {
+      if (corr && corr.corrected_action) {
+        heroActionText.innerHTML = `<span style="color: var(--accent-green); font-weight: 700;">&#8635; Learned:</span> ${_escapeHtml(corr.corrected_action)}`;
+      } else {
+        heroActionText.textContent = anom.recommendedAction.title;
+      }
+    }
     if (heroActionImpact && anom.recommendedAction) {
-      heroActionImpact.textContent = `Owner: ${anom.recommendedAction.owner} · Expected impact: ${anom.recommendedAction.expectedImpact}`;
+      heroActionImpact.textContent = corr && corr.corrected_action
+        ? `From ${corr.is_own ? 'your correction on this anomaly' : `an expert correction on ${corr.match}`}${corr.rationale ? ` — "${corr.rationale}"` : ''}`
+        : `Owner: ${anom.recommendedAction.owner} · Expected impact: ${anom.recommendedAction.expectedImpact}`;
     }
     if (heroApproveBtn) {
       heroApproveBtn.setAttribute('onclick', `handleActionApprove('${scenarioKey}', -1, this)`);
@@ -607,7 +619,42 @@ async function selectScenario(scenarioKey) {
         ? `<button class="btn-action-primary js-approve-action-btn" data-anomaly-key="${scenarioKey}" style="background-color: #166534; color: #ffffff;" disabled><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Approved</button>`
         : `<button class="btn-action-primary js-approve-action-btn" data-anomaly-key="${scenarioKey}" onclick="handleActionApprove('${scenarioKey}', -1, this)">Approve Action</button>`;
 
-      actionCardsGrid.innerHTML = `
+      // Learning loop: an expert's prior correction for this / a similar anomaly,
+      // shown above the engine's own recommendation.
+      const c = anom.actionCorrection;
+      const learnedHtml = (c && c.corrected_action) ? `
+        <div class="action-module-card" style="grid-column: 1 / -1; border-color: var(--accent-green); background: rgba(16,185,129,0.06);">
+          <div class="action-card-header-row">
+            <div class="action-card-header-left">
+              <div class="action-card-heading" style="margin: 0; color: var(--accent-green);">&#8635; Learned Recommendation</div>
+            </div>
+            <span class="sc-status-pill active">From expert feedback</span>
+          </div>
+          <div class="action-card-body" style="color: var(--text-primary); font-weight: 600;">${_escapeHtml(c.corrected_action)}</div>
+          <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 8px;">
+            ${c.is_own ? 'You corrected the engine on this anomaly.' : `Based on an expert correction to ${_escapeHtml(c.match)} by ${_escapeHtml(c.corrected_by)}.`}${c.rationale ? ` &mdash; &ldquo;${_escapeHtml(c.rationale)}&rdquo;` : ''}
+          </div>
+        </div>
+      ` : '';
+
+      // Correction capture: available alongside the thumbs feedback.
+      const correctionFormHtml = `
+        <div class="action-module-card" style="grid-column: 1 / -1; background: transparent; border-style: dashed;">
+          <button class="btn-action-outline" id="actionCorrectionToggle" onclick="toggleActionCorrectionForm()">This recommended action looks wrong &mdash; suggest the right one</button>
+          <div id="actionCorrectionForm" hidden style="margin-top: 14px;">
+            <div class="schema-field-label" style="margin-bottom: 6px;">What should the recommended action be?</div>
+            <textarea id="actionCorrectionText" rows="3" placeholder="e.g. Don't expedite a reorder &mdash; the supplier already confirmed recovery. Reallocate 2,000 units from the TX buffer and monitor for 7 days instead." style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary); font-family: inherit; font-size: 13px; resize: vertical;"></textarea>
+            <div class="schema-field-label" style="margin: 12px 0 6px;">Why? (optional &mdash; helps the engine apply it correctly next time)</div>
+            <input id="actionCorrectionWhy" type="text" placeholder="Short reason" style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary); font-family: inherit; font-size: 13px;" />
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px;">
+              <button class="btn-action-outline" onclick="toggleActionCorrectionForm()">Cancel</button>
+              <button class="btn-action-primary" onclick="submitActionCorrectionForm('${scenarioKey}')">Save correction</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      actionCardsGrid.innerHTML = learnedHtml + `
         <div class="action-module-card" id="actionCard-${scenarioKey}" style="grid-column: 1 / -1;">
           <div class="action-card-header-row">
             <div class="action-card-header-left">
@@ -633,7 +680,7 @@ async function selectScenario(scenarioKey) {
             <button class="btn-action-outline" onclick="handleActionDismiss('${scenarioKey}')">Dismiss</button>
           </div>
         </div>
-      `;
+      ` + correctionFormHtml;
     }
   }
 

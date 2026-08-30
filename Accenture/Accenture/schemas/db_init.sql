@@ -75,6 +75,26 @@ CREATE TABLE IF NOT EXISTS user_feedback (
     timestamp TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 6b. Expert Action Corrections -- when a user judges the recommended action
+-- wrong and types what to do instead. Matched onto future similar anomalies
+-- (same scenario_key, or same kpi_name + cat_id + direction) so the engine
+-- surfaces the corrected action next time. This is the "learning loop".
+CREATE TABLE IF NOT EXISTS action_corrections (
+    correction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    anomaly_id TEXT NOT NULL,
+    scenario_key TEXT,
+    kpi_name TEXT,
+    cat_id TEXT,
+    direction TEXT,
+    detection_type TEXT,
+    original_action TEXT,
+    corrected_action TEXT NOT NULL,
+    rationale TEXT,
+    corrected_by TEXT,
+    status TEXT NOT NULL DEFAULT 'active', -- 'active' | 'dismissed'
+    timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 7. Daily Inventory Logs Table
 CREATE TABLE IF NOT EXISTS inventory_logs (
     date TEXT NOT NULL,

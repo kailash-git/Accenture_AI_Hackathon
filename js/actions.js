@@ -48,6 +48,56 @@ function handleActionAssign(anomalyKey) {
   openAssignmentModal(anomalyKey);
 }
 
+/* ---- Action correction (learning loop) -------------------------------------
+   The user thinks the recommended action is wrong and types what to do
+   instead. Stored server-side keyed to the anomaly's scenario/KPI so a future
+   similar anomaly surfaces the corrected action (api_server.py
+   _match_action_correction). Sits alongside the thumbs feedback. */
+function toggleActionCorrectionForm() {
+  const form = document.getElementById('actionCorrectionForm');
+  const toggle = document.getElementById('actionCorrectionToggle');
+  if (!form) return;
+  form.hidden = !form.hidden;
+  if (toggle) toggle.style.display = form.hidden ? '' : 'none';
+  if (!form.hidden) document.getElementById('actionCorrectionText')?.focus();
+}
+
+async function submitActionCorrectionForm(anomalyKey) {
+  const text = (document.getElementById('actionCorrectionText')?.value || '').trim();
+  const why = (document.getElementById('actionCorrectionWhy')?.value || '').trim();
+  if (!text) {
+    showAppToast('Type what the recommended action should be first.');
+    return;
+  }
+
+  let ok = false;
+  if (typeof apiClient !== 'undefined' && apiClient.isConnected) {
+    const res = await apiClient.submitActionCorrection(anomalyKey, text, why);
+    ok = !!(res && res.success);
+  }
+
+  // Reflect it locally so the "Learned Recommendation" card shows immediately.
+  const anom = ANOMALY_DATASET[anomalyKey];
+  if (anom) {
+    anom.actionCorrection = {
+      corrected_action: text,
+      rationale: why,
+      corrected_by: APP_STATE.activeRole,
+      source_anomaly_id: anom.id,
+      is_own: true,
+      match: 'this anomaly'
+    };
+  }
+
+  showAppToast(ok
+    ? 'Correction saved — the engine will surface it on similar anomalies.'
+    : 'Correction saved for this session.');
+
+  // Re-render the scenario so the learned card + hero recommendation update
+  // (also re-fetches from the backend, proving the match round-trips).
+  if (typeof selectScenario === 'function') selectScenario(anomalyKey);
+}
+
 function openAssignmentModal(anomalyKey) {
   const anom = ANOMALY_DATASET[anomalyKey] || ANOMALY_DATASET.supply;
   const modalBody = document.getElementById('assignModalBody');
