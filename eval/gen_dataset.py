@@ -9,6 +9,15 @@ import calendar
 import json
 import os
 import sqlite3
+import sys
+
+# Windows consoles default to a legacy codepage; force UTF-8 so printing
+# report text (arrows, non-breaking hyphens, box chars) never crashes.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(os.path.dirname(HERE), "Accenture", "Accenture", "data", "business_bi.db")
@@ -122,7 +131,7 @@ def main():
         out.append(row)
 
     path = os.path.join(HERE, "dataset30.jsonl")
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         for r in out:
             f.write(json.dumps(r) + "\n")
     print(f"wrote {path} ({len(out)} queries)")

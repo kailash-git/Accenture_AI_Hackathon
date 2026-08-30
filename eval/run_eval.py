@@ -41,6 +41,15 @@ import sys
 import time
 import urllib.error
 import urllib.request
+# Windows consoles default to a legacy codepage; force UTF-8 so printing
+# report text (arrows, non-breaking hyphens, box chars) never crashes.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
+
 
 CHAT_DELAY_S = 1.5   # spacing between chat calls (free-tier rate limits); --chat-delay
 CHAT_RETRIES = 3     # retries when the provider returns an error / empty reply
@@ -484,7 +493,7 @@ def eval_persona_leak(c):
 def eval_semantic_contract():
     path = os.path.join(ROOT, "Accenture", "Accenture", "schemas", "semantic_contract.json")
     try:
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             sc = json.load(f)
         layer = sc.get("semantic_layer", {})
         need = ["kpis", "thresholds", "mappings", "entitlements"]
@@ -1075,9 +1084,9 @@ def main():
     args = ap.parse_args()
 
     if args.render_only:
-        with open(args.json) as f:
+        with open(args.json, encoding="utf-8") as f:
             results = json.load(f)
-        with open(args.md, "w") as f:
+        with open(args.md, "w", encoding="utf-8") as f:
             f.write(render_md(results))
         print(f"re-rendered {args.md} from {args.json}")
         return
@@ -1110,7 +1119,7 @@ def main():
 
     if not args.skip_chat:
         CHAT_DELAY_S = args.chat_delay
-        with open(args.dataset) as f:
+        with open(args.dataset, encoding="utf-8") as f:
             cases = [json.loads(x) for x in f if x.strip()]
         try:
             results["chat"] = eval_chat(args.server, cases)
@@ -1118,10 +1127,10 @@ def main():
             results["chat"] = {"error": f"{type(e).__name__}: {e}"}
 
     os.makedirs(os.path.dirname(args.json), exist_ok=True)
-    with open(args.json, "w") as f:
+    with open(args.json, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, default=str)
     os.makedirs(os.path.dirname(args.md), exist_ok=True)
-    with open(args.md, "w") as f:
+    with open(args.md, "w", encoding="utf-8") as f:
         f.write(render_md(results))
 
     print(f"wrote {args.json}")

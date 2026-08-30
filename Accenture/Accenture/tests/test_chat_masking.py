@@ -68,6 +68,16 @@ class TestChatReplyMasking(unittest.TestCase):
         self.assertEqual(hits, [])
         self.assertEqual(out, txt)
 
+    def test_unicode_dashes_do_not_slip_the_mask(self):
+        # Models freely emit U+2011 (non-breaking hyphen) and U+2013 (en dash);
+        # "gross‑margin" / "lead–time" must still be redacted.
+        out, hits = mask("The gross‑margin fell about 16% in the West.", "supply_planner")
+        self.assertTrue(hits)
+        self.assertNotIn("margin", out.lower())
+        out2, hits2 = mask("A lead–time blowout hit the Seattle site.", "vp_sales")
+        self.assertTrue(hits2)
+        self.assertNotIn("lead", out2.lower())
+
     def test_admin_is_unmasked(self):
         txt = "Fill rate fell to 0.78; revenue dropped 33.7%; gross margin fell."
         out, hits = mask(txt, "admin")

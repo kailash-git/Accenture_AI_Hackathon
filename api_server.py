@@ -595,6 +595,12 @@ _CHAT_REFUSAL_RE = re.compile(
     r"unable to (?:share|provide|disclose)", re.I)
 _CHAT_REDACTION_MARKER = "[A detail here is restricted for your role and has been withheld.]"
 
+# Models freely emit Unicode hyphens/dashes ("gross‑margin", "lead–time"); fold
+# them all to an ASCII "-" before the mask patterns run so "gross[-\s]?margin"
+# still catches them. Applied only to the copy used for matching, never to the
+# text shown to the user.
+_DASH_FOLD = {c: 0x2D for c in (0x2010, 0x2011, 0x2012, 0x2013, 0x2014, 0x2015, 0x2212)}
+
 
 def _mask_chat_reply(text, role):
     """Redact any sentence of the model's reply that discloses a field `role` is
@@ -607,7 +613,7 @@ def _mask_chat_reply(text, role):
         if _CHAT_REFUSAL_RE.search(s):
             out.append(s)
             continue
-        m = pat.search(s)
+        m = pat.search(s.translate(_DASH_FOLD))
         if m:
             hits.append(m.group(0).lower().replace("  ", " "))
             if not (out and out[-1] == _CHAT_REDACTION_MARKER):

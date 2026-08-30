@@ -16,6 +16,15 @@ import json
 import os
 import time
 import urllib.request
+import sys
+# Windows consoles default to a legacy codepage; force UTF-8 so printing
+# report text (arrows, non-breaking hyphens, box chars) never crashes.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -71,7 +80,7 @@ def provenance_block(server, key, role):
     )
     lineage = ""
     try:
-        with open(CONTRACT) as f:
+        with open(CONTRACT, encoding="utf-8") as f:
             sc = json.load(f)
         lineage = sc["semantic_layer"]["kpis"].get(d.get("kpi_name"), {}).get("lineage", "")
     except Exception:
@@ -118,11 +127,11 @@ def main():
     args = ap.parse_args()
 
     if args.render_only:
-        with open(args.cache) as f:
+        with open(args.cache, encoding="utf-8") as f:
             blob = json.load(f)
         rows, provs = blob["rows"], blob["provs"]
     else:
-        with open(os.path.join(HERE, "scenario_queries.jsonl")) as f:
+        with open(os.path.join(HERE, "scenario_queries.jsonl"), encoding="utf-8") as f:
             cases = [json.loads(x) for x in f if x.strip()]
         rows, provs = [], {}
         for i, c in enumerate(cases):
@@ -133,7 +142,7 @@ def main():
                          "grounding": grounding_cell(resp)})
             if c.get("with_provenance"):
                 provs[c["category"]] = provenance_block(args.server, c["with_provenance"], c["role"])
-        with open(args.cache, "w") as f:
+        with open(args.cache, "w", encoding="utf-8") as f:
             json.dump({"rows": rows, "provs": provs}, f, indent=2)
 
     ts = time.strftime("%Y-%m-%d %H:%M")
@@ -188,7 +197,7 @@ def main():
         L.append("")
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
-    with open(args.out, "w") as f:
+    with open(args.out, "w", encoding="utf-8") as f:
         f.write("\n".join(L))
     print(f"wrote {args.out}")
     for n, r in enumerate(rows, 1):
