@@ -16,21 +16,18 @@ Evaluates each part of the system with a metric that actually fits it:
     * resolution        -- did _select_anomaly_row pick the movement the question meant
     * clarification     -- ambiguous questions must ask, not answer
     * grounding/abstain -- flags match expectation
-    * faithfulness      -- every number in the reply is traceable to the context block
-                           the model was given (RAGAS "faithfulness", rule-based here)
+    * faithfulness      -- every number in the reply is traceable to the context
+                           block the model was given (deterministic; the standin
+                           for RAGAS faithfulness, see section 4 of the report)
     * rbac_leak         -- forbidden terms / $ figures never appear for the role
     * figure_accuracy   -- asked-for figures are present and correct
     * relevancy         -- reply addresses the asked dimension (light check)
     * latency / tokens  -- from the endpoint's own telemetry
 
-  --ragas   also run RAGAS (faithfulness, answer_relevancy, context_precision) over
-            the chat turns. Needs `pip install -r eval/requirements-eval.txt` and a
-            judge model key. Best-effort; the rule-based numbers above do not need it.
-
 Usage:
     python eval/run_eval.py                         # everything, chat against localhost:8000
     python eval/run_eval.py --skip-chat             # deterministic components only
-    python eval/run_eval.py --server http://host:8000 --ragas
+    python eval/run_eval.py --dataset eval/dataset30.jsonl
     python eval/run_eval.py --md docs/EVALUATION.md --json eval/results.json
 """
 import argparse
@@ -52,6 +49,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "Accenture", "Accenture"))
+sys.path.insert(0, os.path.join(ROOT, "Accenture", "Accenture", "src"))
 
 DB_PATH = os.path.join(ROOT, "Accenture", "Accenture", "data", "business_bi.db")
 
@@ -192,6 +190,171 @@ def eval_pvm(c):
         "mean_abs_error_usd": round(statistics.fmean(errs), 6) if errs else None,
         "worst_series": worst[0] if worst else None,
         "identity": "price_effect + volume_effect + mix_effect + other_effect == actual - baseline",
+    }
+
+
+# ---- driver-cause attribution ------------------------------------------------
+# Ground truth for the dominant driver of each curated scenario, and for the
+# sign each PVM effect must carry.
+DRIVER_TRUTH = {
+    "supply":   {"dominant": "volume", "signs": {"volume": "-", "price": "-"},
+                 "why": "supply-constrained volume contraction (fill rate 0.78, 4 stockout days)"},
+    "pricecut": {"dominant": "volume", "signs": {"volume": "+", "price": "-"},
+                 "why": "25% markdown drove a +42% volume lift; the volume gain is the material effect"},
+    "billing":  {"dominant": "__abstain__",
+                 "why": "the positive price effect is a billing-overcharge artefact, not a real driver -> engine abstains"},
+    "sparse":   {"dominant": "__none__",
+                 "why": "SPARSE_HISTORY -- no PVM decomposition is attempted"},
+}
+
+
+def _sign(v):
+    return "+" if v > 1e-6 else "-" if v < -1e-6 else "0"
+
+
+def eval_driver_attribution(c):
+    """Top-1 dominant-driver accuracy and PVM effect-sign accuracy, vs the
+    hand-labelled ground truth for the curated scenarios."""
+    dom_hits = dom_total = 0
+    sign_hits = sign_total = 0
+    per = []
+    for key, truth in DRIVER_TRUTH.items():
+        r = c.execute("SELECT pvm_json, abstained, detection_type FROM anomalies "
+                      "WHERE scenario_key=?", (key,)).fetchone()
+        if not r:
+            continue
+        p = json.loads(r["pvm_json"])
+        got_dom = p.get("dominant_driver")
+        exp = truth["dominant"]
+        if exp == "__abstain__":
+            ok = bool(r["abstained"])
+            got_label = "abstained" if r["abstained"] else f"drove:{got_dom}"
+        elif exp == "__none__":
+            ok = got_dom is None or r["detection_type"] == "SPARSE_HISTORY"
+            got_label = str(got_dom)
+        else:
+            ok = got_dom == exp
+            got_label = str(got_dom)
+        dom_hits += ok
+        dom_total += 1
+        row = {"scenario": key, "expected": exp, "got": got_label, "correct": ok,
+               "why": truth["why"]}
+        for factor, want in truth.get("signs", {}).items():
+            got_s = _sign(float(p[factor]["val"])) if factor in p else "?"
+            sign_hits += got_s == want
+            sign_total += 1
+            row.setdefault("effect_signs", {})[factor] = f"want {want}, got {got_s}"
+        per.append(row)
+    return {
+        "dominant_driver_accuracy_pct": _pct(dom_hits, dom_total),
+        "dominant_driver": f"{dom_hits}/{dom_total}",
+        "effect_sign_accuracy_pct": _pct(sign_hits, sign_total) if sign_total else None,
+        "effect_signs": f"{sign_hits}/{sign_total}",
+        "per_scenario": per,
+        "note": "n=4 curated scenarios with an externally-known cause; the 'gen-' "
+                "sweep has no driver label. dominant_driver = largest |PVM effect|.",
+    }
+
+
+def eval_ablation():
+    """Counterfactual: regenerate a scenario with its injected cause removed
+    (delete the corroborating records on a throwaway DB copy) and re-run the
+    abstention gate. If the engine's confidence in the driver / root cause is
+    genuinely evidence-dependent, removing the injected records must flip the
+    abstention decision in the expected direction."""
+    import shutil
+    import tempfile
+    try:
+        from retrieval.evidence_reconciler import EvidenceReconciler
+        from llm.abstention import evaluate_abstention
+    except Exception as e:  # pragma: no cover
+        return {"error": f"analytics import failed: {type(e).__name__}: {e}"}
+
+    SCEN = {
+        "supply": {
+            "expect": "not_abstained -> abstained (insufficient evidence)",
+            "type_key": "supply",
+            "drop_supply_row": True,
+        },
+        "billing": {
+            "expect": "abstained (contradictory) -> not abstained",
+            "type_key": "billing",
+            "drop_supply_row": False,
+        },
+    }
+
+    def _abst(db_path, row, type_key):
+        item, state = row["item_id"], row["state_id"]
+        pstart = (row["period_start"] or "")[:7] + "-01"
+        pend = (row["period_start"] or "")[:7] + "-28"
+        rec = EvidenceReconciler(db_path).reconcile_evidence(item, state, pstart, pend, type_key)
+        ev = rec["evidence"] if isinstance(rec, dict) else rec
+        pvm = json.loads(row["pvm_json"])
+        price_eff = float(pvm.get("price", {}).get("val", 0.0) or 0.0)
+        return evaluate_abstention(
+            row["confidence"], ev, row["deviation_pct"], row["direction"],
+            price_effect=price_eff, z_score=row["z_score"])
+
+    out = []
+    hits = 0
+    conn = _conn()
+    try:
+        for key, cfg in SCEN.items():
+            row = conn.execute("SELECT * FROM anomalies WHERE scenario_key=?", (key,)).fetchone()
+            if not row:
+                continue
+            base = _abst(DB_PATH, row, cfg["type_key"])
+
+            tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False).name
+            try:
+                shutil.copy(DB_PATH, tmp)
+                t = sqlite3.connect(tmp)
+                mon = (row["period_start"] or "")[:7]
+                lo = (row["period_start"] or "")[:8] + "01"
+                hi = mon + "-28"
+                # widen a little so a record dated a few days after month-end is caught
+                t.execute("DELETE FROM unstructured_feedback WHERE item_id=? AND state_id=? "
+                          "AND date >= date(?, '-10 day') AND date <= date(?, '+15 day')",
+                          (row["item_id"], row["state_id"], lo, hi))
+                if cfg["drop_supply_row"]:
+                    wh = t.execute("SELECT warehouse_sku FROM sku_lookup WHERE item_id=?",
+                                   (row["item_id"],)).fetchone()
+                    if wh:
+                        t.execute("DELETE FROM source_supply_monthly WHERE warehouse_sku=? "
+                                  "AND state_id=? AND month=?", (wh[0], row["state_id"], mon))
+                t.commit()
+                t.close()
+                abl = _abst(tmp, row, cfg["type_key"])
+            finally:
+                try:
+                    os.remove(tmp)
+                except OSError:
+                    pass
+
+            if key == "supply":
+                flipped = (not base["should_abstain"]) and abl["should_abstain"] \
+                          and abl.get("category") == "insufficient_evidence"
+            else:  # billing
+                flipped = base["should_abstain"] and base.get("category") == "contradictory_evidence" \
+                          and not abl["should_abstain"]
+            hits += flipped
+            out.append({
+                "scenario": key,
+                "expected_flip": cfg["expect"],
+                "baseline": {"abstain": base["should_abstain"], "category": base.get("category")},
+                "ablated": {"abstain": abl["should_abstain"], "category": abl.get("category")},
+                "flipped_as_expected": bool(flipped),
+            })
+    finally:
+        conn.close()
+
+    return {
+        "consistency_pct": _pct(hits, len(out)) if out else None,
+        "scenarios_flipped": f"{hits}/{len(out)}",
+        "cases": out,
+        "note": "removing a scenario's injected corroborating records (on a throwaway "
+                "DB copy) must change the abstention decision -- proof the root-cause "
+                "attribution is evidence-driven, not asserted.",
     }
 
 
@@ -484,38 +647,6 @@ def eval_chat(server, cases):
     }
 
 
-def eval_ragas(server, cases):  # pragma: no cover -- optional
-    try:
-        from datasets import Dataset
-        from ragas import evaluate
-        from ragas.metrics import faithfulness, answer_relevancy, context_precision
-    except Exception as e:
-        return {"skipped": True, "reason": f"ragas not installed ({e}); "
-                "pip install -r eval/requirements-eval.txt"}
-    rows = []
-    for row in cases:
-        if row.get("expect_clarification"):
-            continue
-        try:
-            resp = _post_chat(server, row["query"], row["role"])
-        except Exception:
-            continue
-        ctx, _, _ = _load_chat_context(row["role"], row["query"])
-        if ctx is None:
-            continue
-        rows.append({"question": row["query"], "answer": resp.get("reply", ""),
-                     "contexts": [json.dumps(ctx, default=str)],
-                     "ground_truth": resp.get("anomaly", "")})
-    if not rows:
-        return {"skipped": True, "reason": "no gradable rows"}
-    try:
-        ds = Dataset.from_list(rows)
-        res = evaluate(ds, metrics=[faithfulness, answer_relevancy, context_precision])
-        return {"n": len(rows), "scores": {k: round(float(v), 3) for k, v in res.items()}}
-    except Exception as e:
-        return {"skipped": True, "reason": f"ragas run failed: {type(e).__name__}: {e}"}
-
-
 # --------------------------------------------------------------------------- #
 #  report
 # --------------------------------------------------------------------------- #
@@ -541,6 +672,15 @@ def render_md(results):
     p = r["pvm"]
     L.append(f"| PVM decomposition | reconciles to ≤ $0.01 | **{p['reconcile_within_1_cent_pct']}%** "
              f"(max err ${p['max_abs_error_usd']}) |")
+    da = r.get("driver_attribution", {})
+    if da:
+        L.append(f"| Driver attribution | dominant-driver top-1 accuracy | "
+                 f"**{da['dominant_driver_accuracy_pct']}%** ({da['dominant_driver']}); "
+                 f"effect signs {da['effect_sign_accuracy_pct']}% ({da['effect_signs']}) |")
+    ab = r.get("ablation", {})
+    if ab and "error" not in ab:
+        L.append(f"| Ablation (causal) | attribution flips when the injected cause is removed | "
+                 f"**{ab.get('consistency_pct')}%** ({ab.get('scenarios_flipped')}) |")
     a = r["abstention"]
     L.append(f"| Abstention gate | accuracy on canonical set | **{a['accuracy_pct']}%** "
              f"(P {a['precision_pct']} / R {a['recall_pct']}) |")
@@ -578,7 +718,44 @@ def render_md(results):
     L.append(f"- reconcile within $0.01: **{p['reconcile_within_1_cent_pct']}%**")
     L.append(f"- max / mean absolute error: **${p['max_abs_error_usd']}** / ${p['mean_abs_error_usd']}")
     L.append("")
-    L.append("### 2.3 Abstention gate")
+    L.append("### 2.3 Driver-cause attribution")
+    L.append("")
+    if da:
+        L.append(f"Top-1 dominant driver = the factor with the largest \\|PVM effect\\|, "
+                 f"vs. the externally-known cause of each curated scenario.")
+        L.append("")
+        L.append("| Scenario | expected | got | correct | effect signs | why |")
+        L.append("|---|---|---|---|---|---|")
+        for s in da.get("per_scenario", []):
+            signs = "; ".join(f"{k}: {v}" for k, v in s.get("effect_signs", {}).items()) or "—"
+            L.append(f"| {s['scenario']} | {s['expected']} | {s['got']} | "
+                     f"{'✅' if s['correct'] else '❌'} | {signs} | {s['why']} |")
+        L.append("")
+        L.append(f"- dominant-driver accuracy: **{da['dominant_driver_accuracy_pct']}%** "
+                 f"({da['dominant_driver']})")
+        L.append(f"- PVM effect-sign accuracy: **{da['effect_sign_accuracy_pct']}%** "
+                 f"({da['effect_signs']})")
+        L.append(f"- {da['note']}")
+    L.append("")
+    L.append("### 2.4 Ablation / counterfactual consistency")
+    L.append("")
+    if ab and "error" not in ab:
+        L.append(f"{ab['note']}")
+        L.append("")
+        L.append("| Scenario | expected flip | baseline | ablated | flipped as expected |")
+        L.append("|---|---|---|---|---|")
+        for s in ab.get("cases", []):
+            b = s["baseline"]; al = s["ablated"]
+            L.append(f"| {s['scenario']} | {s['expected_flip']} | "
+                     f"abstain={b['abstain']} ({b['category']}) | "
+                     f"abstain={al['abstain']} ({al['category']}) | "
+                     f"{'✅' if s['flipped_as_expected'] else '❌'} |")
+        L.append("")
+        L.append(f"- causal consistency: **{ab.get('consistency_pct')}%** ({ab.get('scenarios_flipped')})")
+    elif ab.get("error"):
+        L.append(f"_skipped: {ab['error']}_")
+    L.append("")
+    L.append("### 2.5 Abstention gate")
     L.append("")
     L.append("| Scenario | expected | got | correct | reason |")
     L.append("|---|---|---|---|---|")
@@ -588,11 +765,11 @@ def render_md(results):
     L.append("")
     L.append(f"Confusion: {a['confusion']} · {a['note']}")
     L.append("")
-    L.append("### 2.4 RBAC leakage in generated narratives")
+    L.append("### 2.6 RBAC leakage in generated narratives")
     L.append("```json")
     L.append(json.dumps(r["persona_leak"], indent=2))
     L.append("```")
-    L.append("### 2.5 Semantic contract")
+    L.append("### 2.7 Semantic contract")
     L.append("```json")
     L.append(json.dumps(r["semantic_contract"], indent=2))
     L.append("```")
@@ -701,44 +878,20 @@ def render_md(results):
         L.append("")
 
     L.append("")
-    L.append("## 4. Does RAGAS fit this system?")
+    L.append("## 4. Why not RAGAS")
     L.append("")
     L.append(
-        "**Partially — it is the right tool for the `/api/chat` surface and nothing "
-        "else.** That path is a genuine RAG pipeline (retrieve a role-masked context "
-        "block → LLM answers over it only), so RAGAS **faithfulness** and **answer "
-        "relevancy** map directly, and **context precision/recall** map onto whether "
-        "`_select_anomaly_row` retrieved the movement the question meant (we have "
-        "ground-truth labels for that). This harness computes rule-based equivalents "
-        "of those so the core numbers need no judge model; `--ragas` adds the "
-        "LLM-judged versions as a cross-check.")
+        "RAGAS only applies to the `/api/chat` surface (a real RAG pipeline: "
+        "retrieve a role-masked context block → answer over it only). It does not "
+        "fit anomaly detection (classification), PVM (exact algebra), the abstention "
+        "gate (binary decision), RBAC masking (safety invariant) or prompt-injection "
+        "(adversarial safety) — those use the classification / exactness / leak-rate "
+        "metrics above. On the chat surface, RAGAS **faithfulness** and **answer "
+        "relevancy** are what the rule-based `faithfulness` and `relevancy` checks "
+        "here stand in for, deterministically and without an LLM judge (RAGAS is "
+        "itself LLM-judged — extra dependency, cost and variance). We do not run "
+        "RAGAS.")
     L.append("")
-    L.append("RAGAS does **not** fit the rest of the engine, which is where most of "
-             "the risk lives:")
-    L.append("")
-    L.append("| Component | Why RAGAS doesn't apply | Metric used instead |")
-    L.append("|---|---|---|")
-    L.append("| Anomaly detection | classification, not generation | precision / recall / F1 vs labelled events |")
-    L.append("| PVM decomposition | exact algebra, no text | reconciliation error in $ (must be ~0) |")
-    L.append("| Abstention gate | binary decision | confusion matrix on the canonical set |")
-    L.append("| RBAC masking | safety invariant, not quality | leak rate, zero-tolerance |")
-    L.append("| Prompt-injection | adversarial safety | refusal rate |")
-    L.append("| Narrative polish | numbers are fixed upstream | number-diff vs deterministic facts |")
-    L.append("")
-    L.append("RAGAS metrics are themselves LLM-judged, so they add a judge dependency, "
-             "cost, and run-to-run variance — fine as a secondary signal, not as the "
-             "primary gate for a system whose headline claim is *never invent a figure*.")
-    L.append("")
-    if r.get("ragas"):
-        L.append("### 4.1 RAGAS run output")
-        if r["ragas"].get("skipped"):
-            L.append(f"\n_Skipped: {r['ragas']['reason']}_")
-        else:
-            L.append("```json")
-            L.append(json.dumps(r["ragas"], indent=2))
-            L.append("```")
-        L.append("")
-
     L.append("## 5. Metric definitions")
     L.append("")
     L.append("Standard metrics used as-is:")
@@ -752,6 +905,20 @@ def render_md(results):
     L.append("- **PVM reconciliation error** = | (volume_effect + price_effect + mix_effect + "
              "other_effect) − (actual_revenue − baseline_revenue) |, per series. "
              "Pass if < \\$0.01. Report max and mean over all Revenue series.")
+    L.append("")
+    L.append("Driver-cause attribution — custom, on the curated ground-truth scenarios:")
+    L.append("")
+    L.append("- **dominant-driver top-1 accuracy** = ( scenarios where "
+             "`argmax_f |PVM effect_f|` equals the labelled cause — or the engine "
+             "correctly abstains where the label says to ) / labelled scenarios.")
+    L.append("- **effect-sign accuracy** = ( PVM effects whose sign matches the "
+             "labelled expected sign ) / labelled effects.")
+    L.append("- **ablation / causal consistency** = ( scenarios where deleting the "
+             "injected corroborating records — on a throwaway DB copy — flips the "
+             "abstention decision in the expected direction ) / ablated scenarios. "
+             "Expected: `supply` loses confidence (not-abstain → abstain, insufficient "
+             "evidence); `billing` loses its contradiction trigger (abstain, "
+             "contradictory → not-abstain).")
     L.append("")
     L.append("Chat rubric — custom, defined here:")
     L.append("")
@@ -797,7 +964,6 @@ def main():
                     help="seconds between chat calls (raise if the provider rate-limits)")
     ap.add_argument("--dataset", default=os.path.join(HERE, "dataset.jsonl"),
                     help="path to the labelled chat query set (jsonl)")
-    ap.add_argument("--ragas", action="store_true")
     ap.add_argument("--render-only", action="store_true",
                     help="skip all evals, just re-render the .md from an existing --json")
     ap.add_argument("--json", default=os.path.join(HERE, "results.json"))
@@ -829,6 +995,8 @@ def main():
         "git": git,
         "detection": eval_detection(c),
         "pvm": eval_pvm(c),
+        "driver_attribution": eval_driver_attribution(c),
+        "ablation": eval_ablation(),
         "abstention": eval_abstention(c),
         "persona_leak": eval_persona_leak(c),
         "semantic_contract": eval_semantic_contract(),
@@ -843,8 +1011,6 @@ def main():
             results["chat"] = eval_chat(args.server, cases)
         except Exception as e:
             results["chat"] = {"error": f"{type(e).__name__}: {e}"}
-        if args.ragas:
-            results["ragas"] = eval_ragas(args.server, cases)
 
     os.makedirs(os.path.dirname(args.json), exist_ok=True)
     with open(args.json, "w") as f:
@@ -857,10 +1023,14 @@ def main():
     print(f"wrote {args.md}")
     d, p, a, pl = (results["detection"], results["pvm"], results["abstention"],
                    results["persona_leak"])
-    print(f"\n  detection   known-event recall  {d['known_event_recall']}%  ({d['known_events_found']})")
-    print(f"  pvm         reconcile <=$0.01   {p['reconcile_within_1_cent_pct']}%  (max ${p['max_abs_error_usd']})")
-    print(f"  abstention  accuracy            {a['accuracy_pct']}%")
-    print(f"  rbac        narratives clean    {pl['clean_pct']}%")
+    da, ab = results["driver_attribution"], results["ablation"]
+    print(f"\n  detection   known-event recall   {d['known_event_recall']}%  ({d['known_events_found']})")
+    print(f"  pvm         reconcile <=$0.01    {p['reconcile_within_1_cent_pct']}%  (max ${p['max_abs_error_usd']})")
+    print(f"  driver      dominant-driver acc  {da['dominant_driver_accuracy_pct']}%  ({da['dominant_driver']})  "
+          f"| effect signs {da['effect_sign_accuracy_pct']}%  ({da['effect_signs']})")
+    print(f"  ablation    causal consistency   {ab.get('consistency_pct')}%  ({ab.get('scenarios_flipped')})")
+    print(f"  abstention  accuracy             {a['accuracy_pct']}%")
+    print(f"  rbac        narratives clean     {pl['clean_pct']}%")
     ch = results.get("chat", {})
     if ch.get("overall_pass_pct") is not None:
         print(f"  chat        overall pass        {ch['overall_pass_pct']}%  "

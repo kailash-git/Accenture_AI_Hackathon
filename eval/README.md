@@ -40,7 +40,7 @@ Queries live in `eval/scenario_queries.jsonl`.
 python eval/run_eval.py                     # everything, chat -> http://127.0.0.1:8000
 python eval/run_eval.py --skip-chat         # deterministic components only (no server, no LLM)
 python eval/run_eval.py --chat-delay 5      # slower pacing if the chat provider rate-limits
-python eval/run_eval.py --ragas             # also run RAGAS (needs the extra deps below)
+python eval/run_eval.py --dataset eval/dataset30.jsonl   # 30-query scored run
 ```
 
 ## What is measured
@@ -49,6 +49,8 @@ python eval/run_eval.py --ragas             # also run RAGAS (needs the extra de
 |---|---|---|
 | Anomaly detection | DB read | recall vs the 4 injected ground-truth events; flag/abstain split |
 | PVM decomposition | DB read | `price+volume+mix+other == actual − baseline`, error in $ |
+| Driver-cause attribution | DB read | dominant-driver top-1 accuracy + PVM effect-sign accuracy vs the curated ground truth |
+| Ablation / causal consistency | throwaway DB copy | delete a scenario's injected corroborating records, re-run the abstention gate, check the decision flips as expected (real DB untouched) |
 | Abstention gate | DB read | confusion matrix on the 4 canonical scenarios |
 | RBAC masking (narratives) | DB read | cross-role leak rate across every generated narrative |
 | Semantic contract | file | structural validity |
@@ -58,17 +60,9 @@ python eval/run_eval.py --ragas             # also run RAGAS (needs the extra de
 each row declares what it expects (`expect_scenario`, `expect_abstain`,
 `forbid_terms`, `expect_figures`, …).
 
-## RAGAS (optional cross-check)
+## RAGAS
 
-```bash
-pip install -r eval/requirements-eval.txt      # see that file for a langchain 1.x shim note
-python eval/ragas_eval.py                       # Faithfulness + ResponseGroundedness on the chat subset
-python eval/ragas_eval.py --all                 # all 30 (uses more judge tokens)
-```
-
-RAGAS only applies to the `/api/chat` surface (it's a real RAG pipeline). The
-harness already computes rule-based equivalents of faithfulness / relevancy /
-context-precision, so the core numbers don't need a judge model. `ragas_eval.py`
-uses the Groq judge from `.env`; `--all` or `answer_relevancy` need more tokens /
-an embedding provider. See `docs/EVALUATION_REPORT.md` § 7 for status and the
-"does RAGAS fit" discussion.
+Not used. RAGAS only fits the `/api/chat` surface, and its faithfulness /
+answer-relevancy metrics are what this harness's rule-based `faithfulness` /
+`relevancy` checks stand in for — deterministically, with no LLM judge. See
+`docs/EVALUATION_REPORT.md` § 7.

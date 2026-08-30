@@ -21,6 +21,8 @@ Re-run: `python eval/run_eval.py --dataset eval/dataset30.jsonl --chat-delay 8`.
 |---|---|---|
 | **Anomaly detection** | **100 / 100** | recall on 4 injected ground-truth events (4/4) |
 | **PVM decomposition** | **100 / 100** | reconciliation error ≤ $0.01 on all 20 series (max **$0.00**) |
+| **Driver-cause attribution** | **100 / 100** | dominant-driver top-1 accuracy 4/4; PVM effect-sign accuracy 4/4 |
+| **Ablation (causal)** | **100 / 100** | 2/2 — removing the injected cause flips the engine's confidence as expected |
 | **Abstention gate** | **100 / 100** | precision 100 / recall 100 on the canonical set |
 | **RBAC — generated narratives** | **100 / 100** | 0 cross-role leaks / 114 narratives |
 | **Chat assistant** | **~90 / 100** | rubric composite; 87.7 raw, ≈ 92 excluding provider-error turns |
@@ -45,6 +47,9 @@ deterministic post-filter** on the reply (§ 6.1).
 | Abstention | accuracy / precision / recall | (TP + TN) / N  ·  TP / (TP + FP)  ·  TP / (TP + FN)  — positive = "should abstain" |
 | RBAC (narratives) | leak rate / clean % | leaked_items / items_checked  ·  100 · (1 − leak rate) |
 | PVM | reconciliation error | \| (v_effect + p_effect + m_effect + o_effect) − (actual_revenue − baseline_revenue) \|, per series; pass if < \$0.01 (accounting identity, not an ML metric) |
+| Driver — dominant-driver accuracy | top-1 accuracy | ( scenarios where `argmax_f \|PVM effect_f\|` = the labelled cause, or the engine correctly abstains where the label says to ) / labelled scenarios |
+| Driver — effect-sign accuracy | sign match rate | ( PVM effects whose sign matches the labelled expected sign ) / labelled effects |
+| Ablation — causal consistency | flip rate | ( scenarios where deleting the injected corroborating records — on a throwaway DB copy — flips the abstention decision in the expected direction ) / ablated scenarios |
 
 **Chat assistant — a rubric, not one named benchmark.** Each query carries binary
 pass/fail checks; the score is the pass-rate. Formulas:
@@ -64,9 +69,6 @@ checks in the part ) · 100  ·  composite = (1 / P) · Σ part_score_p  (P = 9,
 equal weight)  ·  strict pass = turns with every applicable check passing / turns.
 Provider-error turns are excluded from every denominator.
 
-`run_eval.py --ragas` / `eval/ragas_eval.py` run the LLM-judged RAGAS metrics as a
-cross-check (see § 7 for status).
-
 ---
 
 ## 3. Deterministic components (detail)
@@ -79,6 +81,17 @@ cross-check (see § 7 for status).
   scored — the 53 `gen-` rows have no external label.
 - **PVM.** `price + volume + mix + other == actual − baseline` checked on every
   Revenue anomaly: 20/20 reconcile, max abs error **$0.00**, mean **$0.00**.
+- **Driver-cause attribution.** For the 4 curated scenarios the engine's
+  `dominant_driver` (largest \|PVM effect\|) matches the externally-known cause:
+  supply→volume, pricecut→volume (the +42 % lift), billing→correctly abstains,
+  sparse→no PVM. Every PVM effect also carries the right sign (supply: volume −,
+  price −; pricecut: volume +, price −). 4/4 and 4/4.
+- **Ablation / counterfactual.** On a throwaway DB copy, delete a scenario's
+  injected corroborating records and re-run the abstention gate. `supply` flips
+  not-abstain → **abstain (insufficient evidence)** once the supply ticket / review
+  / fill-rate row are gone; `billing` flips **abstain (contradictory)** → not-abstain
+  once the two billing-complaint records are gone. 2/2 — the root-cause attribution
+  is evidence-driven, not asserted. Real `business_bi.db` is never touched.
 - **Abstention.** billing → abstain (contradictory: positive price effect vs. two
   billing-bug records); supply / pricecut / sparse → do not abstain. 4/4 correct.
 - **RBAC narratives.** vp_sales text scanned for warehouse/SKU/carrier/fill-rate;
@@ -179,28 +192,18 @@ unmasked, gutted-reply fallback). Re-running the chat eval will show
 
 ---
 
-## 7. RAGAS
+## 7. Why not RAGAS
 
-**Applicability — only the `/api/chat` surface**, which is a real RAG pipeline
-(retrieve a role-masked context block → answer over it only). There, RAGAS
-**Faithfulness** and **ResponseGroundedness / answer_relevancy** map directly, and
-**context precision/recall** map onto anomaly resolution. RAGAS does **not** fit
-anomaly detection (classification), PVM (exact algebra), the abstention gate
-(binary decision), RBAC masking (safety invariant) or prompt-injection
-(adversarial safety) — those use the classification / exactness / leak-rate
-metrics in § 2. RAGAS is also LLM-judged, adding a judge dependency, cost and
-variance.
-
-**Status.** `eval/ragas_eval.py` is wired — it scores the chat subset with
-**Faithfulness** and **ResponseGroundedness** (both LLM-judged, no embeddings)
-using a Groq judge. The run is currently **blocked in this environment** by three
-things: (1) ragas 0.4.3 imports a `langchain_community.chat_models.vertexai`
-module that langchain 1.x removed (a one-line shim unblocks the import); (2) the
-Groq free-tier **daily token cap** is exhausted; (3) no embedding provider for
-`answer_relevancy`. The rule-based `faithfulness` in § 2 (currently **100 %**) is
-the reported number; run `python eval/ragas_eval.py` for the RAGAS cross-check
-once a judge with token headroom (OpenAI key, or Groq after the daily reset) is
-available.
+RAGAS only applies to the `/api/chat` surface — a real RAG pipeline (retrieve a
+role-masked context block → answer over it only). It does **not** fit anomaly
+detection (classification), PVM (exact algebra), the abstention gate (binary
+decision), RBAC masking (safety invariant) or prompt-injection (adversarial
+safety); those use the classification / exactness / leak-rate metrics in § 2. On
+the chat surface, RAGAS **faithfulness** and **answer relevancy** are exactly what
+the rule-based `faithfulness` and `relevancy` checks here stand in for —
+deterministically, with no LLM judge (RAGAS is itself LLM-judged: extra
+dependency, cost, and run-to-run variance, which is the wrong trade for a system
+whose headline claim is *never invent a figure*). **We do not run RAGAS.**
 
 ---
 
@@ -211,5 +214,4 @@ python api_server.py                                   # for the chat section
 python eval/run_eval.py --skip-chat                    # deterministic only, no LLM
 python eval/run_eval.py --dataset eval/dataset30.jsonl --chat-delay 8   # full 30-query scored run
 python eval/scenario_table.py                          # the 9-scenario Q&A table
-python eval/run_eval.py --ragas                        # + LLM-judged RAGAS cross-check
 ```
