@@ -2,7 +2,7 @@
 src/llm/llm_client.py
 Minimal, cost-controlled OpenAI wrapper.
 
-Design constraints (deliberate, see docs/TECH_APPENDIX.md):
+Design constraints (deliberate; see the "Solution design" section of the root README):
   - The LLM is NEVER the source of quantitative truth. It only polishes
     narrative language around numbers that were already computed
     deterministically by anomaly_detector / pvm_analyzer / evidence_reconciler.

@@ -20,6 +20,12 @@ test_write.txt
 .DS_Store
 Thumbs.db
 
-# --- evidence graph (rebuilt at seed time) ---
-Accenture/Accenture/data/evidence_graph.gpickle
+# --- editor / tooling local state ---
+.claude/settings.local.json
+
+# --- evidence graph ---
+# The pre-built graph at Accenture/Accenture/data/evidence_graph.gpickle IS committed
+# so a clone with only `pip install networkx` is turn-key. Any OTHER .gpickle
+# (scratch rebuilds elsewhere) stays ignored.
 *.gpickle
+!Accenture/Accenture/data/evidence_graph.gpickle
