@@ -40,18 +40,6 @@ prototype produces. All figures are reproducible from the committed database and
 
 ---
 
-## Demo video
-
-Prototype walkthrough: `add public link (YouTube or Google Drive) before submission`
-
-The walkthrough covers, in order: scenario load; the revenue trajectory chart with every series
-anomaly annotated; the evidence trail and the anomaly-centric knowledge graph; a live role switch
-that visibly changes field masking; the conversational assistant (a grounded answer, a clarification
-that makes no model call, and an abstention); approving and assigning an action with an audit
-identifier; and the runtime telemetry panel.
-
----
-
 ## 1. Problem statement and design thesis
 
 ### 1.1 What the Round 2 brief requires
@@ -85,7 +73,7 @@ and why.
 | Contradictory evidence, missing data, and confidence calibration | A deterministic abstention gate that withholds a recommendation on low confidence, on a structured-versus-unstructured contradiction, or on a material movement with no isolable driver |
 | Role-based personalisation of insight depth, actions, and delivery | Three personas, each receiving a different narrative style, length, driver framing, and recommended action |
 | Row-level, column-level, and domain-level security, sensitive-data protection, and auditability | Server-side entitlement masking driven by the contract; restricted fields are removed from the response payload before it leaves the API and before the model receives it, and every action decision writes an audit identifier |
-| Model and data drift, feedback capture, and continuous evaluation | The `user_feedback` table captures every rating, approval, and assignment with an audit identifier; the telemetry endpoint surfaces the counts; consuming that feedback at the next seed run is the documented next step |
+| Model and data drift, feedback capture, and continuous evaluation | Thumbs ratings and an audit trail in `user_feedback`; an action-correction learning loop that stores an analyst's corrected action and resurfaces it on similar movements; an evaluation harness (`eval/run_eval.py`) that scores detection, decomposition, attribution, ablation, abstention, masking and the chat surface, with a report in `docs/EVALUATION_REPORT.md` |
 | Language-model economics (model choice, token consumption, latency, caching, cost per insight) | The live analytics path makes no model calls and incurs no per-request cost; the single optional live model call (the conversational assistant) is opt-in, measured token by token, and defaults to a free-tier provider |
 
 ### 1.3 Design thesis
@@ -150,8 +138,8 @@ of questions asked, not with the number of dashboards rendered.
 
 | Phase | Scope | Indicative duration | Exit criteria |
 |---|---|---|---|
-| P0, Prototype (this submission) | Three KPIs; three structured sources plus unstructured text; three personas; Price-Volume-Mix decomposition, evidence graph, abstention gate, and grounded conversational assistant; server-side masking; runtime telemetry; 54 automated tests | Complete | Every Round 2 minimum expectation demonstrated on illustrative data (see Section 5) |
-| P1, Pilot (single domain) | Connect one production data warehouse (Snowflake, Databricks, or Microsoft Fabric; the semantic contract is platform-neutral); replace the synthetic marketing and supply sources with production feeds; map roles to single sign-on; add an analyst correction interface that writes back to the contract | Approximately one quarter | Analyst agreement rate on ranked drivers at or above 80 percent; abstention precision reviewed weekly; 95th-percentile latency on the analytics path below two seconds |
+| P0, Prototype (this submission) | Three KPIs; three structured sources plus unstructured text; three personas; Price-Volume-Mix decomposition, evidence graph, abstention gate, and grounded conversational assistant; server-side masking; an action-correction learning loop; runtime telemetry; an evaluation harness; 62 automated tests | Complete | Every Round 2 minimum expectation demonstrated on illustrative data (see Section 5) |
+| P1, Pilot (single domain) | Connect one production data warehouse (Snowflake, Databricks, or Microsoft Fabric; the semantic contract is platform-neutral); replace the synthetic marketing and supply sources with production feeds; map roles to single sign-on; extend the action-correction loop so accumulated corrections also re-rank drivers and rewrite the seed-time narrative templates | Approximately one quarter | Analyst agreement rate on ranked drivers at or above 80 percent; abstention precision reviewed weekly; 95th-percentile latency on the analytics path below two seconds |
 | P2, Breadth | 15 to 30 KPI slices; add forecasting for expected-range bands and causal inference (difference-in-differences on promotion and price events) as a third driver method; add proactive alerting to messaging and email channels | Approximately two quarters | Drift monitors in production; the feedback loop closes at each nightly reseed; false-positive alert rate below 10 percent |
 | P3, Scale and governance | Multiple domains (finance, supply, marketing) on one contract; per-geography policy packs for entitlements and data retention; full audit export; a model router that meets cost and latency service-level objectives per use case | Approximately two quarters | Central governance sign-off; cost-per-insight service-level objective met; onboarding a new KPI is a contract edit rather than a code change |
 
@@ -433,13 +421,35 @@ support ticket. The role is taken from the `X-User-Role` request header or the `
 parameter, with permitted values `vp_sales`, `supply_planner`, and `admin`, and a default of
 `vp_sales`.
 
+For the conversational assistant there is a second, defence-in-depth layer: `_mask_chat_reply` runs
+over the model's answer before it is returned and redacts any sentence that discloses a field the
+role is not entitled to (the same entitlements), while keeping sentences that merely decline to give
+a detail. The response carries `reply_masked` and `redacted_terms` so the redaction is auditable.
+This exists because the primary defence (masking the evidence the model sees) is already in place,
+but a generative model cannot be trusted to honour a prompt instruction on its own. It is covered by
+`tests/test_chat_masking.py`.
+
 ### 3.11 Feedback capture and the learning loop
 
-`POST /api/feedback` (a rating with an optional comment) and `POST /api/actions/<key>/approve` and
-`/assign` each write to `user_feedback` with an audit identifier of the form `AUD-XXXXXXXX`, derived
-from a version-4 UUID. The telemetry endpoint surfaces `feedback_count` and `feedback_avg_rating`.
-Capture is implemented in the prototype. Consuming that feedback to revise narratives and re-weight
-drivers at the next seed run is the documented next step, scheduled for Phase P1 of the roadmap.
+Two feedback channels are implemented and both close the loop within the running system.
+
+- **Ratings.** `POST /api/feedback` (a thumbs rating with an optional comment) and
+  `POST /api/actions/<key>/approve` and `/assign` each write to `user_feedback` with an audit
+  identifier of the form `AUD-XXXXXXXX` (a version-4 UUID). The telemetry endpoint surfaces
+  `feedback_count` and `feedback_avg_rating`.
+- **Action corrections (the learning loop).** When an analyst judges the recommended action wrong,
+  they type the action they would take instead. `POST /api/actions/<key>/correct` stores it in an
+  `action_corrections` table (created lazily, so an already-seeded database needs no reseed), keyed
+  to the anomaly's `scenario_key`, `kpi_name`, `cat_id`, and `direction`, and also records a
+  thumbs-down in `user_feedback`. On the next request for that anomaly, or for any other anomaly with
+  the same `(kpi_name, cat_id, direction)` signature, `_match_action_correction` returns the stored
+  correction (an exact `scenario_key` match wins; otherwise the signature match), and the API returns
+  it as `actionCorrection`. The dashboard then shows a "Learned Recommendation" card above the
+  engine's original recommendation. The correction persists across restarts and reseeds.
+
+Consuming the accumulated corrections to also re-rank drivers and rewrite the seed-time narrative
+templates (rather than only overlaying the stored action at request time) is the remaining next
+step, scheduled for Phase P1.
 
 ### 3.12 Runtime telemetry and language-model economics
 
@@ -605,11 +615,11 @@ Edge relations: `belongs_to` 19,639; `same_week` 17,443; `explains` 2,410; `co_o
    zero-filled, so the abstention trigger is a real feed gap rather than a contradiction presented as
    one.
 
-### 4.10 Automated test suite: 54 tests across 8 modules, all passing
+### 4.10 Automated test suite: 62 tests across 9 modules, all passing
 
 ```
 python -m unittest discover -s Accenture/Accenture/tests -p "test_*.py" -v
-# Ran 54 tests in approximately 8.1 seconds. Status: OK.
+# Ran 62 tests in approximately 3 to 8 seconds. Status: OK.
 ```
 
 | Module | Tests | What it verifies |
@@ -622,11 +632,41 @@ python -m unittest discover -s Accenture/Accenture/tests -p "test_*.py" -v
 | `test_schema_parser.py` | 6 | A valid seven-field action parses; a missing field raises; a blank or whitespace field raises; a confidence value above 100 raises; a persona narrative must set exactly one of an action or an abstention; a bundle must contain both personas. |
 | `test_mock_data.py` | 5 | All core tables exist and are populated; the Cost of Goods Sold and margin arithmetic is correct to four decimal places; the November 2012 California supply constraint is present with values 0.78 and 4; all three KPIs retain their own anomaly rows (a regression test against a primary-key collision that once reduced the Revenue anomaly count from 20 to 6); customer reviews and support tickets are both seeded. |
 | `test_schemas.py` | 2 | `semantic_contract.json` is valid JSON and contains the keys `project`, `semantic_layer`, `kpis`, `mappings`, and `entitlements`; `db_init.sql` executes cleanly in a fresh in-memory SQLite database. |
+| `test_chat_masking.py` | 8 | `_mask_chat_reply` redacts a reply sentence that discloses a fill rate, a warehouse, a carrier, a revenue figure, or a gross-margin figure to a role not entitled to it; entitled content is left untouched; a sentence that only declines is kept; `admin` is never masked; a reply gutted by redaction falls back to one clean line; Unicode hyphens and dashes do not slip the filter. |
 
 Several of these are explicitly labelled regression tests. They encode real defects that were caught
 and fixed: the `W-MON` calendar defect; the anomaly-identifier primary-key collision; materiality
 being gated on raw percentage rather than on the z-score; an item identifier leaking through a
-compound key; and a region-wide Price-Volume-Mix result being narrated next to a single-SKU anomaly.
+compound key; a region-wide Price-Volume-Mix result being narrated next to a single-SKU anomaly; and
+Unicode dash variants bypassing the chat-reply role mask.
+
+### 4.11 Model and pipeline evaluation harness
+
+`eval/run_eval.py` scores each part of the system with a metric that fits it, and writes
+`docs/EVALUATION_REPORT.md` (the consolidated report) plus three generated data files. It is separate
+from the unit tests: the tests assert invariants, the harness measures performance. Run the
+deterministic part with `python eval/run_eval.py --skip-chat` (no server, no model); add the chat
+section by starting the API and dropping `--skip-chat`.
+
+| Area | Metric | Result (deterministic run, committed `docs/EVALUATION_REPORT.md`) |
+|---|---|---|
+| Detection | recall on the four injected ground-truth events | 100 percent (4 of 4), each with the expected detection type |
+| Detection | raw z-score flag precision / F1 (artifact = deviation above 300 percent) | 77.2 percent / 0.87; the materiality gate suppresses 13 of 13 artifacts, so post-gate precision is 100 percent |
+| Price-Volume-Mix | reconciliation to the delta | 100 percent of 20 Revenue series within 0.01 US dollars (maximum error 0.00) |
+| Driver-cause attribution | dominant-driver top-1 accuracy; effect-sign accuracy | 100 percent (4 of 4); 100 percent |
+| Price-Volume-Mix | net-direction agreement over all 20 Revenue anomalies | 95 percent (19 of 20; the miss is the sparse-history launch, which carries no decomposition) |
+| Ablation / causal consistency | removing a scenario's injected corroborating records flips the abstention decision as expected | 100 percent (2 of 2), on a throwaway database copy |
+| Abstention gate | accuracy on the canonical four scenarios | 100 percent (precision 100, recall 100) |
+| Role-based masking (generated narratives) | cross-role leak rate | 0 leaks over 114 narratives |
+| Chat assistant | rubric composite (30-query scored run); faithfulness (every number traces to the context block) | about 88 out of 100; 100 percent faithfulness |
+
+The harness also carries an adversarial query set (`eval/dataset_hard.jsonl`: false premises,
+cross-KPI comparisons, out-of-scope aggregation, precision traps) and a required-scenario walkthrough
+(`eval/scenario_table.py` writing `docs/EVALUATION_SCENARIOS.md`). RAGAS is deliberately not used;
+`docs/EVALUATION_REPORT.md` section 7 explains why the rule-based faithfulness and relevancy checks
+stand in for it without an LLM judge. The report notes that the committed chat sections were
+generated before the `_mask_chat_reply` enforcement (Section 3.10) landed and should be regenerated
+on a live run for a fully current chat role-masking figure.
 
 ---
 
@@ -643,7 +683,7 @@ the capability is implemented but one component is documented as a next step.
 | One multi-factor KPI movement with known or simulated drivers | Met | The `supply` scenario: stockout, demand, and price, November 2012 (Section 4.6) |
 | One low-confidence scenario in which the engine requests clarification or abstains | Met | The `billing` scenario abstains on contradiction; an ambiguous chat question returns a clarification with zero tokens (Section 4.6) |
 | One sparse-history or newly launched KPI scenario | Met | The `sparse` scenario: `HOUSEHOLD_1_020`, Texas, 198 days of history (Section 4.6) |
-| One role-based security or entitlement scenario | Met | A live role switch; the server-side masking table plus ten tests (Sections 3.10 and 4.7) |
+| One role-based security or entitlement scenario | Met | A live role switch; the server-side masking table plus the persona and chat-masking tests (Sections 3.10 and 4.7); the chat reply also passes through `_mask_chat_reply` |
 | Evidence showing source freshness, analytical method, contribution, confidence, and lineage | Met | The evidence trail and graph; the contract `lineage` field; `data_freshness_seconds`; the `pvm` contribution block; the per-row `confidence` value |
 | A clear breakdown of language-model versus non-language-model processing | Met | The tables in Sections 3.1 and 3.2, and the `processing` block on every `/api/chat` response |
 | Runtime telemetry covering latency, model calls, token usage, and estimated cost | Met | `GET /api/telemetry`: the seed metrics, the live analytics metrics, and the `live_chat` metrics (Sections 3.12 and 4.1) |
@@ -653,12 +693,13 @@ the capability is implemented but one component is documented as a next step.
 | Generate persona-specific narratives with traceable evidence | Met | A schema-validated dual-persona bundle, with every figure traced to a computed value |
 | Communicate uncertainty and abstain on insufficient or contradictory evidence | Met | `abstention.py`: three independent triggers, no model call (Sections 3.8 and 4.3) |
 | Recommend actions grounded in levers, constraints, and decision rights | Met | The structure of driver, lever, action, expected impact, owner, confidence, and monitoring plan (Section 2.2) |
-| Provide a mechanism to learn from feedback | Partially met | Capture is implemented (`user_feedback`, an audit identifier, and telemetry counts); consumption at the next seed run is the documented next step |
+| Provide a mechanism to learn from feedback | Met | Thumbs ratings and an audit trail (`user_feedback`); an action-correction loop (`POST /api/actions/<key>/correct`, `action_corrections` table, `_match_action_correction`) that stores an analyst's corrected action and resurfaces it on the same anomaly and on same-signature anomalies as a "Learned Recommendation" (Section 3.11). Feeding the corrections back into seed-time driver ranking and narrative templates is the remaining Phase P1 step. |
+| Continuous evaluation of the model and pipeline | Met | `eval/run_eval.py` scores detection, Price-Volume-Mix, driver attribution, ablation, abstention, role masking and the chat assistant; results in `docs/EVALUATION_REPORT.md` (Section 4.11) |
 | Operate within realistic security, cost, latency, and scalability constraints | Met | Server-side masking; a live path with no per-request cost; a standard-library server; CRC-32 reproducibility |
 
 The three deliverables the brief requests map to this repository as follows: the detailed business
 proposal is Sections 1 and 2; the working prototype is Sections 3, 6, and 8; the pitch presentation
-is the demo video together with this document.
+accompanies this repository.
 
 ---
 
@@ -673,6 +714,20 @@ css/                             Stylesheets: tokens, layout, hero, charts, evid
 requirements.txt                 Dependencies for the offline seed and analytics pipeline only
 persona_profiles.md              Persona goals, decision rights, and the entitlement and narrative specification
 
+docs/
+  EVALUATION_REPORT.md           Consolidated evaluation report (Section 4.11)
+  EVALUATION.md                  Full metrics run plus every chat query and answer
+  EVALUATION_SCENARIOS.md        The brief's required-scenario queries with the live answer and its grounding
+  EVALUATION_SCORED.md           The 30-query scored chat run with per-part scores
+
+eval/
+  run_eval.py                    The evaluation harness (deterministic components plus the chat surface)
+  scenario_table.py              Runs the required-scenario queries and writes docs/EVALUATION_SCENARIOS.md
+  gen_dataset.py                 Builds the labelled 30-query chat set from the live database
+  dataset*.jsonl                 Labelled chat query sets, including the adversarial set
+  results.json, scenario_results.json   Machine-readable harness output
+  README.md                      How to run the harness and what each metric means
+
 KPI-data/
   01_get_and_build_dataset.py    Downloads M5 and Walmart data; builds fact_sales_daily.parquet (real, reconciled)
   02_gen_marketing_source.py     Builds the synthetic weekly marketing source
@@ -683,7 +738,7 @@ KPI-data/
 Accenture/Accenture/
   schemas/
     semantic_contract.json       KPI definitions, drivers, thresholds, lineage, and entitlements
-    db_init.sql                  Table data-definition language
+    db_init.sql                  Table data-definition language (includes user_feedback and action_corrections)
   scripts/
     generate_mock_data.py        Seed pipeline: SQLite, then detection, then evidence graph, then narratives, then telemetry
     build_graph.py               Standalone evidence-graph rebuilder
@@ -697,7 +752,7 @@ Accenture/Accenture/
   data/                          Committed SQLite database, parquet source extracts, and the pre-built
                                    evidence_graph.gpickle (committed so a networkx-only clone is turn-key;
                                    regenerated by scripts/build_graph.py or automatically at start-up)
-  tests/                         The 54-test unittest suite for the deterministic layer
+  tests/                         The 62-test unittest suite (deterministic layer plus chat-reply masking)
   docs/persona_profiles.md
 ```
 
@@ -925,8 +980,7 @@ The tests run against the committed database and require no server.
 python -m unittest discover -s Accenture/Accenture/tests -p "test_*.py" -v
 ```
 
-The expected final line is `OK`, preceded by `Ran 54 tests`. The suite completes in approximately
-eight seconds.
+The expected final line is `OK`, preceded by `Ran 62 tests`. The suite completes in a few seconds.
 
 If `pytest` is preferred and installed, the equivalent command is:
 
@@ -953,7 +1007,23 @@ To rebuild only the evidence graph against an already-seeded database:
 python Accenture/Accenture/scripts/build_graph.py
 ```
 
-### 8.11 Step 11 (optional): Exercise the conversational assistant
+### 8.11 Step 11 (optional): Run the evaluation harness
+
+The deterministic part needs only the pipeline dependencies and the committed database, no server and
+no model:
+
+```
+pip install -r requirements.txt
+python eval/run_eval.py --skip-chat
+```
+
+It prints the detection, Price-Volume-Mix, driver-attribution, ablation, abstention and role-masking
+scores and rewrites `docs/EVALUATION.md`. To also score the chat surface, start the API
+(`python api_server.py`) with a key configured and run without `--skip-chat`, optionally
+`--dataset eval/dataset30.jsonl --chat-delay 8`. `python eval/scenario_table.py` runs the
+required-scenario queries and writes `docs/EVALUATION_SCENARIOS.md`.
+
+### 8.12 Step 12 (optional): Exercise the conversational assistant
 
 With a key configured (Step 5), open the "Ask the data" panel on the dashboard and try the following:
 
@@ -965,7 +1035,7 @@ With a key configured (Step 5), open the "Ask the data" panel on the dashboard a
 | How confident are we, on the sparse scenario | The engine abstains: figures are returned, the root cause is declined |
 | Switch the role to Supply Planner and re-ask a revenue question | Revenue and margin figures are masked server-side |
 
-### 8.12 Troubleshooting
+### 8.13 Troubleshooting
 
 | Symptom | Cause | Resolution |
 |---|---|---|
@@ -994,6 +1064,7 @@ With a key configured (Step 5), open the "Ask the data" panel on the dashboard a
 | `POST` | `/api/chat` | A grounded conversational answer. Body: `{message, role, anomaly_key?, focus?}` |
 | `POST` | `/api/feedback` | A rating on a narrative. Body: `{anomaly_id, rating, user_comments}` |
 | `POST` | `/api/actions/<key>/approve` and `/assign` | Records an action decision with an audit identifier; both persist to `user_feedback` |
+| `POST` | `/api/actions/<key>/correct` | The action-correction learning loop. Body: `{corrected_action, rationale?, role?}`. Stores the corrected action in `action_corrections` and a thumbs-down in `user_feedback`; the stored correction is returned as `actionCorrection` on later requests for this anomaly or a same-signature one (Section 3.11) |
 
 The role is taken from the `X-User-Role` request header or the `role` query parameter. Permitted
 values are `vp_sales`, `supply_planner`, and `admin`. The default is `vp_sales`.
@@ -1022,10 +1093,12 @@ values are `vp_sales`, `supply_planner`, and `admin`. The default is `vp_sales`.
   present.
 - The assistant is provider-swappable: Groq (free tier) by default, with Anthropic as a fallback,
   behind a dependency-free standard-library client. There is no vendor lock-in.
-- Feedback capture is implemented; closing the loop is on the roadmap. `user_feedback` records every
-  rating, approval, and assignment with an audit identifier, and surfaces the counts through
-  `/api/telemetry`. Consuming that feedback to revise narratives at the next seed run is the
-  documented next step.
+- The feedback loop runs inside the live system. `user_feedback` records every rating, approval, and
+  assignment with an audit identifier (surfaced through `/api/telemetry`), and the action-correction
+  loop (`/api/actions/<key>/correct`, `action_corrections`) stores an analyst's corrected action and
+  resurfaces it on the same anomaly and on same-signature anomalies. What remains for Phase P1 is
+  feeding the accumulated corrections back into seed-time driver ranking and the narrative templates,
+  rather than only overlaying the stored action at request time.
 - Reproducibility. All seed-time hashing and jitter use CRC-32 rather than Python's per-process
   randomised hash, so a reseed reproduces byte-identical anomalies on any machine.
 - The business-case figures in Section 2.3 are an explicit model with stated assumptions, not

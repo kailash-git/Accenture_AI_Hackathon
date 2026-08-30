@@ -17,7 +17,7 @@ Deliberate real-world mismatches baked in here (per REQ-02):
 import pandas as pd
 import numpy as np
 
-DATA = "/home/claude/kpi_engine/data"
+DATA = "./data"   # run from the KPI-data/ folder (same convention as 01_get_and_build_dataset.py)
 fact = pd.read_parquet(f"{DATA}/fact_sales_daily.parquet")
 
 STATE_TO_REGION_NAME = {"CA": "West", "TX": "South"}   # deliberate naming mismatch

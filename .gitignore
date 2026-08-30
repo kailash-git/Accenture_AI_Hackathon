@@ -21,7 +21,9 @@ test_write.txt
 Thumbs.db
 
 # --- editor / tooling local state ---
-.claude/settings.local.json
+.claude/
+.vscode/
+.idea/
 
 # --- evidence graph ---
 # The pre-built graph at Accenture/Accenture/data/evidence_graph.gpickle IS committed
