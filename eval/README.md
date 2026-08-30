@@ -41,14 +41,15 @@ python eval/run_eval.py                     # everything, chat -> http://127.0.0
 python eval/run_eval.py --skip-chat         # deterministic components only (no server, no LLM)
 python eval/run_eval.py --chat-delay 5      # slower pacing if the chat provider rate-limits
 python eval/run_eval.py --dataset eval/dataset30.jsonl   # 30-query scored run
+python eval/run_eval.py --dataset eval/dataset_hard.jsonl --chat-delay 12   # 12 adversarial queries
 ```
 
 ## What is measured
 
 | Part | How it's exercised | Metric |
 |---|---|---|
-| Anomaly detection | DB read | recall vs the 4 injected ground-truth events; flag/abstain split |
-| PVM decomposition | DB read | `price+volume+mix+other == actual − baseline`, error in $ |
+| Anomaly detection | DB read | recall vs the 4 injected events; raw z-score **flag precision** + F1 (artifact = \|dev\|>300%); post-gate precision |
+| PVM decomposition | DB read | reconciliation error in $; **net-direction agreement** (sign of Σ effects vs the flagged direction) |
 | Driver-cause attribution | DB read | dominant-driver top-1 accuracy + PVM effect-sign accuracy vs the curated ground truth |
 | Ablation / causal consistency | throwaway DB copy | delete a scenario's injected corroborating records, re-run the abstention gate, check the decision flips as expected (real DB untouched) |
 | Abstention gate | DB read | confusion matrix on the 4 canonical scenarios |

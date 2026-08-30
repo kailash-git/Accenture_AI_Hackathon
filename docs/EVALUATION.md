@@ -1,6 +1,6 @@
 # KPI Engine — Evaluation Report
 
-_Generated 2026-08-30T17:02:44 · commit `9cce6d0`_
+_Generated 2026-08-30T17:43:12 · commit `8b38eb9`_
 
 Each part of the system is scored with a metric that fits it. The generative surface (`/api/chat`) is the only natural-language path; everything quantitative upstream of it is deterministic and is checked for exactness, not with an LLM judge.
 
@@ -9,8 +9,10 @@ Each part of the system is scored with a metric that fits it. The generative sur
 | Area | Metric | Result |
 |---|---|---|
 | Detection | known-event recall | **100.0%** (4/4) |
+| Detection | raw z-score flag precision / F1 | **77.2%** / **0.871** (13 artifacts / 57 flags; post-gate 100.0%) |
 | PVM decomposition | reconciles to ≤ $0.01 | **100.0%** (max err $0.0) |
 | Driver attribution | dominant-driver top-1 accuracy | **100.0%** (4/4); effect signs 100.0% (4/4) |
+| Driver attribution | PVM net-direction agreement (all 20 Revenue anomalies) | **95.0%** (19/20) |
 | Ablation (causal) | attribution flips when the injected cause is removed | **100.0%** (2/2) |
 | Abstention gate | accuracy on canonical set | **100.0%** (P 100.0 / R 100.0) |
 | RBAC (narratives) | clean of cross-role leakage | **100.0%** (0 leaks / 114) |
@@ -51,6 +53,14 @@ Each part of the system is scored with a metric that fits it. The generative sur
   "note": "Recall is measured against the 4 deliberately injected ground-truth events; the 53 'gen-' rows are the raw statistical sweep and have no external label, so precision is not computed here."
 }
 ```
+
+**Precision of the raw z-score sweep** — a flag is labelled an *artifact* when `artifact if |deviation_pct| > 300% (a monthly KPI never legitimately moves to >3x its trailing baseline)`:
+
+- raw flag precision: **77.2%** (44/57); recall **100.0%** (4/4 injected); **F1 0.871**
+- artifacts caught by the materiality / abstention gate: **100.0%** (13/13)
+- post-gate (actioned) precision: **100.0%**
+- labelled artifacts: gen-turnover-FOODS_3_090-2011-09-CA, gen-turnover-FOODS_3_090-2011-10-CA, gen-turnover-FOODS_3_090-2011-11-CA, gen-turnover-FOODS_3_090-2011-09-TX, gen-turnover-FOODS_3_090-2011-10-TX, gen-turnover-FOODS_3_090-2011-11-TX …
+- the raw z-score sweep is deliberately liberal; the materiality / abstention gate suppresses every labelled artifact, so post-gate (actioned) precision is higher than raw flag precision.
 ### 2.2 Price–Volume–Mix decomposition
 Identity checked on every Revenue anomaly: `price_effect + volume_effect + mix_effect + other_effect == actual - baseline`.
 
@@ -71,6 +81,7 @@ Top-1 dominant driver = the factor with the largest \|PVM effect\|, vs. the exte
 
 - dominant-driver accuracy: **100.0%** (4/4)
 - PVM effect-sign accuracy: **100.0%** (4/4)
+- **PVM net-direction agreement (all 20 Revenue anomalies): 95.0%** (19/20) — the sum of the four PVM effects points the same way as the flagged move. Disagrees on: sparse.
 - n=4 curated scenarios with an externally-known cause; the 'gen-' sweep has no driver label. dominant_driver = largest |PVM effect|.
 
 ### 2.4 Ablation / counterfactual consistency
@@ -134,6 +145,7 @@ Standard metrics used as-is:
 
 - **recall** = TP / (TP + FN)  ·  **precision** = TP / (TP + FP)  ·  **accuracy** = (TP + TN) / N
 - **leak rate** = leaked_items / items_checked  ·  **clean %** = 100 · (1 − leak rate)
+- **raw flag precision** = ( flags that are not labelled artifacts ) / total flags, artifact ⇔ |deviation_pct| > 300%.  **F1** = 2·P·R / (P + R), R = injected-event recall.
 
 Exactness check (not an ML metric — an accounting identity):
 
@@ -143,6 +155,7 @@ Driver-cause attribution — custom, on the curated ground-truth scenarios:
 
 - **dominant-driver top-1 accuracy** = ( scenarios where `argmax_f |PVM effect_f|` equals the labelled cause — or the engine correctly abstains where the label says to ) / labelled scenarios.
 - **effect-sign accuracy** = ( PVM effects whose sign matches the labelled expected sign ) / labelled effects.
+- **PVM net-direction agreement** = ( Revenue anomalies where `sign(Σ PVM effects)` equals the flagged direction ) / all Revenue anomalies.
 - **ablation / causal consistency** = ( scenarios where deleting the injected corroborating records — on a throwaway DB copy — flips the abstention decision in the expected direction ) / ablated scenarios. Expected: `supply` loses confidence (not-abstain → abstain, insufficient evidence); `billing` loses its contradiction trigger (abstain, contradictory → not-abstain).
 
 Chat rubric — custom, defined here:

@@ -26,8 +26,11 @@ transcript here populates on the next clean `run_eval.py` pass.
 
 | Component | Metric (formula) | Score |
 |---|---|---|
-| Anomaly detection | recall = TP / (TP + FN) on the 4 injected events | **100** (4/4; 57 flagged, 44 abstained, 13 actioned) |
-| PVM decomposition | \|Σ effects − (actual − baseline)\| < \$0.01 | **100** (20/20 series, max error **\$0.00**) |
+| Anomaly detection — recall | TP / (TP + FN) on the 4 injected events | **100** (4/4) |
+| Anomaly detection — raw flag precision | ( flags not labelled artifacts ) / total flags; artifact ⇔ \|dev\| > 300 % | **77.2** (13 artifacts / 57); **F1 0.87** |
+| Anomaly detection — post-gate precision | of the 13 anomalies that reach a recommendation, how many are plausible | **100** (13/13) |
+| PVM — reconciliation | \|Σ effects − (actual − baseline)\| < \$0.01 | **100** (20/20 series, max error **\$0.00**) |
+| PVM — net-direction agreement | sign(Σ effects) == flagged direction, all 20 Revenue anomalies | **95.0** (19/20; miss = sparse launch, no PVM) |
 | Driver-cause attribution | dominant-driver top-1 accuracy; PVM effect-sign accuracy | **100** (4/4; 4/4) |
 | Ablation / causal consistency | abstention flips when the injected cause is removed | **100** (2/2) |
 | Abstention gate | accuracy = (TP + TN) / N on the canonical set | **100** (billing abstains; supply / pricecut / sparse don't) |

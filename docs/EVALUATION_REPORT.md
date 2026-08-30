@@ -19,21 +19,29 @@ Re-run: `python eval/run_eval.py --dataset eval/dataset30.jsonl --chat-delay 8`.
 
 | Area | Score | Metric |
 |---|---|---|
-| **Anomaly detection** | **100 / 100** | recall on 4 injected ground-truth events (4/4) |
-| **PVM decomposition** | **100 / 100** | reconciliation error ≤ $0.01 on all 20 series (max **$0.00**) |
-| **Driver-cause attribution** | **100 / 100** | dominant-driver top-1 accuracy 4/4; PVM effect-sign accuracy 4/4 |
-| **Ablation (causal)** | **100 / 100** | 2/2 — removing the injected cause flips the engine's confidence as expected |
-| **Abstention gate** | **100 / 100** | precision 100 / recall 100 on the canonical set |
-| **RBAC — generated narratives** | **100 / 100** | 0 cross-role leaks / 114 narratives |
+| **Detection — recall** | **100 %** | 4/4 injected ground-truth events flagged |
+| **Detection — raw z-score flag precision** | **77.2 %** | 13 implausible (>300 % deviation) artifacts out of 57 flags; **F1 0.871** |
+| **Detection — precision after the materiality gate** | **100 %** | of the 13 anomalies that reach a recommendation, all 13 are plausible |
+| **PVM decomposition — reconciliation** | **100 %** | \|Σ effects − Δ\| ≤ $0.01 on all 20 series (max $0.00) |
+| **PVM — net-direction agreement** | **95.0 %** | 19/20 Revenue anomalies; the miss is the sparse-history launch (no PVM computed) |
+| **Driver-cause attribution** | **100 %** | dominant-driver top-1 4/4; effect-sign 4/4 |
+| **Ablation (causal)** | **100 %** | 2/2 — removing the injected cause flips the engine's confidence as expected |
+| **Abstention gate** | **100 %** | precision 100 / recall 100 on the canonical set |
+| **RBAC — generated narratives** | **100 %** | 0 cross-role leaks / 114 narratives |
 | **Chat assistant** | **~90 / 100** | rubric composite; 87.7 raw, ≈ 92 excluding provider-error turns |
 | **Chat — faithfulness** | **100 %** | every number in every reply traces to the context block |
 | **Chat — role masking** | **enforced** | deterministic post-filter (`_mask_chat_reply`), covered by `tests/test_chat_masking.py` |
 
-**Read:** the deterministic engine (detection → decomposition → abstention → role
-masking) is airtight. The chat assistant used to occasionally name a
-role-restricted term (fill rate, gross margin, warehouse) because masking there
-relied on the LLM obeying a prompt instruction; **this is now enforced by a
-deterministic post-filter** on the reply (§ 6.1).
+**Read:** the two non-100 numbers are real. The **raw z-score sweep over-flags**
+— 13 of 57 flags are >300 % monthly swings on near-zero baselines
+(early-history / launch-ramp), i.e. statistical artifacts, not business events
+(precision 77.2 %, F1 0.87). The **materiality / abstention gate catches every
+one** of them (post-gate precision 100 %), so none reaches a recommendation — the
+cost of the liberal detector is paid entirely at the gate. **PVM net-direction**
+misses once (95 %): the sparse-history launch is flagged UP but carries no PVM
+decomposition to back the direction. Everything downstream of the gate — driver
+attribution, ablation, abstention, RBAC — holds. The chat assistant's role
+masking, previously soft, is now enforced by a deterministic post-filter (§ 6.1).
 
 ---
 
@@ -73,14 +81,25 @@ Provider-error turns are excluded from every denominator.
 
 ## 3. Deterministic components (detail)
 
-- **Detection.** 57 movements flagged (4 curated + 53 from the raw z-score sweep);
-  44 abstained, 13 carried an automated recommendation. Recall is measured against
-  the 4 deliberately injected events (supply constraint, price cut, billing bug,
-  sparse-history launch) — all 4 found, with the right detection type
-  (HYBRID / EVIDENCE_DRIVEN / EVIDENCE_DRIVEN / SPARSE_HISTORY). Precision is not
-  scored — the 53 `gen-` rows have no external label.
-- **PVM.** `price + volume + mix + other == actual − baseline` checked on every
-  Revenue anomaly: 20/20 reconcile, max abs error **$0.00**, mean **$0.00**.
+- **Detection — recall.** 57 movements flagged (4 curated + 53 from the raw
+  z-score sweep); 44 abstained, 13 carried an automated recommendation. All 4
+  injected events found, with the right detection type
+  (HYBRID / EVIDENCE_DRIVEN / EVIDENCE_DRIVEN / SPARSE_HISTORY). Recall 4/4.
+- **Detection — precision.** A flag is labelled an *artifact* when
+  `|deviation_pct| > 300 %` — no monthly KPI legitimately moves to >3× its
+  trailing baseline; those 13 are near-zero-denominator / early-history effects.
+  **Raw flag precision 44/57 = 77.2 %**, **F1 0.87** (R = 1.0). The materiality /
+  abstention gate abstains on **13/13** of them, so **post-gate (actioned)
+  precision is 100 %** — nothing implausible reaches a recommendation. Labelled
+  artifacts: `gen-turnover-FOODS_3_090-2011-0{9,10,11}-*`,
+  `gen-FOODS_3_090-2011-1{0,1}-*`, `gen-HOUSEHOLD_1_020-2016-0{1,2}-TX`, …
+- **PVM — reconciliation.** `price + volume + mix + other == actual − baseline`
+  on every Revenue anomaly: 20/20 reconcile, max abs error **$0.00**.
+- **PVM — net-direction agreement.** `sign(Σ effects)` vs the flagged direction,
+  over all 20 Revenue anomalies: **19/20 = 95.0 %**. The one miss is `sparse`
+  (HOUSEHOLD_1_020 launch, flagged UP) — it carries an all-zero PVM because no
+  decomposition is attempted on a sparse-history series, so there is nothing to
+  point the direction.
 - **Driver-cause attribution.** For the 4 curated scenarios the engine's
   `dominant_driver` (largest \|PVM effect\|) matches the externally-known cause:
   supply→volume, pricecut→volume (the +42 % lift), billing→correctly abstains,
@@ -136,6 +155,21 @@ separate 23-query run gives **81.8 %** no-leak — see § 6.
 | relevancy | 85 % (11/13) |
 | multifactor_breakdown | 75 % (3/4) — 1 provider error |
 | clarification | 0 % (0/1) — one vague query got answered instead of asked; behaviour is a non-fabricating fallback, label since relaxed |
+
+### Hard-query set (adversarial)
+
+`eval/dataset_hard.jsonl` holds 12 deliberately hard queries designed to break the
+weak spots — **false premises** ("why did revenue *rise* in Nov 2012?"),
+**cross-region / cross-KPI comparisons** the engine can only answer one movement
+at a time, **out-of-scope aggregation** ("total company revenue in Q4 2012") and
+**forecasting**, a **two-decimal precision trap**, **loaded questions** ("wasn't it
+really a competitor's promotion?"), and requests for **numbers not in the
+context**. Run it with `python eval/run_eval.py --dataset eval/dataset_hard.jsonl`.
+It adds `premise_check` (reply must not affirm a false premise) and
+`strict_figures` (tight ±0.5 % tolerance) checks. This set was **not scored in this
+report** — the Groq free-tier daily token budget was exhausted at run time; it is
+expected to land the `resolution`, `premise_check` and `relevancy` metrics well
+below 100 % on the comparison / out-of-scope / loaded cases.
 
 ---
 
