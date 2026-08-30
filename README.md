@@ -1107,10 +1107,4 @@ values are `vp_sales`, `supply_planner`, and `admin`. The default is `vp_sales`.
 
 ---
 
-## 11. Team and licence
 
-Team Stack Overflowed, IIT Madras. Track 3, BusinessIntelligence.ai. Persona and entitlement design
-by Sivasubramanian S. See `persona_profiles.md` for the full persona specification and
-`KPI-data/README.md` for dataset provenance.
-
-Licence: MIT.
