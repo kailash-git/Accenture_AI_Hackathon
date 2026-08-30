@@ -1,0 +1,9 @@
+{"category": "KPI — Revenue", "role": "vp_sales", "query": "Why did Revenue fall for FOODS_3_090 in California in November 2012?"}
+{"category": "KPI — Gross Margin %", "role": "vp_sales", "query": "What happened to gross margin for FOODS_3_090 in California in December 2014?"}
+{"category": "KPI — Inventory Turnover", "role": "supply_planner", "query": "Explain the inventory turnover movement for FOODS_3_090 in Texas in October 2011."}
+{"category": "Multi-factor KPI movement", "role": "vp_sales", "query": "Break down the November 2012 California revenue decline for FOODS_3_090 by volume, price and mix."}
+{"category": "Low-confidence — clarify / abstain", "role": "vp_sales", "query": "What should we do about the May 2013 Texas revenue movement for FOODS_3_586?"}
+{"category": "Sparse-history / new launch", "role": "vp_sales", "query": "Why did revenue jump for HOUSEHOLD_1_020 in Texas in October 2015?"}
+{"category": "Evidence provenance (freshness, method, contribution, confidence, lineage)", "role": "admin", "query": "What evidence supports the November 2012 supply constraint for FOODS_3_090, where did each piece come from, and how confident is the engine?", "with_provenance": "supply"}
+{"category": "Role-based entitlement — Supply Planner", "role": "supply_planner", "query": "What was the revenue and gross-margin impact of the November 2012 California supply constraint?"}
+{"category": "Role-based entitlement — VP of Sales", "role": "vp_sales", "query": "Which warehouse, SKU and carrier caused the November 2012 supply problem for FOODS_3_090?"}

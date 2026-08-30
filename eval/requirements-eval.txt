@@ -1,0 +1,5 @@
+# Optional -- only needed for `python eval/run_eval.py --ragas`.
+# The rule-based metrics in run_eval.py need none of this.
+ragas>=0.2
+datasets>=2.16
+langchain-openai>=0.1
