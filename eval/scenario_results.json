@@ -1,0 +1,78 @@
+{
+  "rows": [
+    {
+      "category": "KPI \u2014 Revenue",
+      "role": "vp_sales",
+      "query": "Why did Revenue fall for FOODS_3_090 in California in November 2012?",
+      "reply": "Revenue dropped sharply because the product\u2019s sales volume collapsed \u2013 volume fell about 28% versus baseline, cutting roughly $4\u202fK (\u224884% of the total revenue loss). A modest price dip (\u20115%, about $780) added to the decline, but volume was the dominant driver. The underlying cause is a supply\u2011constrained fill rate of only 78% in the West, leaving shelves empty.\u202fTo recover the lost run\u2011rate, authorize emergency inventory replenishment for the category in California and shift buffer stock from a neighboring region. This should restore the $4\u202fK\u2011plus revenue impact as fill rates normalize.",
+      "grounding": "movement: `Revenue \u00b7 2012-11 \u00b7 CA` \u00b7 grounded=True \u00b7 abstained=False \u00b7 resolution: Showing the movement matching 2012-11, Revenue, CA, FOODS_3_090. \u00b7 1387.7 ms \u00b7 model `openai/gpt-oss-120b`"
+    },
+    {
+      "category": "KPI \u2014 Gross Margin %",
+      "role": "vp_sales",
+      "query": "What happened to gross margin for FOODS_3_090 in California in December 2014?",
+      "reply": "The system detected a sharp drop in gross\u2011margin percent for the FOODS\u202f3\u202f090 line in California during December\u202f2014 \u2013 roughly a 69\u202f% decline (z\u2011score\u202f\u2248\u202f\u201117.7), flagged as a critical issue. However, the analytics engine abstained because it found no supporting supply, pricing, volume or mix evidence to explain the movement, so confidence in any root\u2011cause analysis is low. No price, volume or mix drivers were computed, and the available marketing\u2011spend record does not clarify the margin shift. At this point the best course is a manual investigation to uncover the underlying cause before deciding on corrective actions.",
+      "grounding": "movement: `GrossMarginPercent \u00b7 2014-12 \u00b7 CA` \u00b7 grounded=True \u00b7 abstained=True \u00b7 resolution: Showing the movement matching 2014-12, GrossMarginPercent, CA, FOODS_3_090. \u00b7 1043.7 ms \u00b7 model `openai/gpt-oss-120b`"
+    },
+    {
+      "category": "KPI \u2014 Inventory Turnover",
+      "role": "supply_planner",
+      "query": "Explain the inventory turnover movement for FOODS_3_090 in Texas in October 2011.",
+      "reply": "The engine flagged a\u202f~1,938\u202f% rise in inventory turnover for FOODS\u202f3\u202f090 in Texas during October\u202f2011 and marked it as critical, but it abstained because it found no corroborating supply\u2011 or demand\u2011side records to explain the jump. The only signal available is a modest fill\u2011rate of\u202f98.4\u202f% at WH\u20111000 with zero stock\u2011out days, which does not account for the massive turnover change. Consequently, the system cannot provide a reliable explanation and recommends a manual analyst review to determine the root cause.",
+      "grounding": "movement: `InventoryTurnover \u00b7 2011-10 \u00b7 TX` \u00b7 grounded=True \u00b7 abstained=True \u00b7 resolution: Showing the movement matching 2011-10, InventoryTurnover, TX, FOODS_3_090. \u00b7 1048.7 ms \u00b7 model `openai/gpt-oss-120b`"
+    },
+    {
+      "category": "Multi-factor KPI movement",
+      "role": "vp_sales",
+      "query": "Break down the November 2012 California revenue decline for FOODS_3_090 by volume, price and mix.",
+      "reply": "The November drop in California revenue was driven almost entirely by a sharp fall in units sold.\u202fOverall, volume cut revenue by about $4.1\u202fM (\u201128% of baseline), price slipped another $0.78\u202fM (\u20115%), and mix had no effect.\u202fFor the FOODS\u202f3\u202f090 line, the only SKU\u2011specific impact recorded is a volume\u2011driven loss of roughly $4.9\u202fM (\u201128% volume); the data do not break out price or mix effects for this product.\u202fThe key takeaway is that restoring fill rates in the West should recover the bulk of the loss.",
+      "grounding": "movement: `Revenue \u00b7 2012-11 \u00b7 CA` \u00b7 grounded=True \u00b7 abstained=False \u00b7 resolution: Showing the movement matching 2012-11, Revenue, CA, FOODS_3_090. \u00b7 1313.9 ms \u00b7 model `openai/gpt-oss-120b`"
+    },
+    {
+      "category": "Low-confidence \u2014 clarify / abstain",
+      "role": "vp_sales",
+      "query": "What should we do about the May 2013 Texas revenue movement for FOODS_3_586?",
+      "reply": "The engine flagged this case for manual review because structured data shows a modest price gain (+$566) while two unstructured records report a pricing\u2011billing bug that likely inflates the price effect.\u202fRevenue fell 1.1% (from $11,871 to $11,739) driven mainly by a 6% volume drop (\u2011$697) that outweighed the price increase.\u202fGiven the contradictory signals, the system cannot issue an automated recommendation; you should have analysts verify the billing issue, correct any overcharges, and assess whether the volume decline is related.\u202fOnly after that validation can a concrete action plan be defined.",
+      "grounding": "movement: `Revenue \u00b7 2013-05 \u00b7 TX` \u00b7 grounded=True \u00b7 abstained=True \u00b7 resolution: Showing the movement matching 2013-05, Revenue, TX, FOODS_3_586. \u00b7 1211.0 ms \u00b7 model `openai/gpt-oss-120b`"
+    },
+    {
+      "category": "Sparse-history / new launch",
+      "role": "vp_sales",
+      "query": "Why did revenue jump for HOUSEHOLD_1_020 in Texas in October 2015?",
+      "reply": "The engine isn\u2019t confident about this movement (only\u202f30\u202f% confidence) because the item\u202fHOUSEHOLD\u202f1\u202f020 has fewer than three months of sales history, so there\u2019s no reliable baseline to compare against. The $28 of revenue you see in October simply reflects the early\u2011launch sales of this new product in Texas, not a measurable price, volume, or mix effect. Until three months of data accumulate, you should monitor the item manually and suspend automated anomaly alerts to avoid false positives.",
+      "grounding": "movement: `Revenue \u00b7 2015-10 \u00b7 TX` \u00b7 grounded=True \u00b7 abstained=False \u00b7 resolution: Showing the movement matching 2015-10, Revenue, TX, HOUSEHOLD_1_020. \u00b7 1117.0 ms \u00b7 model `openai/gpt-oss-120b`"
+    },
+    {
+      "category": "Evidence provenance (freshness, method, contribution, confidence, lineage)",
+      "role": "admin",
+      "query": "What evidence supports the November 2012 supply constraint for FOODS_3_090, where did each piece come from, and how confident is the engine?",
+      "with_provenance": "supply",
+      "reply": "The engine cites four pieces of evidence for the November\u202f2012 supply constraint on\u202fFOODS_3_090: a structured supply signal showing the West\u2011CA warehouse fill\u2011rate fell to\u202f0.78 with four stock\u2011out days; a customer\u2011support ticket reporting critical cargo\u2011arrival delays at the Port of Seattle; a verified customer review noting empty shelves for the product over several days; and a marketing record confirming $9,991 of spend in the West region during the same window. All four items come from the system\u2019s supply, support\u2011ticket, customer\u2011review, and marketing data sources respectively. The analysis confidence is\u202f95\u202fpercent, and the engine did not abstain.",
+      "grounding": "movement: `Revenue \u00b7 2012-11 \u00b7 CA` \u00b7 grounded=True \u00b7 abstained=False \u00b7 resolution: Several movements match 2012-11, FOODS_3_090; showing the most material one. Add a month, region, or item to narrow it further. \u00b7 1842.6 ms \u00b7 model `openai/gpt-oss-120b`"
+    },
+    {
+      "category": "Role-based entitlement \u2014 Supply Planner",
+      "role": "supply_planner",
+      "query": "What was the revenue and gross-margin impact of the November 2012 California supply constraint?",
+      "reply": "The engine shows the gross\u2011margin percent fell by roughly\u202f16.3% (a \u20130.163 deviation) for the November\u202f2012 period in California.\u202fRevenue\u2011related figures are restricted for your role, so that impact can\u2019t be disclosed.",
+      "grounding": "movement: `GrossMarginPercent \u00b7 2012-11 \u00b7 CA` \u00b7 grounded=True \u00b7 abstained=False \u00b7 resolution: Showing the movement matching 2012-11, GrossMarginPercent, CA. \u00b7 1308.3 ms \u00b7 model `openai/gpt-oss-120b`"
+    },
+    {
+      "category": "Role-based entitlement \u2014 VP of Sales",
+      "role": "vp_sales",
+      "query": "Which warehouse, SKU and carrier caused the November 2012 supply problem for FOODS_3_090?",
+      "reply": "The supply disruption was tied to critical cargo\u2011arrival delays at the Seattle warehouse, with the carrier\u202fLogiTrans\u202fidentified as the bottleneck.\u202fThe specific SKU (FOODS_3_090) details are restricted for your role, so that information cannot be shared.\u202fAddressing the Seattle\u2011LogiTrans delay should help restore the lost volume.",
+      "grounding": "movement: `Revenue \u00b7 2012-11 \u00b7 CA` \u00b7 grounded=True \u00b7 abstained=False \u00b7 resolution: Several movements match 2012-11, FOODS_3_090; showing the most material one. Add a month, region, or item to narrow it further. \u00b7 1516.8 ms \u00b7 model `openai/gpt-oss-120b`"
+    }
+  ],
+  "provs": {
+    "Evidence provenance (freshness, method, contribution, confidence, lineage)": {
+      "method": "HYBRID",
+      "confidence": 95.0,
+      "abstained": false,
+      "pvm_contribution": "volume +84%, price +16%, mix +0%, other -0%",
+      "evidence_lines": "- **Fill rate dropped to 0.78 at WH-1000** \u2014 source `source_supply_monthly` (dated Nov 2012); relevance/contribution 0.95 (high tier)<br>- **Seattle warehouse reporting critical cargo arrival delays at Port of Seattle.** \u2014 source `unstructured_feedback (support ticket)` (dated Nov 20, 2012); relevance/contribution 0.47 (medium tier)<br>- **Disappointed.** \u2014 source `unstructured_feedback (customer review)` (dated Nov 22, 2012); relevance/contribution 0.3 (low tier)<br>- **Total marketing spend: $9,991.03 in West Region** \u2014 source `source_marketing_weekly` (dated Nov 2012); relevance/contribution 0.2 (low tier)",
+      "lineage": "fact_sales_daily (raw M5 daily sales, KPI-data/01_get_and_build_dataset.py) -> scripts/generate_mock_data.py:seed_sales() -> AnomalyDetector.run_detection(kpi_name='Revenue')"
+    }
+  }
+}
