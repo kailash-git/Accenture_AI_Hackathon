@@ -14,6 +14,7 @@ const API_CONFIG = {
     anomalyGraph: (id) => `/api/anomalies/${id}/graph`,
     approveAction: (id) => `/api/actions/${id}/approve`,
     assignAction: (id) => `/api/actions/${id}/assign`,
+    correctAction: (id) => `/api/actions/${id}/correct`,
     telemetry: '/api/telemetry',
     submitFeedback: '/api/feedback'
   }
@@ -102,6 +103,7 @@ class BackendApiClient {
       graph_context: raw.graph_context,
       persona: raw.persona,
       generation_method: raw.generation_method,
+      actionCorrection: raw.actionCorrection || (existing && existing.actionCorrection) || null,
       detectionType: raw.detection_type,
       evidenceScore: raw.evidence_score,
       evidenceClassification: raw.evidence_classification,
@@ -239,6 +241,28 @@ class BackendApiClient {
         console.warn('Failed to post feedback:', e);
       }
     }
+  }
+
+  /* Records "the recommended action is wrong, do this instead". The backend
+     stores it keyed to the anomaly's scenario/KPI so it resurfaces on similar
+     anomalies (see _match_action_correction in api_server.py). */
+  async submitActionCorrection(anomalyKey, correctedAction, rationale = '') {
+    if (!this.isConnected) return { success: false, local: true };
+    try {
+      const res = await fetch(`${this.baseUrl}${API_CONFIG.endpoints.correctAction(anomalyKey)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          corrected_action: correctedAction,
+          rationale,
+          role: APP_STATE.activeRole
+        })
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('Failed to submit action correction:', e);
+    }
+    return { success: false, local: true };
   }
 }
 

@@ -51,6 +51,26 @@ GRAPH = None  # populated by _load_evidence_graph() in run_server()
 VALID_ROLES = ("vp_sales", "supply_planner", "admin")
 DEFAULT_ROLE = "vp_sales"
 
+# Expert action corrections -- created lazily so it works on an already-seeded
+# business_bi.db without a re-seed (mirrors schemas/db_init.sql table 6b).
+_ACTION_CORRECTIONS_DDL = """
+CREATE TABLE IF NOT EXISTS action_corrections (
+    correction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    anomaly_id TEXT NOT NULL,
+    scenario_key TEXT,
+    kpi_name TEXT,
+    cat_id TEXT,
+    direction TEXT,
+    detection_type TEXT,
+    original_action TEXT,
+    corrected_action TEXT NOT NULL,
+    rationale TEXT,
+    corrected_by TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+)
+"""
+
 # Live-request SQL latency samples (rolling window, in-memory, reset on restart).
 _SQL_LATENCY_SAMPLES_MS = []
 _REQUEST_COUNT = 0
@@ -1138,6 +1158,30 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
+        if path.startswith('/api/actions/') and path.endswith('/correct'):
+            # The user judged the recommended action wrong and typed what to do
+            # instead. Stored so future similar anomalies surface the correction.
+            anomaly_key = path.split('/')[3]
+            corrected = (payload.get('corrected_action') or '').strip()
+            if not corrected:
+                self._send_json({"error": "corrected_action is required"}, status_code=400)
+                return
+            rationale = (payload.get('rationale') or '').strip()
+            role = payload.get('role')
+            if role not in VALID_ROLES:
+                role = _resolve_role(self.headers, {})
+            audit_id = self._new_audit_id()
+            correction_id = self._save_action_correction(anomaly_key, corrected, rationale, role)
+            # Also record it as a thumbs-down so the telemetry feedback tally reflects it.
+            self._log_feedback(anomaly_key, -1,
+                               f"Action correction (Audit #{audit_id}): {corrected[:240]}")
+            self._send_json({
+                "success": correction_id is not None,
+                "audit_id": audit_id,
+                "correction_id": correction_id,
+            })
+            return
+
         if path == '/api/feedback':
             anomaly_id = payload.get('anomaly_id', 'unknown')
             rating = payload.get('rating', 1)
@@ -1220,6 +1264,9 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
         a = _row_to_anomaly_dict(r)
         a = _apply_persona(a, role)
         a = _apply_entitlements(a, role)
+        # Learning loop: if an expert has corrected the action for this anomaly
+        # or a similar one, hand the correction back so the UI can surface it.
+        a["actionCorrection"] = self._match_action_correction(r)
         self._send_json(a)
 
     def _handle_graph(self, key, role):
@@ -1537,6 +1584,91 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
             conn.close()
         except Exception as e:
             print(f"Warning: could not log feedback: {type(e).__name__}")
+
+    def _save_action_correction(self, anomaly_key, corrected_action, rationale, role):
+        """Persist an expert's replacement for the recommended action, snapshotting
+        the matchable attributes of the anomaly it was made on."""
+        if not os.path.exists(DB_PATH):
+            return None
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            conn.row_factory = sqlite3.Row
+            conn.execute(_ACTION_CORRECTIONS_DDL)
+            r = self._fetch_anomaly_row(conn, anomaly_key)
+            anomaly_id = anomaly_key
+            scenario_key = kpi_name = cat_id = direction = detection_type = None
+            original_action = ""
+            if r:
+                anomaly_id = r["anomaly_id"]  # canonical id, so is_own matching works
+                scenario_key, kpi_name = r["scenario_key"], r["kpi_name"]
+                cat_id, direction = r["cat_id"], r["direction"]
+                detection_type = r["detection_type"]
+                try:
+                    nv = json.loads(r["narratives_json"]) if r["narratives_json"] else {}
+                    ra = (nv.get(DEFAULT_ROLE) or {}).get("recommended_action") or {}
+                    original_action = ra.get("action") or ""
+                except Exception:
+                    pass
+            cur = conn.cursor()
+            cur.execute(
+                """INSERT INTO action_corrections
+                   (anomaly_id, scenario_key, kpi_name, cat_id, direction, detection_type,
+                    original_action, corrected_action, rationale, corrected_by)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (anomaly_id, scenario_key, kpi_name, cat_id, direction, detection_type,
+                 original_action, corrected_action, rationale, role),
+            )
+            conn.commit()
+            cid = cur.lastrowid
+            conn.close()
+            return cid
+        except Exception as e:
+            print(f"Warning: could not save action correction: {type(e).__name__}: {e}")
+            return None
+
+    def _match_action_correction(self, r):
+        """Find the most relevant prior action correction for anomaly row `r`:
+        an exact scenario_key match wins, otherwise same kpi_name + cat_id +
+        direction. Returns None if nothing applies."""
+        if not os.path.exists(DB_PATH) or r is None:
+            return None
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            conn.row_factory = sqlite3.Row
+            conn.execute(_ACTION_CORRECTIONS_DDL)
+            cur = conn.cursor()
+            cur.execute(
+                """SELECT * FROM action_corrections
+                   WHERE status = 'active'
+                     AND ( scenario_key = ?
+                           OR (kpi_name = ? AND cat_id = ? AND direction = ?) )
+                   ORDER BY (scenario_key = ?) DESC, timestamp DESC
+                   LIMIT 1""",
+                (r["scenario_key"], r["kpi_name"], r["cat_id"], r["direction"], r["scenario_key"]),
+            )
+            row = cur.fetchone()
+            conn.close()
+            if not row:
+                return None
+            same_scenario = bool(row["scenario_key"] and row["scenario_key"] == r["scenario_key"])
+            if row["anomaly_id"] == r["anomaly_id"]:
+                match_desc = "this anomaly"
+            elif same_scenario:
+                match_desc = "the same recurring scenario"
+            else:
+                match_desc = f'a similar {row["kpi_name"]} {(row["direction"] or "").lower()} anomaly in {row["cat_id"]}'
+            return {
+                "corrected_action": row["corrected_action"],
+                "rationale": row["rationale"] or "",
+                "corrected_by": row["corrected_by"] or "an analyst",
+                "source_anomaly_id": row["anomaly_id"],
+                "is_own": row["anomaly_id"] == r["anomaly_id"],
+                "match": match_desc,
+                "timestamp": row["timestamp"],
+            }
+        except Exception as e:
+            print(f"Warning: action-correction match failed: {type(e).__name__}: {e}")
+            return None
 
     def _send_json(self, data, status_code=200):
         body = json.dumps(data).encode('utf-8')
