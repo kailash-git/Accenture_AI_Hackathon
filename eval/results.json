@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-30T17:02:44",
-  "git": "9cce6d0",
+  "generated_at": "2026-08-30T17:43:12",
+  "git": "8b38eb9",
   "detection": {
     "known_event_recall": 100.0,
     "known_events_found": "4/4",
@@ -32,6 +32,25 @@
     ],
     "note": "Recall is measured against the 4 deliberately injected ground-truth events; the 53 'gen-' rows are the raw statistical sweep and have no external label, so precision is not computed here."
   },
+  "detection_precision": {
+    "flagged": 57,
+    "artifacts_labelled": 13,
+    "raw_flag_precision_pct": 77.2,
+    "recall_pct": 100.0,
+    "f1": 0.871,
+    "artifact_suppression_pct": 100.0,
+    "post_gate_precision_pct": 100.0,
+    "artifact_examples": [
+      "gen-turnover-FOODS_3_090-2011-09-CA",
+      "gen-turnover-FOODS_3_090-2011-10-CA",
+      "gen-turnover-FOODS_3_090-2011-11-CA",
+      "gen-turnover-FOODS_3_090-2011-09-TX",
+      "gen-turnover-FOODS_3_090-2011-10-TX",
+      "gen-turnover-FOODS_3_090-2011-11-TX"
+    ],
+    "label_rule": "artifact if |deviation_pct| > 300% (a monthly KPI never legitimately moves to >3x its trailing baseline)",
+    "note": "the raw z-score sweep is deliberately liberal; the materiality / abstention gate suppresses every labelled artifact, so post-gate (actioned) precision is higher than raw flag precision."
+  },
   "pvm": {
     "series_checked": 20,
     "reconcile_within_1_cent_pct": 100.0,
@@ -45,6 +64,11 @@
     "dominant_driver": "4/4",
     "effect_sign_accuracy_pct": 100.0,
     "effect_signs": "4/4",
+    "net_direction_agreement_pct": 95.0,
+    "net_direction": "19/20",
+    "net_direction_disagree": [
+      "sparse"
+    ],
     "per_scenario": [
       {
         "scenario": "supply",

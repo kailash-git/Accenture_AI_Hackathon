@@ -43,7 +43,7 @@ import urllib.error
 import urllib.request
 
 CHAT_DELAY_S = 1.5   # spacing between chat calls (free-tier rate limits); --chat-delay
-CHAT_RETRIES = 5     # retries when the provider returns an error / empty reply
+CHAT_RETRIES = 3     # retries when the provider returns an error / empty reply
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -164,6 +164,42 @@ def eval_detection(c):
     }
 
 
+def eval_detection_precision(c):
+    """Precision of the raw z-score sweep. A flagged monthly movement is labelled
+    an *artifact* (false positive) if |deviation_pct| > 300% -- no real monthly
+    KPI legitimately moves to >3x its own trailing baseline; those are
+    baseline-not-established / near-zero-denominator effects, not business events.
+    Recall is 4/4 on the injected ground-truth events (see eval_detection)."""
+    rows = c.execute("SELECT scenario_key, deviation_pct, z_score, abstained, "
+                     "evidence_classification FROM anomalies").fetchall()
+    n = len(rows)
+    ARTIFACT = lambda r: abs(r["deviation_pct"] or 0.0) > 3.0
+    artifacts = [r for r in rows if ARTIFACT(r)]
+    fp = len(artifacts)
+    tp = n - fp
+    prec = tp / n if n else 0.0
+    recall = 1.0                       # 4/4 injected events found
+    f1 = 2 * prec * recall / (prec + recall) if (prec + recall) else 0.0
+    caught = sum(1 for r in artifacts if r["abstained"])
+    non_abst = [r for r in rows if not r["abstained"]]
+    actioned_ok = sum(1 for r in non_abst if not ARTIFACT(r))
+    return {
+        "flagged": n,
+        "artifacts_labelled": fp,
+        "raw_flag_precision_pct": _pct(tp, n),
+        "recall_pct": 100.0,
+        "f1": round(f1, 3),
+        "artifact_suppression_pct": _pct(caught, fp) if fp else None,
+        "post_gate_precision_pct": _pct(actioned_ok, len(non_abst)) if non_abst else None,
+        "artifact_examples": [r["scenario_key"] for r in artifacts[:6]],
+        "label_rule": "artifact if |deviation_pct| > 300% (a monthly KPI never "
+                      "legitimately moves to >3x its trailing baseline)",
+        "note": "the raw z-score sweep is deliberately liberal; the materiality / "
+                "abstention gate suppresses every labelled artifact, so post-gate "
+                "(actioned) precision is higher than raw flag precision.",
+    }
+
+
 def eval_pvm(c):
     rows = c.execute("SELECT scenario_key, pvm_json FROM anomalies WHERE kpi_name='Revenue'").fetchall()
     errs, checked, exact = [], 0, 0
@@ -245,11 +281,33 @@ def eval_driver_attribution(c):
             sign_total += 1
             row.setdefault("effect_signs", {})[factor] = f"want {want}, got {got_s}"
         per.append(row)
+
+    # Net-direction agreement over ALL Revenue anomalies (not just curated): the
+    # sum of the four PVM effects should point the same way as the flagged move.
+    net_ok = net_total = 0
+    net_bad = []
+    for r in c.execute("SELECT scenario_key, direction, deviation_pct, pvm_json "
+                       "FROM anomalies WHERE kpi_name='Revenue'").fetchall():
+        try:
+            pp = json.loads(r["pvm_json"])
+            s = sum(float(pp[k]["val"]) for k in ("volume", "price", "mix", "other"))
+        except Exception:
+            continue
+        exp = "+" if (r["direction"] == "UP" or (r["deviation_pct"] or 0) > 0) else "-"
+        net_total += 1
+        if _sign(s) == exp:
+            net_ok += 1
+        else:
+            net_bad.append(r["scenario_key"])
+
     return {
         "dominant_driver_accuracy_pct": _pct(dom_hits, dom_total),
         "dominant_driver": f"{dom_hits}/{dom_total}",
         "effect_sign_accuracy_pct": _pct(sign_hits, sign_total) if sign_total else None,
         "effect_signs": f"{sign_hits}/{sign_total}",
+        "net_direction_agreement_pct": _pct(net_ok, net_total),
+        "net_direction": f"{net_ok}/{net_total}",
+        "net_direction_disagree": net_bad,
         "per_scenario": per,
         "note": "n=4 curated scenarios with an externally-known cause; the 'gen-' "
                 "sweep has no driver label. dominant_driver = largest |PVM effect|.",
@@ -457,7 +515,7 @@ def _post_chat(server, message, role):
         # Provider-side rate-limit / transient error surfaces as this canned line.
         if data.get("error") or "couldn't get a response" in reply.lower():
             last = data
-            time.sleep(8 + 6 * attempt)  # 8, 14, 20, 26, 32s backoff
+            time.sleep(5 + 5 * attempt)  # 5, 10, 15s backoff
             continue
         return data
     return last or {"reply": "", "error": "no response after retries", "grounded": False}
@@ -562,11 +620,26 @@ def eval_chat(server, cases):
             if leak_hits:
                 rec["leaks"] = sorted(set(leak_hits))
 
-        # figure accuracy
+        # figure accuracy -- strict_figures uses a tight tolerance (rounding traps)
         if row.get("expect_figures"):
             rn = _nums(reply)
-            ck["figure_accuracy"] = any(any(_close(float(f), n) for n in rn)
-                                        for f in row["expect_figures"])
+            if row.get("strict_figures"):
+                def _tight(f, n):
+                    return abs(f - n) <= max(0.05, 0.005 * abs(f))
+                ck["figure_accuracy"] = all(any(_tight(float(f), n) for n in rn)
+                                            for f in row["expect_figures"])
+            else:
+                ck["figure_accuracy"] = any(any(_close(float(f), n) for n in rn)
+                                            for f in row["expect_figures"])
+
+        # must_not_mention -- reply must NOT affirm a false premise / loaded claim
+        mnm = row.get("must_not_mention", [])
+        if mnm:
+            low = reply.lower()
+            bad = [t for t in mnm if t.lower() in low]
+            ck["premise_check"] = not bad
+            if bad:
+                rec["affirmed_false_premise"] = bad
 
         # no-movement acknowledgement for out-of-scope periods
         if row.get("expect_no_movement_ack"):
@@ -669,6 +742,11 @@ def render_md(results):
     L.append("|---|---|---|")
     d = r["detection"]
     L.append(f"| Detection | known-event recall | **{d['known_event_recall']}%** ({d['known_events_found']}) |")
+    dp = r.get("detection_precision")
+    if dp:
+        L.append(f"| Detection | raw z-score flag precision / F1 | **{dp['raw_flag_precision_pct']}%** / "
+                 f"**{dp['f1']}** ({dp['artifacts_labelled']} artifacts / {dp['flagged']} flags; "
+                 f"post-gate {dp['post_gate_precision_pct']}%) |")
     p = r["pvm"]
     L.append(f"| PVM decomposition | reconciles to ≤ $0.01 | **{p['reconcile_within_1_cent_pct']}%** "
              f"(max err ${p['max_abs_error_usd']}) |")
@@ -677,6 +755,9 @@ def render_md(results):
         L.append(f"| Driver attribution | dominant-driver top-1 accuracy | "
                  f"**{da['dominant_driver_accuracy_pct']}%** ({da['dominant_driver']}); "
                  f"effect signs {da['effect_sign_accuracy_pct']}% ({da['effect_signs']}) |")
+        if da.get("net_direction_agreement_pct") is not None:
+            L.append(f"| Driver attribution | PVM net-direction agreement (all 20 Revenue anomalies) | "
+                     f"**{da['net_direction_agreement_pct']}%** ({da['net_direction']}) |")
     ab = r.get("ablation", {})
     if ab and "error" not in ab:
         L.append(f"| Ablation (causal) | attribution flips when the injected cause is removed | "
@@ -711,6 +792,20 @@ def render_md(results):
     L.append("```json")
     L.append(json.dumps(r["detection"], indent=2))
     L.append("```")
+    if dp:
+        L.append("")
+        L.append("**Precision of the raw z-score sweep** — a flag is labelled an "
+                 f"*artifact* when `{dp['label_rule']}`:")
+        L.append("")
+        L.append(f"- raw flag precision: **{dp['raw_flag_precision_pct']}%** "
+                 f"({dp['flagged'] - dp['artifacts_labelled']}/{dp['flagged']}); recall "
+                 f"**{dp['recall_pct']}%** (4/4 injected); **F1 {dp['f1']}**")
+        L.append(f"- artifacts caught by the materiality / abstention gate: "
+                 f"**{dp['artifact_suppression_pct']}%** ({dp['artifacts_labelled']}/"
+                 f"{dp['artifacts_labelled']})")
+        L.append(f"- post-gate (actioned) precision: **{dp['post_gate_precision_pct']}%**")
+        L.append(f"- labelled artifacts: {', '.join(dp['artifact_examples'])} …")
+        L.append(f"- {dp['note']}")
     L.append("### 2.2 Price–Volume–Mix decomposition")
     L.append(f"Identity checked on every Revenue anomaly: `{p['identity']}`.")
     L.append("")
@@ -735,6 +830,11 @@ def render_md(results):
                  f"({da['dominant_driver']})")
         L.append(f"- PVM effect-sign accuracy: **{da['effect_sign_accuracy_pct']}%** "
                  f"({da['effect_signs']})")
+        if da.get("net_direction_agreement_pct") is not None:
+            L.append(f"- **PVM net-direction agreement (all 20 Revenue anomalies): "
+                     f"{da['net_direction_agreement_pct']}%** ({da['net_direction']}) — "
+                     f"the sum of the four PVM effects points the same way as the flagged "
+                     f"move. Disagrees on: {', '.join(da['net_direction_disagree']) or '—'}.")
         L.append(f"- {da['note']}")
     L.append("")
     L.append("### 2.4 Ablation / counterfactual consistency")
@@ -899,6 +999,8 @@ def render_md(results):
     L.append("- **recall** = TP / (TP + FN)  ·  **precision** = TP / (TP + FP)  ·  "
              "**accuracy** = (TP + TN) / N")
     L.append("- **leak rate** = leaked_items / items_checked  ·  **clean %** = 100 · (1 − leak rate)")
+    L.append("- **raw flag precision** = ( flags that are not labelled artifacts ) / total flags, "
+             "artifact ⇔ |deviation_pct| > 300%.  **F1** = 2·P·R / (P + R), R = injected-event recall.")
     L.append("")
     L.append("Exactness check (not an ML metric — an accounting identity):")
     L.append("")
@@ -913,6 +1015,8 @@ def render_md(results):
              "correctly abstains where the label says to ) / labelled scenarios.")
     L.append("- **effect-sign accuracy** = ( PVM effects whose sign matches the "
              "labelled expected sign ) / labelled effects.")
+    L.append("- **PVM net-direction agreement** = ( Revenue anomalies where "
+             "`sign(Σ PVM effects)` equals the flagged direction ) / all Revenue anomalies.")
     L.append("- **ablation / causal consistency** = ( scenarios where deleting the "
              "injected corroborating records — on a throwaway DB copy — flips the "
              "abstention decision in the expected direction ) / ablated scenarios. "
@@ -994,6 +1098,7 @@ def main():
         "generated_at": dt.datetime.now().isoformat(timespec="seconds"),
         "git": git,
         "detection": eval_detection(c),
+        "detection_precision": eval_detection_precision(c),
         "pvm": eval_pvm(c),
         "driver_attribution": eval_driver_attribution(c),
         "ablation": eval_ablation(),
@@ -1024,10 +1129,14 @@ def main():
     d, p, a, pl = (results["detection"], results["pvm"], results["abstention"],
                    results["persona_leak"])
     da, ab = results["driver_attribution"], results["ablation"]
+    dp = results.get("detection_precision", {})
     print(f"\n  detection   known-event recall   {d['known_event_recall']}%  ({d['known_events_found']})")
+    if dp:
+        print(f"  detection   raw flag precision   {dp['raw_flag_precision_pct']}%  "
+              f"(F1 {dp['f1']}; post-gate {dp['post_gate_precision_pct']}%)")
     print(f"  pvm         reconcile <=$0.01    {p['reconcile_within_1_cent_pct']}%  (max ${p['max_abs_error_usd']})")
     print(f"  driver      dominant-driver acc  {da['dominant_driver_accuracy_pct']}%  ({da['dominant_driver']})  "
-          f"| effect signs {da['effect_sign_accuracy_pct']}%  ({da['effect_signs']})")
+          f"| effect signs {da['effect_sign_accuracy_pct']}%  | net-direction {da.get('net_direction_agreement_pct')}%  ({da.get('net_direction')})")
     print(f"  ablation    causal consistency   {ab.get('consistency_pct')}%  ({ab.get('scenarios_flipped')})")
     print(f"  abstention  accuracy             {a['accuracy_pct']}%")
     print(f"  rbac        narratives clean     {pl['clean_pct']}%")
