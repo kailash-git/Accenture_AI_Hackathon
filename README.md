@@ -1,3 +1,13 @@
+---
+title: KPI Intelligence Engine
+emoji: 📊
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # KPI Intelligence-to-Action Engine
 
 Accenture Innovation Challenge 2026, Round 2, Track 3 (BusinessIntelligence.ai)
