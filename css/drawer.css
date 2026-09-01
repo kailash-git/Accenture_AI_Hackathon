@@ -261,6 +261,59 @@
   line-height: 1.45;
 }
 
+/* Causal Root-Cause Analysis (EasyRCA) block -- mirrors .d-ev-card */
+.d-rca-tag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.d-rca-head {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.d-rca-warn { color: var(--accent-amber, #f59e0b); font-weight: 700; }
+.d-rca-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.d-rca-card.primary {
+  border-color: var(--accent-green-border, #166534);
+  background-color: var(--accent-green-dim, rgba(16, 185, 129, 0.08));
+}
+.d-rca-var {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.d-rca-eff { font-size: 11px; font-weight: 700; color: var(--text-tertiary); }
+.d-rca-mech {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.d-rca-foot {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  line-height: 1.45;
+  margin-top: 6px;
+}
+
 /* Toast Notifications */
 .app-toast-container {
   position: fixed;

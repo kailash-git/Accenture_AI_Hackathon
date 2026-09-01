@@ -1,0 +1,8432 @@
+{
+  "system": "adtributor",
+  "n_synth": 400,
+  "seed": 0,
+  "n_cases": 403,
+  "breakdown": {
+    "overall": {
+      "n": 403,
+      "dimension_accuracy": 0.738,
+      "exact_set_accuracy": 0.574,
+      "hit_or_partial": 0.664,
+      "top1_element_accuracy": 0.664,
+      "mean_element_f1": 0.634,
+      "miss_abstained_rate": 0.143,
+      "abstain_correct_rate": 1.0,
+      "distractor_pick_rate": 0.284,
+      "mean_conf_correct": 65.5,
+      "mean_conf_wrong": 35.1
+    },
+    "real": {
+      "n": 3,
+      "dimension_accuracy": 0.0,
+      "exact_set_accuracy": 0.0,
+      "hit_or_partial": 0.0,
+      "top1_element_accuracy": 0.0,
+      "mean_element_f1": 0.0,
+      "miss_abstained_rate": 0.667,
+      "abstain_correct_rate": null,
+      "distractor_pick_rate": null,
+      "mean_conf_correct": null,
+      "mean_conf_wrong": 26.6
+    },
+    "synthetic": {
+      "n": 400,
+      "dimension_accuracy": 0.745,
+      "exact_set_accuracy": 0.58,
+      "hit_or_partial": 0.67,
+      "top1_element_accuracy": 0.67,
+      "mean_element_f1": 0.64,
+      "miss_abstained_rate": 0.138,
+      "abstain_correct_rate": 1.0,
+      "distractor_pick_rate": 0.284,
+      "mean_conf_correct": 65.5,
+      "mean_conf_wrong": 35.3
+    },
+    "synthetic_with_distractor": {
+      "n": 109,
+      "dimension_accuracy": 0.789,
+      "exact_set_accuracy": 0.358,
+      "hit_or_partial": 0.56,
+      "top1_element_accuracy": 0.56,
+      "mean_element_f1": 0.492,
+      "miss_abstained_rate": 0.211,
+      "abstain_correct_rate": null,
+      "distractor_pick_rate": 0.284,
+      "mean_conf_correct": 71.7,
+      "mean_conf_wrong": 34.6
+    },
+    "synthetic_no_distractor": {
+      "n": 224,
+      "dimension_accuracy": 0.723,
+      "exact_set_accuracy": 0.688,
+      "hit_or_partial": 0.723,
+      "top1_element_accuracy": 0.723,
+      "mean_element_f1": 0.711,
+      "miss_abstained_rate": 0.103,
+      "abstain_correct_rate": null,
+      "distractor_pick_rate": null,
+      "mean_conf_correct": 84.0,
+      "mean_conf_wrong": 35.9
+    },
+    "synthetic_none": {
+      "n": 67,
+      "dimension_accuracy": 0.0,
+      "exact_set_accuracy": 0.0,
+      "hit_or_partial": 0.0,
+      "top1_element_accuracy": 0.0,
+      "mean_element_f1": 0.0,
+      "miss_abstained_rate": 0.0,
+      "abstain_correct_rate": 1.0,
+      "distractor_pick_rate": null,
+      "mean_conf_correct": 15.0,
+      "mean_conf_wrong": null
+    }
+  },
+  "rows": [
+    {
+      "case_id": "supply",
+      "kind": "real",
+      "intervention": "real",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "CA"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "pricecut",
+      "kind": "real",
+      "intervention": "real",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "FOODS_3_090"
+      ],
+      "pred_dim": "store_id",
+      "pred_elements": [
+        "TX_1",
+        "CA_3"
+      ],
+      "abstained": false,
+      "confidence": 49.9,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "billing",
+      "kind": "real",
+      "intervention": "real",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "TX"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0000",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01",
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01",
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 76.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0001",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0002",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0003",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0004",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0005",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0006",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0007",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 46.0,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0008",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0009",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0010",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 74.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0011",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01",
+        "I04"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0012",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0013",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 88.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0014",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 64.7,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0015",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0016",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 46.3,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0017",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 70.2,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0018",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 59.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0019",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 51.9,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0020",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 47.1,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0021",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0022",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00",
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07",
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0023",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0024",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 73.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0025",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I04",
+        "I03",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 49.8,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0026",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0027",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0028",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 87.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0029",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0030",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 84.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0031",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0032",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0033",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0034",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 83.1,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0035",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02",
+        "I04"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I02",
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0036",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0037",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02",
+        "I04"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I02",
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0038",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 56.8,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0039",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 85.4,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0040",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0041",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 94.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0042",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00",
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00",
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 92.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0043",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0044",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 60.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0045",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 90.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0046",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0047",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0048",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 85.4,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0049",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0050",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04",
+        "I05"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 77.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0051",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 85.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0052",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 53.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0053",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0054",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0055",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 94.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0056",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 91.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0057",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0058",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0059",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05",
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0060",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0061",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 76.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0062",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0063",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 74.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0064",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0065",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0066",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0067",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0068",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 90.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0069",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 47.0,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0070",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0071",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 67.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0072",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I08"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0073",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0074",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0075",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1",
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 55.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0076",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0077",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 76.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0078",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 91.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0079",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0080",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 72.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0081",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01",
+        "I04"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 79.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0082",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 91.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0083",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0084",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1",
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 85.4,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0085",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I08"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0086",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 69.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0087",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0088",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0089",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 82.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0090",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 82.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0091",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0092",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0093",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 46.3,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0094",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0095",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0096",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 92.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0097",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 83.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0098",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0099",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0100",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 46.9,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0101",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0102",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 70.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0103",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 78.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0104",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03",
+        "I06",
+        "I02",
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 50.0,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0105",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07",
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 47.4,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0106",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00",
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 47.5,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0107",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0108",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0109",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I09"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0110",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 89.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0111",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 57.4,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0112",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0113",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 91.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0114",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 78.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0115",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0116",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01",
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 47.4,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0117",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I08",
+        "I01",
+        "I04",
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 49.4,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0118",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01",
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01",
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0119",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0120",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0121",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 81.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0122",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0123",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 78.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0124",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0125",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1",
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 80.6,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0126",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 53.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0127",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0128",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 67.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0129",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03",
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07",
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 80.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0130",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 66.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0131",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0132",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04",
+        "I08"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I08",
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0133",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06",
+        "I00",
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 49.0,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0134",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 82.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0135",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 59.8,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0136",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 62.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0137",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0138",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I09"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0139",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 47.7,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0140",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 59.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0141",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 53.9,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0142",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04",
+        "I05"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 80.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0143",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0144",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01",
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01",
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0145",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 47.6,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0146",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0147",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0148",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 81.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0149",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 76.3,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0150",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 67.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0151",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 64.1,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0152",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0153",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0154",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0155",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0156",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0157",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06",
+        "I08"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I08",
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 77.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0158",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 52.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0159",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 91.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0160",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 50.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0161",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0",
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 91.0,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0162",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09",
+        "I08",
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 49.0,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0163",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0164",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 47.1,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0165",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 71.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0166",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06",
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 47.9,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0167",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I08"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0168",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06",
+        "I05",
+        "I02",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 50.0,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0169",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 70.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0170",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0171",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I08"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 47.3,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0172",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00",
+        "I08"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I08",
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 75.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0173",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0174",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 77.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0175",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0176",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0177",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 75.6,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0178",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0",
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 83.0,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0179",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 67.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0180",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 78.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0181",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 83.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0182",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03",
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 47.1,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0183",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 55.7,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0184",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 87.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0185",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0186",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0",
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 93.4,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0187",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 59.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0188",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 86.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0189",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0190",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01",
+        "I08"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I08",
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0191",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 46.1,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0192",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07",
+        "I09",
+        "I05",
+        "I00",
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 51.1,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0193",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 76.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0194",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 55.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0195",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 77.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0196",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 71.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0197",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 58.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0198",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 73.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0199",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 56.8,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0200",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0201",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 52.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0202",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03",
+        "I06",
+        "I01",
+        "I04",
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 51.1,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0203",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0204",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 78.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0205",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 92.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0206",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 46.6,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0207",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 59.2,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0208",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 56.3,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0209",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0210",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1",
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 55.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0211",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 57.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0212",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0213",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0214",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0215",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0216",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 46.5,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0217",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02",
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06",
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 74.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0218",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 57.7,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0219",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0220",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 72.2,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0221",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0222",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 73.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0223",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 94.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0224",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0225",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 47.2,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0226",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0227",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06",
+        "I08"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 91.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0228",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 54.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0229",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 47.6,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0230",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0231",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 84.3,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0232",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01",
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 66.1,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0233",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0234",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 73.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0235",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I03",
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 48.5,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0236",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 83.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0237",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04",
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 82.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0238",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 88.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0239",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 61.5,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0240",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 58.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0241",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0242",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 56.4,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0243",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 93.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0244",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 55.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0245",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0246",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0247",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0248",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 79.0,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0249",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0250",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0251",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0252",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0253",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 53.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0254",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03",
+        "I08"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 82.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0255",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0256",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 75.1,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0257",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0258",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0259",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 47.2,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0260",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0261",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0262",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0263",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05",
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0264",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I04",
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 48.9,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0265",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0266",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0267",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0268",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 82.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0269",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I08"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0270",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 76.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0271",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 73.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0272",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0273",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 86.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0274",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 78.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0275",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05",
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09",
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0276",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04",
+        "I08"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0277",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0278",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0279",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I08"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 82.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0280",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 91.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0281",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I00",
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 48.6,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0282",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 88.4,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0283",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0284",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 57.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0285",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00",
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 69.3,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0286",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0287",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0288",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 87.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0289",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 78.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0290",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 46.1,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0291",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 46.5,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0292",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0293",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0294",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05",
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 47.5,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0295",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 83.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0296",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 70.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0297",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0298",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0299",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 51.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0300",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0",
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 91.0,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0301",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 69.5,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0302",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0303",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 68.2,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0304",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 46.1,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0305",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 79.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0306",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I04",
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 68.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0307",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 46.2,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0308",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 72.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0309",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0310",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 84.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0311",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0312",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 71.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0313",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0314",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 75.3,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0315",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0316",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 66.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0317",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0318",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0319",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0320",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1",
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 91.4,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0321",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0322",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 59.2,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0323",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0324",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00",
+        "I01"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00",
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0325",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 47.5,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0326",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 68.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0327",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03",
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07",
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 75.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0328",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 86.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0329",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06",
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06",
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 79.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0330",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0331",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 51.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0332",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 46.7,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0333",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 78.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0334",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07"
+      ],
+      "abstained": false,
+      "confidence": 79.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0335",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 67.1,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0336",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0337",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0338",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0339",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 79.8,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0340",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 76.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0341",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 74.9,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0342",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0343",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 93.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0344",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 46.6,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0345",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0346",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 76.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0347",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09",
+        "I03",
+        "I04"
+      ],
+      "abstained": false,
+      "confidence": 48.3,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0348",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0349",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0350",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01",
+        "I07",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 48.7,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0351",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0352",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00",
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00",
+        "I09"
+      ],
+      "abstained": false,
+      "confidence": 91.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0353",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02",
+        "I07"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07",
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 81.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0354",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03",
+        "I09",
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 48.8,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0355",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 46.3,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0356",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0"
+      ],
+      "abstained": false,
+      "confidence": 83.9,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0357",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0358",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I00"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 86.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0359",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 72.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0360",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I07"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0361",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 81.5,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0362",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 47.2,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0363",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0364",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 70.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0365",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R1"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0366",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0367",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0368",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0369",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 60.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0370",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 48.0,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0371",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 57.5,
+      "outcome": "wrong",
+      "dim_ok": true,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0372",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 78.6,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0373",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0374",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0375",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0376",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0377",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0378",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 93.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0379",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 47.1,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0380",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0"
+      ],
+      "pred_dim": "state_id",
+      "pred_elements": [
+        "R0",
+        "R1"
+      ],
+      "abstained": false,
+      "confidence": 85.0,
+      "outcome": "partial",
+      "dim_ok": true,
+      "element_f1": 0.6666666666666666,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": true
+    },
+    {
+      "case_id": "syn0381",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 74.4,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0382",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07",
+        "I00"
+      ],
+      "abstained": false,
+      "confidence": 47.6,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0383",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01",
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03",
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0384",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C2",
+        "C1"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0385",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I07",
+        "I03",
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 48.3,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0386",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 46.1,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0387",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I05",
+        "I09"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I09",
+        "I05"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0388",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I01",
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 48.3,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0389",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I01",
+        "I06",
+        "I08"
+      ],
+      "abstained": false,
+      "confidence": 48.5,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0390",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I06"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 52.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0391",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C0",
+        "C1"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C0"
+      ],
+      "abstained": false,
+      "confidence": 68.2,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0392",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I01",
+        "I04"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I04",
+        "I01"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0393",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1"
+      ],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "miss-abstained",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0394",
+      "kind": "synthetic",
+      "intervention": "distractor",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I02"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I02"
+      ],
+      "abstained": false,
+      "confidence": 54.7,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": true,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0395",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "item_id",
+      "gold_elements": [
+        "I03"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I03"
+      ],
+      "abstained": false,
+      "confidence": 78.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0396",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0397",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "cat_id",
+      "gold_elements": [
+        "C1",
+        "C2"
+      ],
+      "pred_dim": "cat_id",
+      "pred_elements": [
+        "C1",
+        "C2"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "exact",
+      "dim_ok": true,
+      "element_f1": 1.0,
+      "top1_element": true,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0398",
+      "kind": "synthetic",
+      "intervention": "shock",
+      "gold_dim": "state_id",
+      "gold_elements": [
+        "R0",
+        "R1"
+      ],
+      "pred_dim": "item_id",
+      "pred_elements": [
+        "I02",
+        "I05",
+        "I07",
+        "I06"
+      ],
+      "abstained": false,
+      "confidence": 49.9,
+      "outcome": "wrong",
+      "dim_ok": false,
+      "element_f1": 0.0,
+      "top1_element": false,
+      "has_distractor": false,
+      "hit_distractor": false
+    },
+    {
+      "case_id": "syn0399",
+      "kind": "synthetic",
+      "intervention": "none",
+      "gold_dim": null,
+      "gold_elements": [],
+      "pred_dim": null,
+      "pred_elements": [],
+      "abstained": true,
+      "confidence": 15.0,
+      "outcome": "abstain-correct",
+      "dim_ok": null,
+      "element_f1": null,
+      "top1_element": null,
+      "has_distractor": false,
+      "hit_distractor": false
+    }
+  ]
+}
