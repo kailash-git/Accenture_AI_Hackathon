@@ -1297,6 +1297,15 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
 
+    def list_directory(self, path):
+        self.send_error(404, "Not Found")
+        return None
+
+    def do_HEAD(self):
+        if urlparse(self.path).path.rstrip('/') == '':
+            self.path = '/dashboard.html'
+        return http.server.SimpleHTTPRequestHandler.do_HEAD(self)
+
     def do_GET(self):
         global _REQUEST_COUNT
         _REQUEST_COUNT += 1
@@ -1304,6 +1313,10 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed.path.rstrip('/')
         query = parse_qs(parsed.query)
         role = _resolve_role(self.headers, query)
+
+        if path in ('', '/'):
+            self.path = '/dashboard.html'
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
         if path == '/api/health':
             self._send_json({
