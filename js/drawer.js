@@ -154,7 +154,7 @@ function renderDrawerRca(rca) {
     const win = rca.window ? `${rca.window[0]} → ${rca.window[1]}` : '';
     const rows = rca.rootCauses.map((rc, i) => `
       <div class="d-rca-card${i === 0 ? ' primary' : ''}">
-        <div class="d-rca-var">${i === 0 ? '★ ' : ''}${rc.variable}
+        <div class="d-rca-var">${i === 0 ? 'top: ' : ''}${rc.variable}
           <span class="d-rca-eff">${rc.effect}σ</span>
         </div>
         <div class="d-rca-mech">${MECH_LABEL[rc.mechanism] || rc.mechanism}</div>
@@ -192,7 +192,7 @@ function renderDrawerAttribution(attr) {
       const els = (c.elements || []).join(', ');
       return `
         <div class="d-rca-card${i === 0 ? ' primary' : ''}">
-          <div class="d-rca-var">${i === 0 ? '★ ' : ''}${dim} = ${els}
+          <div class="d-rca-var">${i === 0 ? 'top: ' : ''}${dim} = ${els}
             <span class="d-rca-eff">EP ${Math.round((c.explanatory_power || 0) * 100)}%</span>
           </div>
           <div class="d-rca-mech">surprise ${(c.surprise || 0).toFixed(4)} (Jensen-Shannon)</div>

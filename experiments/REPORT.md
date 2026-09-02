@@ -23,7 +23,7 @@ heuristic-confidence approach?
 | gold var anywhere in output | 0.31 | **0.91** |
 | false-attribution rate | 0.29 | **0.004** |
 | MRR | 0.31 | **0.78** |
-| real scenarios (supply / pricecut / billing / sparse) | supply ✓, pricecut ✗, billing abstain, sparse ✓ | supply ✓, pricecut ✓, billing abstain, sparse ✓ |
+| real scenarios (supply / pricecut / billing / sparse) | supply hit, pricecut miss, billing abstain, sparse abstain | supply hit, pricecut hit, billing abstain, sparse abstain |
 | mean confidence — correct / wrong | 51 / 50 | **71 / 22** |
 
 The `billing` scenario is the deliberately-conflicting case (logged revenue
@@ -80,10 +80,10 @@ same direction and magnitude.)
 
 | Scenario | Gold | Baseline | EasyRCA |
 |---|---|---|---|
-| Port-of-Seattle stockout (`supply`) | supply | `fill_rate` ✅ | `stockout_days` ✅ |
-| 25% price cut (`pricecut`) | `sell_price` | `units` ❌ | `sell_price` ✅ |
+| Port-of-Seattle stockout (`supply`) | supply | `fill_rate` (hit) | `stockout_days` (hit) |
+| 25% price cut (`pricecut`) | `sell_price` | `units` (miss) | `sell_price` (hit) |
 | Register-overcharge billing bug (`billing`) | price / sentiment | `units` (abstain) | *(abstains)* |
-| Cold start, no sales (`sparse`) | *(abstain)* | abstain ✅ | abstain ✅ |
+| Cold start, no sales (`sparse`) | *(abstain)* | abstain (ok) | abstain (ok) |
 
 - **Price cut** is the cleanest win. The cut lands 2013-08-18; the daily
   detector fires later when the price has *already* been low for days, so the
