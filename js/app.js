@@ -69,19 +69,29 @@ async function loadAnomalyListFromBackend() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Check health, then load the real anomaly list if the backend is reachable.
+  // 1. Check backend health.
   if (typeof apiClient !== 'undefined') {
     await apiClient.checkHealth();
-    await loadAnomalyListFromBackend();
   }
+
+  const streaming = typeof apiClient !== 'undefined' && apiClient.isConnected
+    && typeof startAnomalyStream === 'function';
 
   // 1.5 Populate Period Dropdown & Render Sidebar Cards dynamically
   populateCalendarPeriodSelect();
-  renderSidebarCards();
 
-  // 2. Initialize Default Scenario
-  const firstKey = ANOMALY_DATASET.supply ? 'supply' : Object.keys(ANOMALY_DATASET)[0];
-  await selectScenario(firstKey);
+  if (streaming) {
+    // Live ticker: anomalies arrive from /api/anomalies/stream a few at a time,
+    // each already role-masked by the server, and are prepended to the deck.
+    // startAnomalyStream() clears the static placeholder cards and auto-selects
+    // the first arrival.
+    startAnomalyStream();
+  } else {
+    // Offline / no backend: fall back to the static ANOMALY_DATASET one-shot.
+    renderSidebarCards();
+    const firstKey = ANOMALY_DATASET.supply ? 'supply' : Object.keys(ANOMALY_DATASET)[0];
+    await selectScenario(firstKey);
+  }
 
   // 2.5 Live telemetry panel
   refreshTelemetryPanel();
@@ -1388,27 +1398,38 @@ function renderSidebarCards() {
     return true;
   });
   
-  const cardsHtml = filteredKeys.map(key => {
-    const anom = ANOMALY_DATASET[key];
-    const isActive = APP_STATE.activeAnomalyKey === key ? 'active' : '';
-    
-    let iconSvg = '';
-    if (key.includes('supply')) {
-      iconSvg = `<svg viewBox="0 0 24 24" style="stroke: var(--accent-blue)"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`;
-    } else if (key.includes('billing')) {
-      iconSvg = `<svg viewBox="0 0 24 24" style="stroke: var(--accent-amber)"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-    } else {
-      iconSvg = `<svg viewBox="0 0 24 24" style="stroke: var(--accent-green)"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`;
-    }
-    
-    const title = anom.title || (anom.kpi_name + ' ' + (anom.deviation_pct < 0 ? 'Drop' : 'Lift'));
-    const subtitle = (anom.item_id ? anom.item_id : anom.sku) + ' · ' + (anom.state_id ? anom.state_id : anom.region) + ' · ' + (anom.period_start ? anom.period_start.substring(0, 7) : anom.date);
-    const zScoreStr = typeof anom.z_score === 'number' ? anom.z_score.toFixed(2) : (anom.zScore || '2.00');
-    const devStr = typeof anom.deviation_pct === 'number' ? (anom.deviation_pct * 100).toFixed(1) + '%' : (anom.deviation || '0.0%');
-    const status = anom.status || 'active';
-    const confidence = anom.confidence || 90;
-    
-    return `
+  const cardsHtml = filteredKeys.map(key => scenarioCardHtml(key, ANOMALY_DATASET[key])).join('');
+
+  // Remove existing scenario card elements
+  container.querySelectorAll('.scenario-card').forEach(el => el.remove());
+
+  // Append new scenario cards
+  container.insertAdjacentHTML('beforeend', cardsHtml);
+}
+
+/* Markup for a single deck card. Shared by renderSidebarCards() (one-shot
+   render) and js/stream.js (live ticker prepend) so the two stay identical. */
+function scenarioCardHtml(key, anom) {
+  anom = anom || {};
+  const isActive = APP_STATE.activeAnomalyKey === key ? 'active' : '';
+
+  let iconSvg = '';
+  if (key.includes('supply')) {
+    iconSvg = `<svg viewBox="0 0 24 24" style="stroke: var(--accent-blue)"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`;
+  } else if (key.includes('billing')) {
+    iconSvg = `<svg viewBox="0 0 24 24" style="stroke: var(--accent-amber)"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+  } else {
+    iconSvg = `<svg viewBox="0 0 24 24" style="stroke: var(--accent-green)"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`;
+  }
+
+  const title = anom.title || ((anom.kpi_name || 'KPI') + ' ' + (anom.deviation_pct < 0 ? 'Drop' : 'Lift'));
+  const subtitle = (anom.item_id ? anom.item_id : anom.sku) + ' · ' + (anom.state_id ? anom.state_id : anom.region) + ' · ' + (anom.period_start ? anom.period_start.substring(0, 7) : anom.date);
+  const zScoreStr = typeof anom.z_score === 'number' ? anom.z_score.toFixed(2) : (anom.zScore || '2.00');
+  const devStr = typeof anom.deviation_pct === 'number' ? (anom.deviation_pct * 100).toFixed(1) + '%' : (anom.deviation || '0.0%');
+  const status = anom.status || 'active';
+  const confidence = anom.confidence || 90;
+
+  return `
       <div class="scenario-card ${isActive}" data-scenario="${key}" data-status="${status}" onclick="selectScenario('${key}')">
         <div class="sc-top">
           <div class="sc-icon">${iconSvg}</div>
@@ -1431,13 +1452,6 @@ function renderSidebarCards() {
         </div>
       </div>
     `;
-  }).join('');
-  
-  // Remove existing scenario card elements
-  container.querySelectorAll('.scenario-card').forEach(el => el.remove());
-
-  // Append new scenario cards
-  container.insertAdjacentHTML('beforeend', cardsHtml);
 }
 
 /* Extract Unique Year-Months and Populate the Selector Dropdown */

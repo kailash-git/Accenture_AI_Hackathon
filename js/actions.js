@@ -372,7 +372,10 @@ async function setAppRole(roleKey) {
 
   // Re-fetch the full anomaly list + current scenario detail under the new role so
   // every rendered field (narrative, action, masking) reflects real server enforcement.
-  if (typeof loadAnomalyListFromBackend === 'function') {
+  if (typeof STREAM_STATE !== 'undefined' && STREAM_STATE.running && typeof resetAnomalyStream === 'function') {
+    // Live deck: re-stream every card from the top under the new role's masking.
+    resetAnomalyStream();
+  } else if (typeof loadAnomalyListFromBackend === 'function') {
     await loadAnomalyListFromBackend();
     renderSidebarCards();
   }
