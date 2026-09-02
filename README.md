@@ -3,6 +3,9 @@
 Accenture Innovation Challenge 2026, Round 2, Track 3 (BusinessIntelligence.ai)
 Team Stack Overflowed, IIT Madras
 
+**Live demo:** <https://kpi-hack.onrender.com> — hosted on a free tier, so the first request after
+an idle period takes about 30 seconds to wake the instance.
+
 ---
 
 ## Abstract
