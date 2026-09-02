@@ -1,129 +1,168 @@
 /* ==========================================================================
-   ANOMALY REPORT  --  short standalone HTML export of the current anomaly,
-   with two inline-SVG charts. Client-side only, no backend, no libraries.
+   ANOMALY REPORT  --  client-side PDF export of the current anomaly, with two
+   small vector charts drawn straight into the PDF. Uses jsPDF (loaded in
+   dashboard.html); falls back to a standalone HTML file if jsPDF is missing.
    ========================================================================== */
 
-function _rptEsc(s) {
-  return String(s == null ? '' : s).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
-}
-function _rptMoney(v) {
-  return `${v < 0 ? '-' : ''}$${Math.abs(Math.round(v)).toLocaleString()}`;
-}
-
-/* Diverging horizontal bar chart (values around a centre 0 line). */
-function _rptDivergingBars(rows, w = 460) {
-  const max = Math.max(...rows.map(r => Math.abs(r.val)), 1);
-  const labelW = 96, zero = labelW + (w - labelW) / 2, span = (w - labelW) / 2 - 40;
-  const bars = rows.map((r, i) => {
-    const bw = (Math.abs(r.val) / max) * span;
-    const x = r.val >= 0 ? zero : zero - bw;
-    const fill = r.val < 0 ? '#ef4444' : (r.val > 0 ? '#10b981' : '#94a3b8');
-    const tx = r.val >= 0 ? x + bw + 4 : x - 4;
-    return `<g transform="translate(0,${i * 28})">
-      <text x="0" y="15" font-size="12" fill="#555">${_rptEsc(r.label)}</text>
-      <rect x="${x.toFixed(1)}" y="3" width="${Math.max(bw, 1).toFixed(1)}" height="15" rx="3" fill="${fill}"/>
-      <text x="${tx.toFixed(1)}" y="15" text-anchor="${r.val >= 0 ? 'start' : 'end'}" font-size="11" fill="#222">${r.disp}</text>
-    </g>`;
-  }).join('');
-  return `<svg width="${w}" height="${rows.length * 28 + 4}" viewBox="0 0 ${w} ${rows.length * 28 + 4}">
-    <line x1="${zero}" y1="0" x2="${zero}" y2="${rows.length * 28}" stroke="#e2e2e2"/>${bars}</svg>`;
-}
-
-/* Simple 0-100 confidence bar. */
-function _rptConfidenceBar(pct) {
-  const p = Math.max(0, Math.min(100, pct || 0));
-  const fill = p >= 75 ? '#10b981' : (p >= 50 ? '#f59e0b' : '#ef4444');
-  return `<svg width="460" height="26" viewBox="0 0 460 26">
-    <rect x="0" y="6" width="360" height="12" rx="6" fill="#eee"/>
-    <rect x="0" y="6" width="${(p / 100 * 360).toFixed(1)}" height="12" rx="6" fill="${fill}"/>
-    <text x="372" y="16" font-size="12" fill="#222">${p.toFixed(0)}%</text></svg>`;
+function _rptData() {
+  const anom = (typeof ANOMALY_DATASET !== 'undefined' && ANOMALY_DATASET[APP_STATE.activeAnomalyKey]) || null;
+  if (!anom) return null;
+  const DIM = { item_id: 'item', state_id: 'region', store_id: 'store', cat_id: 'category' };
+  const rc = anom.rootCause || {};
+  const at = anom.attribution || {};
+  return {
+    anom,
+    status: (anom.status || 'active').replace(/^./, c => c.toUpperCase()),
+    confidence: Math.round(anom.confidence || 0),
+    pvm: [
+      ['Volume', anom.pvm && anom.pvm.volume], ['Price', anom.pvm && anom.pvm.price],
+      ['Mix', anom.pvm && anom.pvm.mix], ['Other', anom.pvm && anom.pvm.other]
+    ].filter(([, d]) => d && typeof d.val === 'number').map(([label, d]) => ({ label, val: d.val })),
+    rcLines: (rc.available && Array.isArray(rc.rootCauses) && rc.rootCauses.length)
+      ? rc.rootCauses.slice(0, 3).map(x => `${x.variable} - ${String(x.mechanism || '').replace(/_/g, ' ')} (${Number(x.effect).toFixed(1)} sigma)`)
+      : [rc.reason || 'Not available.'],
+    atLines: (at.available && Array.isArray(at.candidates) && at.candidates.length)
+      ? at.candidates.slice(0, 3).map(c => `${DIM[c.dimension] || c.dimension} = ${(c.elements || []).join(', ')}  (EP ${Math.round((c.explanatory_power || 0) * 100)}%)`)
+      : [at.reason || 'Not available.'],
+    evCount: Array.isArray(anom.evidence) ? anom.evidence.length : 0,
+    now: new Date().toISOString().replace('T', ' ').slice(0, 16) + ' UTC'
+  };
 }
 
 function downloadAnomalyReport() {
-  const anom = (typeof ANOMALY_DATASET !== 'undefined' && ANOMALY_DATASET[APP_STATE.activeAnomalyKey]) || null;
-  if (!anom) { if (typeof showAppToast === 'function') showAppToast('No anomaly selected'); return; }
+  const d = _rptData();
+  if (!d) { if (typeof showAppToast === 'function') showAppToast('No anomaly selected'); return; }
 
-  const now = new Date().toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
-  const status = (anom.status || 'active').replace(/^./, c => c.toUpperCase());
+  const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
+  if (!jsPDFCtor) { _downloadAnomalyReportHtml(d); return; }
 
-  // Chart 1 -- PVM decomposition (skip if masked to null for this role)
-  const pvm = anom.pvm || {};
-  const pvmRows = [
-    ['Volume', pvm.volume], ['Price', pvm.price], ['Mix', pvm.mix], ['Other', pvm.other]
-  ].filter(([, d]) => d && typeof d.val === 'number')
-    .map(([label, d]) => ({ label, val: d.val, disp: `${d.val >= 0 ? '+' : '-'}$${Math.abs(Math.round(d.val)).toLocaleString()}` }));
-  const pvmChart = pvmRows.length
-    ? _rptDivergingBars(pvmRows)
-    : '<div style="color:#999;font-size:12px">Not available for this KPI / role.</div>';
+  const a = d.anom;
+  const doc = new jsPDFCtor({ unit: 'pt', format: 'a4' });
+  const M = 48, W = doc.internal.pageSize.getWidth(), RIGHT = W - M, CW = RIGHT - M;
+  let y = M;
 
-  // EasyRCA root cause
-  const rc = anom.rootCause || {};
-  const rcList = (rc.available && Array.isArray(rc.rootCauses) && rc.rootCauses.length)
-    ? '<ul>' + rc.rootCauses.slice(0, 3).map(x =>
-        `<li><b>${_rptEsc(x.variable)}</b> &mdash; ${_rptEsc(String(x.mechanism || '').replace(/_/g, ' '))} (${Number(x.effect).toFixed(1)}&sigma;)</li>`).join('') + '</ul>'
-    : `<div style="color:#777;font-size:13px">${_rptEsc(rc.reason || 'Not available.')}</div>`;
+  const need = h => { if (y + h > doc.internal.pageSize.getHeight() - M) { doc.addPage(); y = M; } };
+  const heading = t => { need(28); y += 10; doc.setFont('helvetica', 'bold').setFontSize(9).setTextColor(110);
+    doc.text(t.toUpperCase(), M, y); doc.setDrawColor(225).line(M, y + 4, RIGHT, y + 4); y += 16; };
+  const para = (t, opt = {}) => {
+    doc.setFont('helvetica', opt.bold ? 'bold' : 'normal').setFontSize(opt.size || 10)
+      .setTextColor(opt.color != null ? opt.color : 40);
+    const lines = doc.splitTextToSize(String(t || ''), CW);
+    need(lines.length * (opt.lh || 13));
+    doc.text(lines, M, y); y += lines.length * (opt.lh || 13) + (opt.gap || 4);
+  };
+  const list = arr => {
+    doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(40);
+    arr.forEach(item => {
+      const lines = doc.splitTextToSize(item, CW - 12);
+      need(lines.length * 13);
+      doc.text('•', M, y);
+      doc.text(lines, M + 12, y); y += lines.length * 13 + 2;
+    });
+    y += 4;
+  };
 
-  // Adtributor slice attribution
-  const at = anom.attribution || {};
-  const DIM = { item_id: 'item', state_id: 'region', store_id: 'store', cat_id: 'category' };
-  const atList = (at.available && Array.isArray(at.candidates) && at.candidates.length)
-    ? '<ul>' + at.candidates.slice(0, 3).map(c =>
-        `<li><b>${_rptEsc(DIM[c.dimension] || c.dimension)} = ${_rptEsc((c.elements || []).join(', '))}</b> &mdash; EP ${Math.round((c.explanatory_power || 0) * 100)}%</li>`).join('') + '</ul>'
-    : `<div style="color:#777;font-size:13px">${_rptEsc(at.reason || 'Not available.')}</div>`;
+  // ---- header ----
+  doc.setFont('helvetica', 'bold').setFontSize(16).setTextColor(20);
+  doc.text(doc.splitTextToSize(a.title || 'Anomaly', CW), M, y); y += 22;
+  doc.setFont('helvetica', 'normal').setFontSize(9).setTextColor(110);
+  doc.text([`${a.sku || ''}  ·  ${a.region || ''}  ·  ${a.date || ''}`,
+    `${d.status}  ·  ${d.confidence}% confidence${a.abstained ? '  ·  abstained' : ''}`].join('    '), M, y);
+  y += 16;
+  para(a.headline || '', { bold: true, size: 11, gap: 2 });
+  para(a.summary || '', { color: 70, size: 9.5, lh: 12 });
 
-  const evCount = Array.isArray(anom.evidence) ? anom.evidence.length : 0;
-  const syn = anom.synthesis || {};
-  const act = anom.recommendedAction;
+  // ---- confidence bar ----
+  heading('Detection confidence');
+  need(20);
+  const p = Math.max(0, Math.min(100, d.confidence));
+  const cFill = p >= 75 ? [16, 185, 129] : (p >= 50 ? [245, 158, 11] : [239, 68, 68]);
+  doc.setFillColor(238).roundedRect(M, y, 320, 10, 5, 5, 'F');
+  doc.setFillColor(...cFill).roundedRect(M, y, 320 * p / 100, 10, 5, 5, 'F');
+  doc.setFont('helvetica', 'bold').setFontSize(10).setTextColor(30).text(`${p}%`, M + 330, y + 9);
+  y += 20;
 
-  const html = `<!doctype html><meta charset="utf-8"><title>Anomaly Report &mdash; ${_rptEsc(anom.title)}</title>
-<style>body{font:14px/1.55 -apple-system,Segoe UI,Roboto,sans-serif;color:#1a1a1a;max-width:680px;margin:32px auto;padding:0 18px}
-h1{font-size:19px;margin:0 0 2px}.sub{color:#777;font-size:12px;margin-bottom:6px}
-.meta{font-size:12px;color:#555;margin-bottom:18px}
-h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#666;margin:22px 0 6px;border-top:1px solid #eee;padding-top:14px}
-p{margin:6px 0}ul{margin:6px 0;padding-left:20px}li{margin:2px 0}
-.state{margin:6px 0 4px;font-size:13px;color:#333}
-.syn-title{font-weight:700}.syn-body{color:#444;font-size:13px}
-footer{color:#999;font-size:11px;margin-top:26px;border-top:1px solid #eee;padding-top:12px}</style>
+  // ---- PVM diverging bars ----
+  heading('Price-Volume-Mix decomposition');
+  if (d.pvm.length) {
+    const max = Math.max(...d.pvm.map(r => Math.abs(r.val)), 1);
+    const labelW = 70, zero = M + labelW + (CW - labelW) / 2, span = (CW - labelW) / 2 - 46;
+    need(d.pvm.length * 20 + 6);
+    doc.setDrawColor(225).line(zero, y - 2, zero, y - 2 + d.pvm.length * 20);
+    d.pvm.forEach(r => {
+      const bw = Math.abs(r.val) / max * span;
+      const x = r.val >= 0 ? zero : zero - bw;
+      const fill = r.val < 0 ? [239, 68, 68] : (r.val > 0 ? [16, 185, 129] : [148, 163, 184]);
+      doc.setFont('helvetica', 'normal').setFontSize(9).setTextColor(90).text(r.label, M, y + 10);
+      doc.setFillColor(...fill).roundedRect(x, y + 2, Math.max(bw, 1), 11, 2, 2, 'F');
+      const lbl = `${r.val >= 0 ? '+' : '-'}$${Math.abs(Math.round(r.val)).toLocaleString()}`;
+      doc.setTextColor(40);
+      if (r.val >= 0) doc.text(lbl, x + bw + 4, y + 11);
+      else doc.text(lbl, x - 4, y + 11, { align: 'right' });
+      y += 20;
+    });
+    y += 4;
+  } else {
+    para('Not available for this KPI / role.', { color: 150, size: 9 });
+  }
 
-<h1>${_rptEsc(anom.title)}</h1>
-<div class="meta">${_rptEsc(anom.sku || '')} &middot; ${_rptEsc(anom.region || '')} &middot; ${_rptEsc(anom.date || '')}
- &middot; ${_rptEsc(status)} &middot; ${Math.round(anom.confidence || 0)}% confidence${anom.abstained ? ' &middot; abstained' : ''}</div>
+  heading('Root cause - upstream variable (EasyRCA)');
+  list(d.rcLines);
+  heading('Attribution - responsible slice (Adtributor)');
+  list(d.atLines);
 
-<p class="state"><b>${_rptEsc(anom.headline || '')}</b></p>
-<p class="syn-body">${_rptEsc(anom.summary || '')}</p>
+  const syn = a.synthesis || {};
+  heading('Root cause synthesis');
+  para(syn.title || '', { bold: true, size: 10 });
+  para(syn.body || '', { color: 70, size: 9.5, lh: 12 });
 
-<h2>Detection confidence</h2>
-${_rptConfidenceBar(anom.confidence)}
+  const act = a.recommendedAction;
+  heading('Recommended action');
+  if (act) {
+    para(act.title || '', { bold: true, size: 10 });
+    para(act.expectedImpact || act.expected_impact || '', { color: 70, size: 9.5, lh: 12 });
+  } else {
+    para((a.abstention && a.abstention.reason) || 'Engine abstained - no automated recommendation.', { color: 70, size: 9.5 });
+  }
 
-<h2>Price&ndash;Volume&ndash;Mix decomposition</h2>
-${pvmChart}
+  y += 8; need(24);
+  doc.setDrawColor(230).line(M, y, RIGHT, y); y += 12;
+  doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(150);
+  doc.text(doc.splitTextToSize(
+    `Generated ${d.now} from the KPI Intelligence Engine  ·  ${d.evCount} corroborating evidence record(s)  ·  figures are engine output, deterministic where the backend is reachable.`,
+    CW), M, y);
 
-<h2>Root cause &mdash; upstream variable (EasyRCA)</h2>
-${rcList}
-
-<h2>Attribution &mdash; responsible slice (Adtributor)</h2>
-${atList}
-
-<h2>Root cause synthesis</h2>
-<p class="syn-title">${_rptEsc(syn.title || '')}</p>
-<p class="syn-body">${_rptEsc(syn.body || '')}</p>
-
-<h2>Recommended action</h2>
-${act
-  ? `<p><b>${_rptEsc(act.title || '')}</b></p><p class="syn-body">${_rptEsc(act.expectedImpact || act.expected_impact || '')}</p>`
-  : `<p class="syn-body">${_rptEsc((anom.abstention && anom.abstention.reason) || 'Engine abstained &mdash; no automated recommendation.')}</p>`}
-
-<footer>Generated ${now} from the KPI Intelligence Engine &middot; ${evCount} corroborating evidence record(s) &middot; figures are engine output, deterministic where the backend is reachable.</footer>`;
-
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
   const slug = (APP_STATE.activeAnomalyKey || 'anomaly').replace(/[^a-z0-9]+/gi, '-');
-  a.href = url;
-  a.download = `anomaly-report-${slug}-${now.slice(0, 10)}.html`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  doc.save(`anomaly-report-${slug}-${d.now.slice(0, 10)}.pdf`);
+  if (typeof showAppToast === 'function') showAppToast('Anomaly report downloaded (PDF)');
+}
+
+/* Fallback when jsPDF failed to load (offline / CDN blocked). */
+function _downloadAnomalyReportHtml(d) {
+  const a = d.anom, esc = s => String(s == null ? '' : s).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+  const rows = arr => '<ul>' + arr.map(x => `<li>${esc(x)}</li>`).join('') + '</ul>';
+  const pvm = d.pvm.map(r => `<tr><td>${esc(r.label)}</td><td>${r.val >= 0 ? '+' : '-'}$${Math.abs(Math.round(r.val)).toLocaleString()}</td></tr>`).join('');
+  const syn = a.synthesis || {}, act = a.recommendedAction;
+  const html = `<!doctype html><meta charset="utf-8"><title>Anomaly Report - ${esc(a.title)}</title>
+<style>body{font:14px/1.55 -apple-system,Segoe UI,Roboto,sans-serif;color:#1a1a1a;max-width:680px;margin:32px auto;padding:0 18px}
+h1{font-size:19px;margin:0 0 4px}.meta{color:#666;font-size:12px;margin-bottom:16px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#666;margin:22px 0 6px;border-top:1px solid #eee;padding-top:14px}
+table{border-collapse:collapse;width:100%}td{padding:3px 8px;border-bottom:1px solid #eee}td:last-child{text-align:right}
+footer{color:#999;font-size:11px;margin-top:24px;border-top:1px solid #eee;padding-top:12px}</style>
+<h1>${esc(a.title)}</h1>
+<div class="meta">${esc(a.sku || '')} &middot; ${esc(a.region || '')} &middot; ${esc(a.date || '')} &middot; ${esc(d.status)} &middot; ${d.confidence}% confidence${a.abstained ? ' &middot; abstained' : ''}</div>
+<p><b>${esc(a.headline || '')}</b></p><p>${esc(a.summary || '')}</p>
+<h2>Price-Volume-Mix decomposition</h2><table>${pvm || '<tr><td colspan=2>Not available.</td></tr>'}</table>
+<h2>Root cause - upstream variable (EasyRCA)</h2>${rows(d.rcLines)}
+<h2>Attribution - responsible slice (Adtributor)</h2>${rows(d.atLines)}
+<h2>Root cause synthesis</h2><p><b>${esc(syn.title || '')}</b></p><p>${esc(syn.body || '')}</p>
+<h2>Recommended action</h2><p>${act ? `<b>${esc(act.title || '')}</b><br>${esc(act.expectedImpact || act.expected_impact || '')}` : esc((a.abstention && a.abstention.reason) || 'Engine abstained.')}</p>
+<footer>Generated ${d.now} &middot; ${d.evCount} evidence record(s) &middot; jsPDF unavailable, exported as HTML.</footer>`;
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  const link = document.createElement('a');
+  const slug = (APP_STATE.activeAnomalyKey || 'anomaly').replace(/[^a-z0-9]+/gi, '-');
+  link.href = url; link.download = `anomaly-report-${slug}-${d.now.slice(0, 10)}.html`;
+  document.body.appendChild(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  if (typeof showAppToast === 'function') showAppToast('Anomaly report downloaded');
+  if (typeof showAppToast === 'function') showAppToast('Anomaly report downloaded (HTML - PDF lib unavailable)');
 }
