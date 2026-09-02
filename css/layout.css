@@ -425,41 +425,6 @@ body.sidebar-collapsed .sidebar-panel {
   background-color: rgba(34, 197, 94, 0.22);
 }
 
-/* Live-stream deck indicator (js/stream.js) */
-.deck-live-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-left: 8px;
-  padding: 1px 6px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  border-radius: var(--radius-xs);
-  background-color: var(--accent-green-dim);
-  color: var(--accent-green);
-  border: 1px solid var(--accent-green-border);
-}
-
-.deck-live-badge.is-done {
-  background-color: transparent;
-  color: var(--text-tertiary);
-  border-color: var(--border-subtle);
-}
-
-.deck-live-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background-color: var(--accent-green);
-  animation: deck-live-pulse 1.4s ease-in-out infinite;
-}
-
-@keyframes deck-live-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
-}
-
 /* Scenario Cards */
 .scenario-card {
   background-color: transparent;
@@ -470,22 +435,6 @@ body.sidebar-collapsed .sidebar-panel {
   cursor: pointer;
   transition: all var(--dur-medium) var(--ease-standard);
   position: relative;
-}
-
-/* Newly streamed card: starts nudged left + transparent, then transitions in */
-.scenario-card.sc-arriving {
-  opacity: 0;
-  transform: translateX(-16px);
-}
-
-/* Brief highlight after a streamed card settles */
-.scenario-card.sc-fresh {
-  animation: sc-fresh-flash 2.4s var(--ease-standard);
-}
-
-@keyframes sc-fresh-flash {
-  0% { background-color: var(--accent-green-dim); box-shadow: inset 2px 0 0 var(--accent-green); }
-  100% { background-color: transparent; box-shadow: inset 2px 0 0 transparent; }
 }
 
 .scenario-card:hover {

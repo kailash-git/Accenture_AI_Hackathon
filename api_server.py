@@ -1328,14 +1328,6 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
-        if path == '/api/anomalies/stream':
-            self._handle_anomalies_stream(
-                role,
-                query.get('after', ['0'])[0],
-                query.get('limit', ['3'])[0],
-            )
-            return
-
         if path in ('/api/anomalies/latest', '/api/anomalies'):
             self._handle_anomalies_list(role)
             return
@@ -1496,56 +1488,6 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
             a = _apply_entitlements(a, role)
             anomalies.append(a)
         self._send_json(anomalies)
-
-    def _handle_anomalies_stream(self, role, after_raw, limit_raw):
-        # Live-ticker variant of _handle_anomalies_list: the dashboard polls this a
-        # few rows at a time instead of pulling all 57 (each row costs an EasyRCA +
-        # Adtributor + PVM workup). Ordering is the INVERSE of the list handler's
-        # materiality rank -- raw statistical detections stream in first, the fully
-        # worked-up curated scenarios and the most significant movements arrive last
-        # so they land on top of the deck. Every item goes through the exact same
-        # _row_to_anomaly_dict -> _apply_persona -> _apply_entitlements pipeline, so
-        # role masking is identical to every other anomaly endpoint.
-        if not os.path.exists(DB_PATH):
-            self._send_json({"error": "Database not seeded. Run scripts/generate_mock_data.py."}, status_code=503)
-            return
-        try:
-            after = max(0, int(after_raw))
-        except (TypeError, ValueError):
-            after = 0
-        try:
-            limit = max(1, min(int(limit_raw), 6))
-        except (TypeError, ValueError):
-            limit = 3
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        try:
-            total_rows, _ = _timed_query(conn, "SELECT COUNT(*) AS n FROM anomalies")
-            total = total_rows[0]["n"] if total_rows else 0
-            rows, _ = _timed_query(conn, """
-                SELECT * FROM anomalies
-                ORDER BY
-                    CASE WHEN scenario_key LIKE 'gen-%' THEN 0 ELSE 1 END,
-                    CASE severity WHEN 'CRITICAL' THEN 2 WHEN 'WARNING' THEN 1 ELSE 0 END,
-                    ABS(z_score) ASC
-                LIMIT ? OFFSET ?
-            """, (limit, after))
-        finally:
-            conn.close()
-        items = []
-        for r in rows:
-            a = _row_to_anomaly_dict(r)
-            a = _apply_persona(a, role)
-            a = _apply_entitlements(a, role)
-            items.append(a)
-        next_after = after + len(items)
-        self._send_json({
-            "items": items,
-            "after": after,
-            "nextAfter": next_after,
-            "total": total,
-            "done": next_after >= total,
-        })
 
     def _fetch_anomaly_row(self, conn, key):
         rows, _ = _timed_query(conn, "SELECT * FROM anomalies WHERE scenario_key = ? OR anomaly_id = ?", (key, key))
