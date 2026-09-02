@@ -55,12 +55,13 @@ price0          = e.unitPrice
 fullStockDemand = e.healthyBaselineRevenue / price0
 ```
 
-**Baseline reference** — the reset state: price unchanged, demand ×1, fill rate
-at `baselineFillRate`:
+**Baseline reference** — price unchanged, demand ×1, fill rate at
+`baselineFillRate`. This is what "Reset" returns to and what the % / $ deltas
+are measured against (it is *not* the default view — see Wiring):
 
 ```
 units0 = fullStockDemand * 1.0 * e.baselineFillRate
-rev0   = units0 * price0                              // the "default load" number
+rev0   = units0 * price0
 ```
 
 **Current state** — from the sliders:
@@ -113,9 +114,11 @@ Bar height is `abs(effect) / maxEffect * 120px`; colour is the existing
 
 ## Wiring
 
-- **Scenario switch** — the sidebar cards call `selectScenario()`, which now ends
-  with `if (typeof simReset === 'function') simReset()`, so a new scenario wipes
-  any slider position and re-renders against its own economics.
+- **Default view / scenario switch** — the sidebar cards call `selectScenario()`,
+  which ends with `if (typeof simMatchRecorded === 'function') simMatchRecorded()`.
+  So on first load and on every scenario switch the sliders start at that
+  scenario's `recordedOutcome` (the simulator opens showing what actually
+  happened); "Reset" is what returns it to the pre-anomaly baseline.
 - **Nav tab / scroll spy** — `'section-simulator'` was added to `sectionIds` in
   `setupNavigationScrollSpy()`; the section carries the `scroll-reveal` class and
   is picked up by `observeScrollRevealElements()` like every other section.

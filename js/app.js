@@ -684,8 +684,9 @@ async function selectScenario(scenarioKey) {
     }
   }
 
-  // Reset the What-If Simulator sliders + re-render for the newly selected scenario.
-  if (typeof simReset === 'function') simReset();
+  // Default the What-If Simulator to this scenario's recorded outcome (the
+  // "Reset" button still returns it to the pre-anomaly baseline).
+  if (typeof simMatchRecorded === 'function') simMatchRecorded();
 
   showAppToast(`Loaded scenario: ${anom.title} (${anom.persona || APP_STATE.activeRole} view)`);
 }
