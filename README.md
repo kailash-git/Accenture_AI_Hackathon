@@ -36,7 +36,16 @@ prototype produces. All figures are reproducible from the committed database and
 | 8 | [Setup and execution guide](#8-setup-and-execution-guide) | Complete, step-by-step instructions |
 | 9 | [API reference](#9-api-reference) | Every endpoint |
 | 10 | [Design decisions and assumptions](#10-design-decisions-and-assumptions) | Stated assumptions and their rationale |
-| 11 | [Team and licence](#11-team-and-licence) | Authorship |
+| 11 | [Companion documents (consolidated)](#11-companion-documents-consolidated) | Every standalone `.md` folded in; the original files are kept in place |
+| 12 | [Team and licence](#12-team-and-licence) | Authorship |
+
+Two interactive dashboard features are documented in Section 3: the
+[Revenue What-If simulator](#313-revenue-what-if-simulator) (3.13) and the
+[anomaly report export](#314-anomaly-report-export-pdf) (3.14). Section 11
+consolidates every companion `.md` file (persona profiles, method citations,
+the causal-RCA and slice-attribution experiment, the two feature notes, and the
+evaluation-harness reports) into this document; the standalone files remain in
+the repository unchanged.
 
 ---
 
@@ -468,6 +477,71 @@ The pricing constants used for cost telemetry are: seed-time polish with `gpt-4o
 at 1.00 and 5.00 US dollars per million input and output tokens respectively; and the Groq free tier
 reported at zero.
 
+### 3.13 Revenue What-If simulator
+
+Section 07 of the dashboard. Three sliders — **price adjustment** (percent, −80…+150),
+**demand shift** (percent, −90…+500) and **fill rate** (fraction, 0.30…1.00) — recompute a
+projected revenue number, a stat row (units sold, gross margin percent, unit price) and a
+Price / Volume / Interaction breakdown, live in the browser. It makes **no backend calls**:
+every value is derived client-side from a small per-scenario economics block, consistent with the
+same principle as the rest of the system — the language model is never in this path either.
+
+**Per-scenario inputs.** `js/state.js` carries `baselineEconomics`
+(`unitPrice`, `unitCost`, `healthyBaselineRevenue`, `currentFillRate`, `baselineFillRate`) and
+`recordedOutcome` (`priceChangePct`, `volumeChangePct`, `fillRatePct`) on each scenario. Values are
+chosen to be consistent with facts already stated in that scenario's narrative (for `supply`: sell
+price steady at 1.25, supplier cost 0.88, fill rate 0.78 against a 0.98 baseline). A scenario
+without these fields falls back to `SIM_FALLBACK_ECONOMICS` / `SIM_FALLBACK_OUTCOME` in
+`js/simulator.js`. `normalizeAnomalyForUI(raw, existing)` preserves `baselineEconomics` when it
+merges live backend data over the static object, because the backend never sends that block.
+
+**Model.** The measured fact is revenue, not units, so latent demand is backed out:
+`price0 = unitPrice`; `fullStockDemand = healthyBaselineRevenue / price0`. The baseline reference
+(what "Reset" returns to and what the deltas are measured against) is
+`units0 = fullStockDemand × baselineFillRate`, `rev0 = units0 × price0`. The current state, from the
+sliders, is `price1 = price0 × (1 + priceAdj/100)`, `demand1 = fullStockDemand × (1 + demandShift/100)`,
+`units1 = demand1 × fillRate` (fill rate caps how much demand converts), `rev1 = units1 × price1`
+(the projected number). Gross margin percent is `(rev1 − unitCost × units1) / rev1 × 100`.
+
+**Price / Volume / Interaction decomposition.** With `ΔP = price1 − price0`, `ΔV = units1 − units0`
+and `total = rev1 − rev0`, the identity `ΔP·units0 + ΔV·price0 + ΔP·ΔV ≡ rev1 − rev0` holds exactly
+(`P1·V1 − P0·V0` expands to precisely those three terms). To keep the displayed integers summing with
+no visible gap, the price and volume effects are rounded and the interaction takes the residual:
+`interactionR = round(total) − round(ΔP·units0) − round(ΔV·price0)`. Bars reuse the Section 02 PVM
+markup and colour rule (red below zero, green above).
+
+**Buttons and wiring.** *Reset* sets price and demand to 0 and the fill slider to `baselineFillRate`.
+*Match Recorded Outcome* sets the sliders to `recordedOutcome`. `selectScenario()` ends by calling
+`simMatchRecorded()`, so on first load and on every scenario switch the simulator opens showing what
+actually happened, and *Reset* is what returns it to the pre-anomaly baseline. `simRender()` reads
+all figures from `_simCompute()`, a pure function of the sliders plus the economics block.
+`'section-simulator'` is registered in the navigation scroll-spy. Full note:
+`docs/WHAT_IF_SIMULATOR.md` (Section 11.4).
+
+### 3.14 Anomaly report export (PDF)
+
+The **Download Report** button in the Root Cause Synthesis card (Section 05, next to *Copy Briefing*)
+exports a one-page PDF about the currently selected anomaly. `js/report.js` &rarr;
+`downloadAnomalyReport()` reads `ANOMALY_DATASET[APP_STATE.activeAnomalyKey]` — already role-masked
+and merged with live backend data by `normalizeAnomalyForUI` — and makes **no fetch**. It is rendered
+client-side with jsPDF (`jspdf@2.5.2`, loaded from jsDelivr in `dashboard.html`): one page, roughly
+12 KB, selectable vector text, saved as `anomaly-report-<scenario>-<date>.pdf`. If jsPDF fails to
+load (offline, or the CDN is blocked) it falls back to a standalone HTML file with the same content.
+
+The report contains a header (SKU, region, date, status, confidence), the headline and summary, then:
+
+| Section | Source |
+|---|---|
+| Detection confidence | vector bar, `anom.confidence` |
+| Price–Volume–Mix decomposition | diverging vector bars, `anom.pvm.{volume,price,mix,other}.val` |
+| Root cause — upstream variable (EasyRCA) | top 3 of `anom.rootCause.rootCauses`, else the `reason` |
+| Attribution — responsible slice (Adtributor) | top 3 of `anom.attribution.candidates`, else the `reason` |
+| Root cause synthesis | `anom.synthesis.{title,body}` |
+| Recommended action | `anom.recommendedAction`, or the abstention reason |
+
+Masked or `RESTRICTED` values pass through exactly as the server sent them — the export never
+un-masks. Full note: `docs/ANOMALY_REPORT.md` (Section 11.5).
+
 ---
 
 ## 4. Results, evaluations, and statistics
@@ -707,17 +781,26 @@ accompanies this repository.
 ```
 api_server.py                    Live API and static-file server (Python standard library plus networkx to load the graph)
 dashboard.html                   Single-page dashboard
-js/                              Front-end modules: api, state, charts, drawer, evidence, actions, app, chat
+js/                              Front-end modules: api, state, charts, drawer, evidence, actions, app, chat,
+                                   simulator (Section 3.13), report (Section 3.14)
 css/                             Stylesheets: tokens, layout, hero, charts, evidence, drawer, chat
 .env.example                     Template for the optional API keys (copy to .env)
 requirements.txt                 Dependencies for the offline seed and analytics pipeline only
-persona_profiles.md              Persona goals, decision rights, and the entitlement and narrative specification
+persona_profiles.md              Persona goals, decision rights, and the entitlement and narrative specification (Section 11.1)
+CITATIONS.md                     EasyRCA and Adtributor: full citations, BibTeX, and part-wise metric improvement (Section 11.2)
 
 docs/
   EVALUATION_REPORT.md           Consolidated evaluation report (Section 4.11)
   EVALUATION.md                  Full metrics run plus every chat query and answer
   EVALUATION_SCENARIOS.md        The brief's required-scenario queries with the live answer and its grounding
   EVALUATION_SCORED.md           The 30-query scored chat run with per-part scores
+  WHAT_IF_SIMULATOR.md           Full note for the Revenue What-If simulator (Section 3.13 / 11.4)
+  ANOMALY_REPORT.md              Full note for the anomaly report export (Section 3.14 / 11.5)
+
+experiments/
+  REPORT.md                      Causal-RCA (EasyRCA) and slice-attribution (Adtributor) experiment write-up (Section 11.3)
+  run_eval.py, compare.py        EasyRCA vs baseline harness
+  slice_eval.py, slice_compare.py  Adtributor vs magnitude harness
 
 eval/
   run_eval.py                    The evaluation harness (deterministic components plus the chat surface)
@@ -745,7 +828,9 @@ Accenture/Accenture/
     analytics/                   anomaly_detector, pvm_analyzer, evidence_signal, series_anomaly,
                                    sentiment, aggregation,
                                    graph_builder, graph_entities, graph_subgraph,
-                                   graph_query, graph_store, graph_narrative_adapter
+                                   graph_query, graph_store, graph_narrative_adapter,
+                                   causal_graph, rca_series, easy_rca (EasyRCA lens),
+                                   adtributor (Adtributor lens) — see Section 11.2
     llm/                         llm_client (optional polish), narrative_generator, abstention, schema_parser
     retrieval/                   evidence_reconciler
   data/                          Committed SQLite database, parquet source extracts, and the pre-built
@@ -1106,4 +1191,265 @@ values are `vp_sales`, `supply_planner`, and `admin`. The default is `vp_sales`.
 
 ---
 
+## 11. Companion documents (consolidated)
+
+The repository carries several standalone Markdown documents. Their content is folded into this
+section so the README is a single reference; **every original file is kept in place, unchanged**, at
+the path named under each heading.
+
+| Sub-section | Source file (kept in the repo) | Also covered in |
+|---|---|---|
+| 11.1 Persona profiles | `persona_profiles.md` | Sections 3.9, 3.10 |
+| 11.2 Root-cause method citations | `CITATIONS.md` | — |
+| 11.3 Causal-RCA and slice-attribution experiment | `experiments/REPORT.md` | — |
+| 11.4 Revenue What-If simulator | `docs/WHAT_IF_SIMULATOR.md` | Section 3.13 |
+| 11.5 Anomaly report export | `docs/ANOMALY_REPORT.md` | Section 3.14 |
+| 11.6 Evaluation-harness reports | `docs/EVALUATION_REPORT.md`, `docs/EVALUATION.md`, `docs/EVALUATION_SCENARIOS.md`, `docs/EVALUATION_SCORED.md`, `eval/README.md` | Section 4.11 |
+| 11.7 Dataset provenance | `KPI-data/README.md` | Sections 3.4, 4.9 |
+
+### 11.1 Persona profiles
+
+*Source: `persona_profiles.md`.*
+
+Two operational personas plus an unrestricted audit role. Each is a real server-side entitlement,
+enforced in `_apply_entitlements` and verified by `tests/test_personas.py` (Section 4.7), not a
+client-side style swap.
+
+| Persona | Role key | Goal | Sees | Masked server-side |
+|---|---|---|---|---|
+| VP of Retail Sales | `vp_sales` | Revenue and margin outcomes, decisions to approve | Revenue, gross margin, marketing effect, PVM, actions | SKU-level identifiers, warehouse and supply-chain logistics detail |
+| Regional Supply Chain Planner | `supply_planner` | Fill rate, stockout days, inventory turnover, replenishment | Unit velocity, fill rate, stockout days, turnover, supply evidence | Revenue and gross-margin figures, marketing spend, COGS (returned as `RESTRICTED` or nulled) |
+| Data Governance Admin | `admin` | Oversight and audit | Everything | Nothing |
+
+The revenue timeline is persona-aware at source: a `supply_planner` request for the "revenue" metric
+receives **Units**, never a currency figure (`_handle_timeline`). Narratives are re-worded per
+persona (goal, decision rights, and the entitlement vocabulary drive the prompt); a
+`supply_planner`-scoped request never receives a revenue or margin number to word.
+
+### 11.2 Root-cause method citations
+
+*Source: `CITATIONS.md`.*
+
+Two published root-cause-analysis methods are reimplemented from scratch and integrated. Both run
+**alongside** the pre-existing Price–Volume–Mix decomposition, never replacing it.
+
+| Lens | Question it answers | Paper | Module |
+|---|---|---|---|
+| PVM (pre-existing) | **how** — price vs volume vs mix | — | `.../analytics/pvm_analyzer.py` |
+| EasyRCA | **why** — which upstream causal KPI variable | Assaad et al., AISTATS 2023 | `.../analytics/{causal_graph,rca_series,easy_rca}.py` |
+| Adtributor | **where** — which item / region / store / category slice | Bhagwan et al., NSDI 2014 | `.../analytics/adtributor.py` |
+
+**[1] EasyRCA.** Charles K. Assaad, Imad Ez-Zejjari, Lei Zan. *"Root Cause Identification for
+Collective Anomalies in Time Series given an Acyclic Summary Causal Graph with Loops."* Proceedings
+of the 26th International Conference on Artificial Intelligence and Statistics (AISTATS), PMLR
+**206**:8395–8404, 2023.
+
+```bibtex
+@InProceedings{pmlr-v206-assaad23a,
+  title     = {Root Cause Identification for Collective Anomalies in Time Series
+               given an Acyclic Summary Causal Graph with Loops},
+  author    = {Assaad, Charles K. and Ez-Zejjari, Imad and Zan, Lei},
+  booktitle = {Proceedings of The 26th International Conference on Artificial
+               Intelligence and Statistics},
+  pages     = {8395--8404},
+  year      = {2023},
+  editor    = {Ruiz, Francisco and Dy, Jennifer and van de Meent, Jan-Willem},
+  volume    = {206},
+  series    = {Proceedings of Machine Learning Research},
+  publisher = {PMLR},
+  url       = {https://proceedings.mlr.press/v206/assaad23a.html}
+}
+```
+
+Reference implementation: <https://github.com/ckassaad/EasyRCA>. Our implementation is from-scratch
+(`numpy` + `networkx` + `scipy` only — no `dowhy` / `tigramite` / `causal-learn`): d-separation
+decomposition, then direct identification, then linear regime-comparison of each variable's
+structural equation. The graph-with-loops case is out of scope; the summary graph here is a DAG of 10
+KPI variables and 16 hand-authored edges (2 lifted from the PVM `explains` edges). Surfaced as
+`rootCause` on every anomaly and in the drawer's "Causal Root-Cause Analysis" section; feeds
+`confidence` additively only when confident and weekly-visible; RBAC via `_mask_rca_block`; debug
+route `GET /api/anomalies/{key}/rca`; `requirements.txt` gains `scipy`.
+
+Measured improvement (4 labelled scenarios + 300 synthetic causal panels, seed 0; seeds 1–3
+consistent; baseline = PVM + evidence graph + heuristic attribution):
+
+| Metric | Baseline | EasyRCA | Δ |
+|---|--:|--:|--:|
+| top-1 accuracy | 0.31 | **0.68** | **+0.37** |
+| gold variable anywhere in output | 0.31 | **0.91** | **+0.60** |
+| MRR | 0.31 | **0.78** | **+0.47** |
+| false-attribution rate | 0.29 | **0.004** | **−0.29** |
+| miss (should attribute, abstained) | 0.40 | **0.09** | **−0.31** |
+| mean confidence — correct / wrong | 51 / 50 | **71 / 22** | separates signal |
+
+Per intervention type (synthetic): structural shock top-1 0.31 → **0.80**; mechanism shift top-1
+0.51 → 0.61 (gold-in-list 0.95); null cases both abstain ≈ 0.97. Real attributable scenarios
+(`supply`, `pricecut`, `billing`): **1/3 → 2/3** — the baseline gets `pricecut` wrong (day-over-day
+PVM blames volume; EasyRCA names `sell_price`); both abstain on the deliberately conflicting
+`billing` case. `sparse` (cold start): both abstain, correct.
+
+**[2] Adtributor.** Ranjita Bhagwan, Rahul Kumar, Ramachandran Ramjee, George Varghese, Surjyakanta
+Mohapatra, Hemanth Manoharan, Piyush Shah. *"Adtributor: Revenue Debugging in Advertising Systems."*
+11th USENIX Symposium on Networked Systems Design and Implementation (NSDI '14), pp. 43–55, USENIX
+Association, 2014.
+
+```bibtex
+@inproceedings{bhagwan2014adtributor,
+  title     = {Adtributor: Revenue Debugging in Advertising Systems},
+  author    = {Bhagwan, Ranjita and Kumar, Rahul and Ramjee, Ramachandran and
+               Varghese, George and Mohapatra, Surjyakanta and
+               Manoharan, Hemanth and Shah, Piyush},
+  booktitle = {11th USENIX Symposium on Networked Systems Design and
+               Implementation (NSDI 14)},
+  pages     = {43--55},
+  year      = {2014},
+  publisher = {USENIX Association},
+  url       = {https://www.usenix.org/conference/nsdi14/technical-sessions/presentation/bhagwan}
+}
+```
+
+Our implementation is from-scratch (`numpy` + `pandas` + `sqlite3`): Explanatory Power plus
+**Surprise** (Jensen–Shannon divergence between forecast and actual element-share distributions) plus
+succinctness (a per-element EP threshold and a surprise gate, so the set is not padded with
+large-but-unsurprising slices). Fundamental measure Revenue and derived measure GrossMarginPercent
+(the paper's finite-difference partial-derivative EP); InventoryTurnover declines cleanly. Forecast =
+trailing-window mean (the paper uses ARMA). Surfaced as `attribution` on every anomaly and in the
+drawer's "Anomaly Attribution (by slice)" section; RBAC via `_mask_attribution_block`; debug route
+`GET /api/anomalies/{key}/attribution`.
+
+Measured improvement (3 labelled scenarios + 400 synthetic portfolios, seed 0; seeds 1–2 consistent;
+baseline "magnitude" = rank slices by raw |actual − forecast|, i.e. what `pvm.products` does today):
+
+| Metric | magnitude (current) | Adtributor | Δ |
+|---|--:|--:|--:|
+| dimension accuracy | 0.50 | **0.74** | **+0.24** |
+| exact element-set accuracy | 0.44 | **0.57** | **+0.13** |
+| top-1 element accuracy | 0.47 | **0.66** | **+0.19** |
+| mean element F1 | 0.46 | **0.63** | **+0.17** |
+| mean confidence — correct / wrong | 68 / 71 | **65 / 35** | separates signal |
+| null cases abstained correctly | 1.00 | 1.00 | — |
+
+Distractor subset (109 cases — a large slice's magnitude moves while its share is unchanged; the
+paper's headline "Data-Center-X vs Mobile/Tablet" motivation):
+
+| Metric | magnitude | Adtributor | Δ |
+|---|--:|--:|--:|
+| dimension accuracy | 0.28 | **0.79** | **+0.51** |
+| exact element-set | 0.08 | **0.36** | **+0.28** |
+| top-1 element | 0.18 | **0.56** | **+0.38** |
+| element F1 | 0.16 | **0.49** | **+0.33** |
+
+Known caveat: the distractor element still enters Adtributor's set roughly 28% of the time (vs
+magnitude's 19%) — it recovers the correct *dimension* far more often, but under a large uniform
+background move the big slice retains high EP and small non-zero surprise.
+
+Reproduce:
+
+```bash
+python experiments/run_eval.py --system baseline --n-synth 300 --seed 0
+python experiments/run_eval.py --system easyrca  --n-synth 300 --seed 0
+python experiments/compare.py
+
+python experiments/slice_eval.py --system magnitude  --n-synth 400 --seed 0
+python experiments/slice_eval.py --system adtributor --n-synth 400 --seed 0
+python experiments/slice_compare.py
+```
+
+### 11.3 Causal-RCA and slice-attribution experiment
+
+*Source: `experiments/REPORT.md`.*
+
+**Question.** Does replacing the attribution step with the EasyRCA procedure produce better
+root-cause calls than the PVM + evidence + heuristic-confidence approach; and does ranking anomaly
+slices by *distribution surprise* (Adtributor) beat the current per-product breakdown, which ranks by
+raw |actual − forecast|?
+
+**Verdict, both parts: yes.** The headline tables are reproduced in Section 11.2. The two rows that
+matter as much as the top-line accuracy are the confidence-calibration rows: the current heuristic's
+confidence is ~50 whether it is right or wrong (it carries no information), whereas EasyRCA's
+effect-size-derived confidence is 71 vs 22, so a low-confidence flag becomes a usable "do not trust
+this" signal; Adtributor's surprise-derived confidence separates 65 vs 35 against magnitude's flat
+68 vs 71.
+
+Real scenarios (ground truth from `generate_mock_data.py`):
+
+| Scenario | Gold | Baseline | EasyRCA |
+|---|---|---|---|
+| Port-of-Seattle stockout (`supply`) | supply | `fill_rate` (hit) | `stockout_days` (hit) |
+| 25% price cut (`pricecut`) | `sell_price` | `units` (miss) | `sell_price` (hit) |
+| Register-overcharge billing bug (`billing`) | price / sentiment | `units` (abstain) | *(abstains)* |
+| Cold start, no sales (`sparse`) | *(abstain)* | abstain (ok) | abstain (ok) |
+
+Documented weaknesses carried forward: (1) top-1 0.68 but gold-in-list 0.91 — the UI shows the whole
+ranked list, not one pick; (2) the weekly panel hides single-day blips, so PVM/evidence stays the
+primary path for point anomalies; (3) two synthetic-null cases were attributed at ~75 confidence — a
+materiality gate before emitting a root cause is the fix; (4) the linear regime test can misfire on a
+genuinely non-linear but unchanged mechanism; (5) every EasyRCA result is conditional on the
+hand-authored graph — `validate_against_evidence_graph()` cross-checks its edges against
+co-occurrence in `scripts/build_graph.py`. For Adtributor: the distractor element still leaks in ~28%
+of the time; real scenarios are portfolio-thin so live attribution is scoped to the anomaly's own
+item/state and broken down by store/category; only Revenue and GrossMarginPercent have an additive
+slice decomposition.
+
+Both lenses are **additive**: they run alongside PVM and evidence and nothing about either of those
+changes. Unit tests: `tests/test_adtributor.py` (5) and the EasyRCA cases in `tests/test_analytics.py`.
+
+### 11.4 Revenue What-If simulator
+
+*Source: `docs/WHAT_IF_SIMULATOR.md`. Full description: Section 3.13.*
+
+File map:
+
+| File | Role |
+|---|---|
+| `js/simulator.js` | all the math and rendering (`_simCompute`, `simRender`, `simReset`, `simMatchRecorded`) |
+| `dashboard.html` | the `#section-simulator` markup, the "What-If Simulator" nav tab, the `<script>` tag |
+| `css/charts.css` | five `.sim-slider*` rules; everything else reuses existing `.pvm-*` / `.viz-*` classes |
+| `js/state.js` | `baselineEconomics` + `recordedOutcome` on each scenario |
+| `js/app.js` | `section-simulator` in the scroll-spy list; `simMatchRecorded()` at the end of `selectScenario` |
+| `js/api.js` | `baselineEconomics` / `recordedOutcome` carried through `normalizeAnomalyForUI` |
+
+### 11.5 Anomaly report export
+
+*Source: `docs/ANOMALY_REPORT.md`. Full description: Section 3.14.*
+
+`js/report.js` &rarr; `downloadAnomalyReport()`, triggered from the button next to *Copy Briefing* in
+the Root Cause Synthesis card. Reads the already-role-masked `ANOMALY_DATASET` entry, renders a
+one-page PDF with jsPDF (`jspdf@2.5.2`, jsDelivr), falls back to standalone HTML if the library is
+unavailable, and never un-masks a `RESTRICTED` value.
+
+### 11.6 Evaluation-harness reports
+
+*Sources: `docs/EVALUATION_REPORT.md`, `docs/EVALUATION.md`, `docs/EVALUATION_SCENARIOS.md`,
+`docs/EVALUATION_SCORED.md`, `eval/README.md`. Full metrics and method: Section 4.11.*
+
+| File | Contents |
+|---|---|
+| `docs/EVALUATION_REPORT.md` | The consolidated report — detection, decomposition, attribution, ablation, abstention, masking and the chat surface, with the argument against RAGAS |
+| `docs/EVALUATION.md` | The full metrics run plus every chat query and its answer |
+| `docs/EVALUATION_SCENARIOS.md` | The brief's required-scenario queries with the live answer and its grounding (`eval/scenario_table.py`) |
+| `docs/EVALUATION_SCORED.md` | The 30-query scored chat run with per-part scores |
+| `eval/README.md` | How to run the harness and what each metric means |
+
+### 11.7 Dataset provenance
+
+*Source: `KPI-data/README.md`. Also: Sections 3.4 and 4.9.*
+
+How `fact_sales_daily` is built from real M5 and Walmart daily sales for three items across
+California and Texas (January 2011 – April 2016), reconciled with the two synthetic companion sources
+(marketing, supply); the deliberate cross-source mismatches; and the six data-integrity checks
+(all passing).
+
+---
+
+## 12. Team and licence
+
+Team Stack Overflowed, IIT Madras — Accenture Innovation Challenge 2026, Round 2, Track 3
+(BusinessIntelligence.ai).
+
+The dataset backbone is real M5 (Kaggle "M5 Forecasting – Accuracy") and Walmart sales data, used
+for the challenge under its original terms; the marketing and supply companion sources are synthetic.
+The two root-cause methods in Section 11.2 are reimplemented from their published papers and are
+cited there. All other code in this repository is the team's own work, provided for evaluation in the
+Accenture Innovation Challenge.
 
