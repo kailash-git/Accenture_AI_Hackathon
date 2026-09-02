@@ -1,0 +1,4528 @@
+{
+  "system": "baseline",
+  "n_synth": 300,
+  "seed": 0,
+  "n_cases": 304,
+  "breakdown": {
+    "overall": {
+      "n": 304,
+      "top1_accuracy": 0.31,
+      "hit_or_partial": 0.31,
+      "false_attribution_rate": 0.29,
+      "miss_abstained_rate": 0.4,
+      "attribution_rate": 0.6,
+      "mrr": 0.31,
+      "abstain_cases": 59,
+      "abstain_correct_rate": 0.966,
+      "mean_conf_correct": 50.8,
+      "mean_conf_wrong": 49.9
+    },
+    "real": {
+      "n": 4,
+      "top1_accuracy": 0.333,
+      "hit_or_partial": 0.333,
+      "false_attribution_rate": 0.333,
+      "miss_abstained_rate": 0.333,
+      "attribution_rate": 0.667,
+      "mrr": 0.333,
+      "abstain_cases": 1,
+      "abstain_correct_rate": 1.0,
+      "mean_conf_correct": 62.5,
+      "mean_conf_wrong": 95.0
+    },
+    "synthetic": {
+      "n": 300,
+      "top1_accuracy": 0.31,
+      "hit_or_partial": 0.31,
+      "false_attribution_rate": 0.289,
+      "miss_abstained_rate": 0.401,
+      "attribution_rate": 0.599,
+      "mrr": 0.31,
+      "abstain_cases": 58,
+      "abstain_correct_rate": 0.966,
+      "mean_conf_correct": 50.6,
+      "mean_conf_wrong": 49.4
+    },
+    "synthetic_structural_shock": {
+      "n": 114,
+      "top1_accuracy": 0.281,
+      "hit_or_partial": 0.281,
+      "false_attribution_rate": 0.298,
+      "miss_abstained_rate": 0.421,
+      "attribution_rate": 0.579,
+      "mrr": 0.281,
+      "abstain_cases": 0,
+      "abstain_correct_rate": null,
+      "mean_conf_correct": 58.4,
+      "mean_conf_wrong": 51.2
+    },
+    "synthetic_mechanism_shift": {
+      "n": 128,
+      "top1_accuracy": 0.336,
+      "hit_or_partial": 0.336,
+      "false_attribution_rate": 0.281,
+      "miss_abstained_rate": 0.383,
+      "attribution_rate": 0.617,
+      "mrr": 0.336,
+      "abstain_cases": 0,
+      "abstain_correct_rate": null,
+      "mean_conf_correct": 50.3,
+      "mean_conf_wrong": 47.4
+    },
+    "synthetic_none": {
+      "n": 58,
+      "top1_accuracy": 0.0,
+      "hit_or_partial": 0.0,
+      "false_attribution_rate": 0.0,
+      "miss_abstained_rate": 0.0,
+      "attribution_rate": 0.0,
+      "mrr": 0.0,
+      "abstain_cases": 58,
+      "abstain_correct_rate": 0.966,
+      "mean_conf_correct": 46.5,
+      "mean_conf_wrong": 56.0
+    }
+  },
+  "rows": [
+    {
+      "case_id": "supply",
+      "kind": "real",
+      "intervention": "real",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate",
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "pricecut",
+      "kind": "real",
+      "intervention": "real",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 95.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "billing",
+      "kind": "real",
+      "intervention": "real",
+      "behaviour": "signal",
+      "gold": [
+        "sell_price",
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 95.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "sparse",
+      "kind": "real",
+      "intervention": "real",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": true,
+      "confidence": 30.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0000",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0001",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0002",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0003",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0004",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0005",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0006",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0007",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0008",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0009",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0010",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0011",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0012",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0013",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0014",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0015",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0016",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0017",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0018",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0019",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0020",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0021",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0022",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0023",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0024",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0025",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0026",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0027",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0028",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0029",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0030",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0031",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0032",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0033",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0034",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0035",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0036",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0037",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0038",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0039",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0040",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0041",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0042",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0043",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0044",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0045",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0046",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0047",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0048",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0049",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0050",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0051",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0052",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0053",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0054",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0055",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0056",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0057",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0058",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0059",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0060",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0061",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0062",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0063",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0064",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0065",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0066",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0067",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0068",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0069",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0070",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0071",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0072",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0073",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0074",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0075",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0076",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0077",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "abstain-miss",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0078",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0079",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0080",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0081",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0082",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0083",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0084",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0085",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0086",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0087",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0088",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0089",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0090",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0091",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0092",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0093",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0094",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0095",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0096",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0097",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0098",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0099",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0100",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0101",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0102",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0103",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0104",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0105",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "abstain-miss",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0106",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0107",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0108",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0109",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0110",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0111",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0112",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0113",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0114",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0115",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0116",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0117",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0118",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0119",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0120",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0121",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0122",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0123",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0124",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0125",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0126",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0127",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0128",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0129",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0130",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0131",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0132",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0133",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0134",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0135",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0136",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0137",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0138",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0139",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0140",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0141",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0142",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0143",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0144",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0145",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0146",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0147",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0148",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0149",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0150",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0151",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0152",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0153",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0154",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0155",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0156",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0157",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0158",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0159",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0160",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0161",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0162",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0163",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0164",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0165",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0166",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0167",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0168",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0169",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0170",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0171",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0172",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0173",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0174",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0175",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0176",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0177",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0178",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0179",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0180",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0181",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0182",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0183",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0184",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0185",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0186",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0187",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0188",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0189",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0190",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0191",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0192",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0193",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0194",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0195",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0196",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0197",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0198",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0199",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0200",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0201",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0202",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0203",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0204",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0205",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0206",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0207",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0208",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0209",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0210",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0211",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0212",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0213",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0214",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0215",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0216",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0217",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0218",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0219",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0220",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0221",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0222",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0223",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0224",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0225",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0226",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0227",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0228",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0229",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0230",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0231",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0232",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0233",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "marketing_spend"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0234",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0235",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0236",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0237",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0238",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0239",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0240",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0241",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0242",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0243",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0244",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0245",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0246",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0247",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0248",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0249",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0250",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0251",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0252",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0253",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0254",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0255",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0256",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0257",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0258",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0259",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0260",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0261",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0262",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0263",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0264",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0265",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0266",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0267",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0268",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0269",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0270",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0271",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0272",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0273",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0274",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0275",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0276",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0277",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0278",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0279",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0280",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0281",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "marketing_spend"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0282",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "sell_price"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0283",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0284",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0285",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0286",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "sentiment"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0287",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0288",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0289",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "gross_margin_percent"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0290",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 56.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0291",
+      "kind": "synthetic",
+      "intervention": "none",
+      "behaviour": "abstain",
+      "gold": [],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "abstain-correct",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0292",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0293",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "units"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0294",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "fill_rate"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "hit",
+      "gold_rank": 1
+    },
+    {
+      "case_id": "syn0295",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0296",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "sell_price"
+      ],
+      "abstained": false,
+      "confidence": 56.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0297",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "inventory_turnover"
+      ],
+      "predicted": [],
+      "abstained": true,
+      "confidence": 43.0,
+      "outcome": "miss-abstained",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0298",
+      "kind": "synthetic",
+      "intervention": "structural_shock",
+      "behaviour": "attribute",
+      "gold": [
+        "stockout_days"
+      ],
+      "predicted": [
+        "fill_rate"
+      ],
+      "abstained": false,
+      "confidence": 69.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    },
+    {
+      "case_id": "syn0299",
+      "kind": "synthetic",
+      "intervention": "mechanism_shift",
+      "behaviour": "attribute",
+      "gold": [
+        "revenue"
+      ],
+      "predicted": [
+        "units"
+      ],
+      "abstained": false,
+      "confidence": 43.0,
+      "outcome": "false-attr",
+      "gold_rank": null
+    }
+  ]
+}

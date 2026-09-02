@@ -32,7 +32,7 @@ import urllib.request
 import uuid
 from urllib.parse import parse_qs, urlparse
 
-PORT = 8000
+PORT = int(os.environ.get('PORT', '8000'))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ACCENTURE_DIR = os.path.join(BASE_DIR, 'Accenture', 'Accenture')
 DB_PATH = os.path.join(ACCENTURE_DIR, 'data', 'business_bi.db')
@@ -498,7 +498,110 @@ def _anomaly_subgraph_for_row(r):
     return dict(_EMPTY_GRAPH_CTX)
 
 
+# EasyRCA (Assaad et al., AISTATS 2023) -- "which upstream KPI variable is the
+# root cause". Runs alongside the PVM / evidence attribution; see CITATIONS.md.
+_RCA_KPI_TO_VAR = {
+    "Revenue": "revenue",
+    "GrossMarginPercent": "gross_margin_percent",
+    "InventoryTurnover": "inventory_turnover",
+}
+_RCA_MEMO = {}
+
+
+def build_rca_block(kpi_name, item_id, state_id, period_start, period_end):
+    """EasyRCA over the summary causal graph for one anomaly. Always returns a
+    safe dict; memoized (deep-copied on return so role-masking can't corrupt
+    the cache)."""
+    base = {"available": False, "status": "unavailable", "rootCauses": [],
+            "reason": "", "method": "EasyRCA (Assaad et al., 2023) - reimplemented"}
+    target_var = _RCA_KPI_TO_VAR.get(kpi_name)
+    if target_var is None:
+        base["reason"] = f"no causal RCA for KPI '{kpi_name}'"
+        return base
+
+    key = (kpi_name, item_id, state_id, period_start, period_end)
+    if key in _RCA_MEMO:
+        return copy.deepcopy(_RCA_MEMO[key])
+    try:
+        from analytics.rca_series import build_weekly_panel
+        from analytics.easy_rca import derive_windows_for_period, find_root_causes
+
+        panel = build_weekly_panel(DB_PATH, item_id, state_id)
+        w = derive_windows_for_period(panel, target_var, period_start, period_end)
+        if w is None:
+            base["status"] = "insufficient_data"
+            base["reason"] = "not enough weekly history around this period to run causal RCA"
+            _RCA_MEMO[key] = base
+            return base
+
+        r = find_root_causes(w["normal_df"], w["anom_df"],
+                             anomalous_vars=w["anomalous_vars"],
+                             onsets=w["onsets"] or None)
+        out = {
+            "available": True,
+            "status": r["status"],
+            "targetVar": w["target_var"],
+            "targetVisible": bool(w["target_visible"]),
+            "window": [w["window"][0].strftime("%Y-%m-%d"), w["window"][1].strftime("%Y-%m-%d")],
+            "normalWeeks": len(w["normal_df"]),
+            "anomalousWeeks": len(w["anom_df"]),
+            "anomalousVars": w["anomalous_vars"],
+            "rootCauses": [
+                {"variable": rc["variable"], "mechanism": rc["mechanism"],
+                 "effect": round(float(rc["effect"]), 2), "label": rc["label"]}
+                for rc in r["root_causes"]
+            ],
+            "subgroups": r["subgroups"],
+            "reason": r["reason"],
+            "method": r["method"],
+        }
+        _RCA_MEMO[key] = out
+        return out
+    except Exception as e:  # noqa: BLE001 -- never let RCA break the anomaly payload
+        base["status"] = "error"
+        base["reason"] = f"{type(e).__name__}: {e}"
+        return base
+
+
+def _rca_adjusted_confidence(confidence, rca):
+    """Additive only: a confident, weekly-visible RCA verdict counts as one
+    more corroborating source (+5, clamped). Otherwise unchanged."""
+    try:
+        if (rca.get("available") and rca.get("status") == "ok"
+                and rca.get("rootCauses") and rca.get("targetVisible")):
+            return min(97.0, float(confidence) + 5.0)
+    except Exception:
+        pass
+    return confidence
+
+
+# Adtributor (Bhagwan et al., NSDI 2014) -- "which item/store/region/category
+# slice accounts for the deviation", ranked by distribution surprise. See CITATIONS.md.
+_ATTR_MEMO = {}
+
+
+def build_attribution_block(kpi_name, item_id, state_id, period_start, period_end):
+    """Adtributor slice attribution for an anomaly, scoped to its item/state.
+    Always returns a safe dict; memoized."""
+    key = (kpi_name, item_id, state_id, period_start, period_end)
+    if key in _ATTR_MEMO:
+        return copy.deepcopy(_ATTR_MEMO[key])
+    try:
+        from analytics.adtributor import run_attribution
+        out = run_attribution(DB_PATH, kpi_name, period_start, period_end,
+                              item_id=item_id, state_id=state_id)
+    except Exception as e:  # noqa: BLE001
+        out = {"available": False, "candidates": [], "reason": f"{type(e).__name__}: {e}",
+               "method": "Adtributor (Bhagwan et al., NSDI 2014) - reimplemented"}
+    _ATTR_MEMO[key] = out
+    return copy.deepcopy(out)
+
+
 def _row_to_anomaly_dict(r):
+    rca = build_rca_block(r["kpi_name"], r["item_id"], r["state_id"],
+                          r["period_start"], r["period_end"])
+    attribution = build_attribution_block(r["kpi_name"], r["item_id"], r["state_id"],
+                                          r["period_start"], r["period_end"])
     return {
         "id": r["anomaly_id"],
         "detected_at": r["detected_at"],
@@ -514,8 +617,10 @@ def _row_to_anomaly_dict(r):
         "z_score": r["z_score"],
         "direction": r["direction"],
         "severity": r["severity"],
-        "confidence": r["confidence"],
+        "confidence": _rca_adjusted_confidence(r["confidence"], rca),
         "status": r["status"],
+        "rootCause": rca,
+        "attribution": attribution,
         "scenario_key": r["scenario_key"],
         "detection_type": r["detection_type"],
         "evidence_score": r["evidence_score"],
@@ -683,6 +788,59 @@ def _mask_graph_for_role(graph_ctx, role):
     return d
 
 
+# Causal-RCA root-cause variables restricted per role (same contract lines the
+# rest of _apply_entitlements enforces). admin: nothing restricted.
+_RCA_RESTRICTED_VARS = {
+    "supply_planner": {"revenue", "gross_margin_percent", "marketing_spend"},
+    "vp_sales": {"fill_rate", "stockout_days", "inventory_turnover"},
+}
+
+
+def _mask_rca_block(d, role):
+    """Drop restricted variables from the rootCause block for `role`, in place."""
+    rca = d.get("rootCause")
+    if not isinstance(rca, dict) or not rca.get("available"):
+        return
+    blocked = _RCA_RESTRICTED_VARS.get(role, set())
+    if not blocked:
+        return
+    kept = [rc for rc in rca.get("rootCauses", []) if rc.get("variable") not in blocked]
+    if len(kept) != len(rca.get("rootCauses", [])):
+        rca["rootCauses"] = kept
+        rca["_restricted"] = sorted(blocked)
+        d.setdefault("_masked_fields", []).append("rootCause restricted variables")
+    rca["anomalousVars"] = [v for v in rca.get("anomalousVars", []) if v not in blocked]
+
+
+# vp_sales cannot see SKU/warehouse-level identity; supply_planner cannot see
+# revenue/margin figures (and the whole slice attribution is a revenue split).
+_ATTR_REDACT_DIMS = {"vp_sales": {"item_id", "store_id"}}
+
+
+def _mask_attribution_block(d, role):
+    attr = d.get("attribution")
+    if not isinstance(attr, dict) or not attr.get("available"):
+        return
+    if role == "supply_planner":
+        d["attribution"] = {"available": False, "candidates": [],
+                            "reason": "revenue/margin slice attribution is restricted for this role",
+                            "method": attr.get("method", "")}
+        d.setdefault("_masked_fields", []).append("attribution (financial)")
+        return
+    redact = _ATTR_REDACT_DIMS.get(role, set())
+    if not redact:
+        return
+    touched = False
+    for c in attr.get("candidates", []):
+        if c.get("dimension") in redact:
+            c["elements"] = ["RESTRICTED"] * len(c.get("elements", []))
+            for te in c.get("top_elements", []):
+                te["element"] = "RESTRICTED"
+            touched = True
+    if touched:
+        d.setdefault("_masked_fields", []).append("attribution SKU/store element names")
+
+
 def _apply_entitlements(anomaly, role):
     """
     Real server-side masking per schemas/semantic_contract.json (REQ-08).
@@ -749,6 +907,9 @@ def _apply_entitlements(anomaly, role):
                 e["title"] = "RESTRICTED"
                 e["preview"] = "RESTRICTED"
                 e["fullText"] = "RESTRICTED"
+
+    _mask_rca_block(d, role)
+    _mask_attribution_block(d, role)
     return d
 
 
@@ -1136,6 +1297,15 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
 
+    def list_directory(self, path):
+        self.send_error(404, "Not Found")
+        return None
+
+    def do_HEAD(self):
+        if urlparse(self.path).path.rstrip('/') == '':
+            self.path = '/dashboard.html'
+        return http.server.SimpleHTTPRequestHandler.do_HEAD(self)
+
     def do_GET(self):
         global _REQUEST_COUNT
         _REQUEST_COUNT += 1
@@ -1143,6 +1313,10 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed.path.rstrip('/')
         query = parse_qs(parsed.query)
         role = _resolve_role(self.headers, query)
+
+        if path in ('', '/'):
+            self.path = '/dashboard.html'
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
         if path == '/api/health':
             self._send_json({
@@ -1162,6 +1336,16 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
             key = path.split('/')[3]
             metric = (query.get('metric', ['revenue'])[0] or 'revenue').lower()
             self._handle_timeline(key, role, metric)
+            return
+
+        if path.startswith('/api/anomalies/') and path.endswith('/rca'):
+            key = path.split('/')[3]
+            self._handle_rca(key, role)
+            return
+
+        if path.startswith('/api/anomalies/') and path.endswith('/attribution'):
+            key = path.split('/')[3]
+            self._handle_attribution(key, role)
             return
 
         if path.startswith('/api/anomalies/') and path.endswith('/graph'):
@@ -1332,6 +1516,48 @@ class ApiRequestHandler(http.server.SimpleHTTPRequestHandler):
         # or a similar one, hand the correction back so the UI can surface it.
         a["actionCorrection"] = self._match_action_correction(r)
         self._send_json(a)
+
+    def _handle_rca(self, key, role):
+        """Debug: the causal RCA block only, role-masked."""
+        if not os.path.exists(DB_PATH):
+            self._send_json({"available": False, "status": "unavailable",
+                             "reason": "database not seeded"})
+            return
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        try:
+            r = self._fetch_anomaly_row(conn, key)
+        finally:
+            conn.close()
+        if not r:
+            self._send_json({"available": False, "status": "unavailable",
+                             "reason": f"no anomaly for key '{key}'"}, status_code=404)
+            return
+        wrapper = {"rootCause": build_rca_block(r["kpi_name"], r["item_id"], r["state_id"],
+                                               r["period_start"], r["period_end"])}
+        _mask_rca_block(wrapper, role)
+        self._send_json(wrapper["rootCause"])
+
+    def _handle_attribution(self, key, role):
+        """Debug: the slice-attribution block only, role-masked."""
+        if not os.path.exists(DB_PATH):
+            self._send_json({"available": False, "candidates": [],
+                             "reason": "database not seeded"})
+            return
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        try:
+            r = self._fetch_anomaly_row(conn, key)
+        finally:
+            conn.close()
+        if not r:
+            self._send_json({"available": False, "candidates": [],
+                             "reason": f"no anomaly for key '{key}'"}, status_code=404)
+            return
+        wrapper = {"attribution": build_attribution_block(
+            r["kpi_name"], r["item_id"], r["state_id"], r["period_start"], r["period_end"])}
+        _mask_attribution_block(wrapper, role)
+        self._send_json(wrapper["attribution"])
 
     def _handle_graph(self, key, role):
         empty = dict(_EMPTY_GRAPH_CTX)

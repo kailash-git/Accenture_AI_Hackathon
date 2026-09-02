@@ -3,7 +3,10 @@
    ========================================================================== */
 
 const API_CONFIG = {
-  baseUrl: 'http://127.0.0.1:8000',
+  // same origin as the served page; :8000 only when opened as a file://
+  baseUrl: (location.protocol === 'http:' || location.protocol === 'https:')
+    ? location.origin
+    : 'http://127.0.0.1:8000',
   isBackendConnected: false,
   pollIntervalMs: 15000,
   endpoints: {
@@ -100,6 +103,8 @@ class BackendApiClient {
       products: raw.products,
       evidence: raw.evidence,
       logistics: raw.logistics,
+      rootCause: raw.rootCause || (existing && existing.rootCause) || null,
+      attribution: raw.attribution || (existing && existing.attribution) || null,
       graph_context: raw.graph_context,
       persona: raw.persona,
       generation_method: raw.generation_method,

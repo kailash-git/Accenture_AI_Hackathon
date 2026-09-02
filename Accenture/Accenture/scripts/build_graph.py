@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'src'))
 
 from analytics.graph_builder import build_graph
 from analytics.graph_store import save_graph
+from analytics.causal_graph import validate_against_evidence_graph
 
 DB_PATH = os.path.join(BASE_DIR, 'data', 'business_bi.db')
 GRAPH_PATH = os.path.join(BASE_DIR, 'data', 'evidence_graph.gpickle')
@@ -34,6 +35,13 @@ def main():
     print(f"  PVM mismatches: {graph.graph.get('pvm_mismatches')}")
     for k, v in sorted(kinds.items()):
         print(f"  {k}: {v}")
+
+    # cross-check the hand-authored summary causal graph against evidence-graph co-occurrence
+    print("\nSummary causal graph vs evidence-graph co-occurrence:")
+    for row in validate_against_evidence_graph(graph):
+        u, v = row["edge"]
+        mark = "ok  " if row["supported"] else "NONE"
+        print(f"  [{mark}] {u} -> {v}  (co-occurrences: {row['cooccurrence_support']})")
 
 
 if __name__ == '__main__':
