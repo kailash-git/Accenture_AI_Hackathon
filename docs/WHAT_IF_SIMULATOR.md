@@ -111,6 +111,15 @@ Bar height is `abs(effect) / maxEffect * 120px`; colour is the existing
 - **Match Recorded Outcome** — sets the sliders to `recordedOutcome`
   (`fillRatePct / 100` for the fill slider), then `simRender()`. For supply that
   is `0% / 0% / 0.78`, reproducing the recorded ≈ −20 % revenue drop.
+- **Download Report** — `simDownloadReport()` builds a short standalone HTML
+  file (~3 KB) from the current `_simCompute()` state: inputs, projected outcome,
+  the units/margin/price row, the decomposition table, plus two inline-SVG charts
+  (baseline vs projected revenue; a Price / Volume / Interaction diverging-bar
+  chart). Delivered via a `Blob` + `<a download>` — no backend, no libraries.
+
+`simRender()` and `simDownloadReport()` both call `_simCompute()`, a pure
+function that reads the sliders + economics and returns every figure, so the
+on-page view and the downloaded report can never disagree.
 
 ## Wiring
 
