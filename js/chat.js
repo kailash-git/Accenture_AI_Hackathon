@@ -17,7 +17,10 @@ function setChatPanelOpen(open) {
   const panel = document.getElementById('chatPanel');
   const launcher = document.getElementById('chatLauncher');
   if (panel) panel.classList.toggle('is-open', open);
-  if (launcher) launcher.setAttribute('aria-expanded', String(open));
+  if (launcher) {
+    launcher.setAttribute('aria-expanded', String(open));
+    launcher.classList.toggle('is-hidden', open);  // hide the pill while the sidebar is open
+  }
   if (open) {
     const input = document.getElementById('chatInput');
     if (input) setTimeout(() => input.focus(), 50);

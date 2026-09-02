@@ -247,7 +247,7 @@ function animateNumericCount(el) {
 /* Topbar Navigation & Scroll Spy */
 function setupNavigationScrollSpy() {
   const navTabs = document.querySelectorAll('.topbar-tab');
-  const sectionIds = ['section-overview', 'section-what-changed', 'section-why', 'section-evidence', 'section-actions', 'section-telemetry'];
+  const sectionIds = ['section-overview', 'section-what-changed', 'section-why', 'section-evidence', 'section-actions', 'section-simulator', 'section-telemetry'];
 
   navTabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -683,6 +683,10 @@ async function selectScenario(scenarioKey) {
       ` + correctionFormHtml;
     }
   }
+
+  // Default the What-If Simulator to this scenario's recorded outcome (the
+  // "Reset" button still returns it to the pre-anomaly baseline).
+  if (typeof simMatchRecorded === 'function') simMatchRecorded();
 
   showAppToast(`Loaded scenario: ${anom.title} (${anom.persona || APP_STATE.activeRole} view)`);
 }

@@ -37,6 +37,11 @@ const APP_STATE = {
 const ANOMALY_DATASET = {
   supply: {
     id: 'ANOM-2012-11-CA',
+    // What-If Simulator inputs (client-side only; see js/simulator.js). Consistent
+    // with the narrative: sell price steady at $1.25, supplier cost $0.88, fill
+    // rate 0.78 vs 0.98 baseline.
+    baselineEconomics: { unitPrice: 1.25, unitCost: 0.88, healthyBaselineRevenue: 44000, currentFillRate: 0.78, baselineFillRate: 0.98 },
+    recordedOutcome: { priceChangePct: 0, volumeChangePct: 0, fillRatePct: 78 },
     title: 'Supply Constraint',
     category: 'Multi-Factor Variance',
     sku: 'FOODS_3_090',
@@ -132,6 +137,10 @@ const ANOMALY_DATASET = {
 
   billing: {
     id: 'ANOM-2013-05-TX',
+    // Consistent with the narrative: contract price $1.68, supplier cost $1.18,
+    // register overcharge x2.0, fill rate 1.00.
+    baselineEconomics: { unitPrice: 1.68, unitCost: 1.18, healthyBaselineRevenue: 3360, currentFillRate: 1.00, baselineFillRate: 1.00 },
+    recordedOutcome: { priceChangePct: 100, volumeChangePct: 0, fillRatePct: 100 },
     title: 'Billing Bug',
     category: 'Conflicting Evidence (Abstain)',
     sku: 'FOODS_3_586',
@@ -214,6 +223,10 @@ const ANOMALY_DATASET = {
 
   pricecut: {
     id: 'ANOM-2013-08-CA',
+    // Consistent with the narrative: markdown from $1.67 to $1.25 (-25%),
+    // supplier cost $0.88, +42% volume, fill rate 0.99 vs 0.98 baseline.
+    baselineEconomics: { unitPrice: 1.67, unitCost: 0.88, healthyBaselineRevenue: 15000, currentFillRate: 0.99, baselineFillRate: 0.98 },
+    recordedOutcome: { priceChangePct: -25, volumeChangePct: 42, fillRatePct: 99 },
     title: 'Price Cut + Volume Lift',
     category: 'Price-Volume-Mix Elasticity',
     sku: 'FOODS_3_090',
@@ -286,6 +299,10 @@ const ANOMALY_DATASET = {
 
   sparse: {
     id: 'ANOM-2013-08-TX',
+    // Consistent with the narrative: premium household cleaner ($4.99 price,
+    // $3.49 cost), new launch with +420% trial velocity, fill rate 0.99.
+    baselineEconomics: { unitPrice: 4.99, unitCost: 3.49, healthyBaselineRevenue: 2400, currentFillRate: 0.99, baselineFillRate: 0.98 },
+    recordedOutcome: { priceChangePct: 0, volumeChangePct: 420, fillRatePct: 99 },
     title: 'New Product Launch',
     category: 'Sparse History Variance',
     sku: 'HOUSEHOLD_1_020',
