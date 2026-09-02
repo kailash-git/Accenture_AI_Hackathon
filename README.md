@@ -42,74 +42,46 @@ and source code.
 
 ## 1. Problem statement and design thesis
 
-### 1.1 The complexities the brief identifies, and how the engine addresses each
+The Round 2 brief asks for a prototype that detects and prioritises material KPI movements,
+reconciles heterogeneous sources, ranks drivers with appropriate methods, produces persona-specific
+evidence-cited narratives, communicates uncertainty or abstains, recommends decision-rights-aware
+actions, learns from feedback, and works within realistic security, cost, and latency limits —
+without ever treating the language model as the source of a quantitative value.
 
-The Round 2 brief asks for a working prototype that detects and prioritises material KPI movements,
-reconciles heterogeneous sources, ranks drivers with appropriate analytical methods, produces
-persona-specific evidence-cited narratives, communicates uncertainty or abstains, recommends
-decision-rights-aware actions, learns from feedback, and operates within realistic security, cost,
-and latency limits — while never treating the language model as the source of a quantitative value
-and demonstrating explicitly where deterministic logic, SQL, statistics, causal inference,
-retrieval, or a model is used and why.
+**Design thesis.** Quantitative values are produced by code; narrative wording is produced by the
+model; the boundary is visible in every response (`processing` on the chat endpoint; `pvm`,
+`evidence`, `graph_context` on every anomaly). The engine is deliberately biased toward abstention:
+of the 57 movements it admits, it holds 44 at `abstained`, returning figures and a confidence
+indicator rather than asserting a cause it cannot support.
 
-| Complexity identified in the brief | Response in this engine |
+| Complexity in the brief | Response |
 |---|---|
-| Multiple interacting drivers (price, volume, mix, marketing, supply, seasonality, events) | Deterministic Price-Volume-Mix decomposition for revenue; a causal lens (EasyRCA) that names the upstream KPI variable; a slice lens (Adtributor) that names the responsible item/region/store/category; and an anomaly-centric knowledge graph that links a movement to co-occurring supply, marketing, event, and inventory movements for the same item and region |
-| Different source refresh cadences, grains, data-quality levels, and historical coverage | Three structured sources at three grains (daily, weekly, monthly) plus unstructured text, with an explicit reconciliation layer that resolves calendar, region-name, and SKU-key mismatches before any join |
-| Inconsistent KPI definitions, hierarchies, calendars, and aggregation logic | A semantic contract (`semantic_contract.json`) that fixes every KPI formula, grain, driver set, threshold, lineage, and access rule in one governed file |
-| Sparse history for new products, categories, or markets | A dedicated sparse-history path that returns figures with a low-confidence indicator and declines to assert a root cause |
-| Materiality defined by both statistical significance and business impact | A rolling z-score gate against an eight-period baseline, seasonally tempered, combined with a severity ladder, and a result list ordered by materiality rather than recency |
-| Contradictory evidence, missing data, and confidence calibration | A deterministic abstention gate that withholds a recommendation on low confidence, on a structured-versus-unstructured contradiction, or on a material movement with no isolable driver |
-| Role-based personalisation of insight depth, actions, and delivery | Three personas, each receiving a different narrative style, length, driver framing, and recommended action |
-| Row-level, column-level, and domain-level security, sensitive-data protection, and auditability | Server-side entitlement masking driven by the contract; restricted fields are removed from the response payload before it leaves the API and before the model receives it, and every action decision writes an audit identifier |
-| Model and data drift, feedback capture, and continuous evaluation | Thumbs ratings and an audit trail in `user_feedback`; an action-correction learning loop that stores an analyst's corrected action and resurfaces it on similar movements; an evaluation harness (`eval/run_eval.py`) that scores detection, decomposition, attribution, ablation, abstention, masking and the chat surface |
-| Language-model economics (model choice, token consumption, latency, caching, cost per insight) | The live analytics path makes no model calls and incurs no per-request cost; the single optional live model call (the conversational assistant) is opt-in, measured token by token, and defaults to a free-tier provider |
-
-### 1.2 Design thesis
-
-A business-intelligence engine earns trust by being explicit about what it knows, how it knows it,
-and when it should withhold a conclusion. The system therefore enforces a strict separation:
-quantitative values are produced by code, narrative wording is produced by the model, and the
-boundary between the two is visible in every response through the `processing` block on the chat
-endpoint and the `pvm`, `evidence`, and `graph_context` blocks on every anomaly.
-
-The engine is also deliberately biased toward abstention. Of the 57 movements it admits, it holds 44
-at the `abstained` state, returning the figures and a confidence indicator rather than asserting a
-cause it cannot support. This is the intended behaviour under the brief's instruction to bias toward
-caution when evidence is thin.
+| Multiple interacting drivers | PVM decomposition for revenue; EasyRCA (upstream causal variable) and Adtributor (responsible slice) lenses; an anomaly-centric knowledge graph |
+| Mixed source cadences, grains, quality | Three structured grains (daily/weekly/monthly) plus unstructured text, with a reconciliation layer for calendar, region-name and SKU-key mismatches |
+| Inconsistent KPI definitions | One governed semantic contract (`semantic_contract.json`) |
+| Sparse history | A dedicated low-confidence path that declines a root cause |
+| Materiality = significance + impact | Rolling z-score gate, severity ladder, materiality ordering |
+| Contradiction / missing data | A deterministic abstention gate (low confidence, contradiction, or no isolable driver) |
+| Role-based personalisation | Three personas: different style, length, framing, action |
+| Row/column/domain security | Server-side masking; restricted fields stripped before the payload leaves the API or reaches the model; audit IDs on every action |
+| Drift and feedback | Ratings and audit trail; an action-correction learning loop; an evaluation harness |
+| Model economics | The live path makes zero model calls; the one optional live call is opt-in, metered, free-tier by default |
 
 ---
 
 ## 2. Business proposal
 
-### 2.1 The intelligence-to-action contract
+Every explained movement is delivered as
+`driver → lever → action → expected impact → owner → confidence → monitoring plan`, schema-validated
+by `src/llm/schema_parser.py` (Pydantic) before storage: all seven fields present, `confidence`
+0–100, exactly one of `recommended_action` or `abstention`.
 
-Every explained movement is delivered in the structure the brief specifies:
-
-```
-driver  ->  controllable lever  ->  action  ->  expected impact  ->  owner  ->  confidence  ->  monitoring plan
-```
-
-This structure is schema-validated by `src/llm/schema_parser.py` (using Pydantic) before it can be
-stored. All seven fields must be present and non-blank, `confidence` must lie between 0 and 100, and
-each persona narrative must carry exactly one of `recommended_action` or `abstention`, never both and
-never neither.
-
-### 2.2 Business case and impact
-
-The prototype runs on illustrative fast-moving consumer goods data. The figures below are therefore
-a transparent model with stated assumptions, not measured outcomes, presented in the manner the
-brief invites.
-
-| Value lever | Assumption | Illustrative annual value for a mid-size retailer (approximately 2 billion USD revenue, approximately 40 tracked KPI slices) |
-|---|---|---|
-| Analyst time recovered | A material movement currently takes an analyst approximately three to four hours to investigate across systems; the engine delivers a cited first draft in seconds. Approximately 50 material movements per month. | Approximately 1,900 to 2,500 analyst-hours per year redeployed from assembly to judgement |
-| Faster corrective action | Reducing mean time to explanation for a revenue movement from approximately five business days to less than one day recovers approximately 20 percent of the at-risk revenue that would otherwise leak during the delay. A single supply-constraint event comparable to the November 2012 scenario is modelled at approximately 9,000 USD run-rate per month. | A six-figure recovered-revenue figure per material event class, per year |
-| Fewer poor decisions caused by weak explanations | The abstention gate prevents approximately 77 percent of movements from generating a confident and possibly incorrect recommendation. Avoiding one mis-targeted promotion (a misread of price elasticity) per quarter. | Avoided promotional margin give-away |
-| Inference cost avoided | The live path is deterministic and incurs no per-request cost. A naive design in which the model explains every KPI on every refresh, at approximately 4,000 tokens per insight across 40 slices on an hourly refresh, would cost materially more per month. | Approximately 100 percent of live inference cost avoided |
-
-The salient architectural property is that the costly path is optional. Cost scales with the number
-of questions asked, not with the number of dashboards rendered.
+On illustrative data the value case is a transparent model, not a measured outcome: a material
+movement that takes an analyst three to four hours becomes a cited first draft in seconds
+(~50 per month); mean time to explanation drops from ~5 business days to under one; the abstention
+gate stops ~77 percent of movements from producing a confident, possibly wrong recommendation; and
+the live path carries no per-request inference cost. The load-bearing property is architectural —
+cost scales with questions asked, not dashboards rendered.
 
 ---
 
@@ -199,34 +171,26 @@ flowchart TB
 
 | Item | Detail |
 |---|---|
-| KPIs (three, all wired end to end) | `Revenue` (additive, decomposed by Price-Volume-Mix), `GrossMarginPercent` (non-additive), and `InventoryTurnover` (non-additive, derived from inventory logs). All three are detected, charted, and independently anomaly-flagged. |
-| Structured sources (three grains) | `fact_sales_daily`, real M5 and Walmart data at a daily grain (27,409 rows). `source_marketing_weekly`, a weekly grain, Monday-start, using region names rather than state codes (1,642 rows). `source_supply_monthly`, a monthly grain, keyed by an internal `warehouse_sku` code that forces a genuine lookup join (384 rows). |
-| Unstructured source | `unstructured_feedback`, seven curated customer reviews and support tickets tied to real anomaly dates, plus `inventory_logs` (8,279 rows) for the turnover KPI. |
-| Real data backbone | M5 Forecasting (Walmart): three items across two states (California and Texas), January 2011 to April 2016. `FOODS_3_090` and `FOODS_3_586` are in the same department, so a genuine mix effect is computable. `HOUSEHOLD_1_020` has a short real history (429 days in California, 198 days in Texas) and is used for the sparse-history scenario. |
-| Deliberate and documented source inconsistency | Region naming (`West` and `South` versus `CA` and `TX`) requires an explicit mapping; the weekly calendar (Monday start) differs from the sales calendar (Sunday start); supply is keyed by `warehouse_sku` rather than `item_id`. One genuine calendar defect (the pandas frequency code `W-MON` anchors weeks to end on Monday, not to start on Monday) was caught during integrity testing and is left documented, not concealed, in `KPI-data/README.md`. |
-| Semantic contract | `schemas/semantic_contract.json`. Per KPI: `description`, `calculation_type` (additive or non_additive), `sql_formula`, `source_table`, `dimensions`, `granularity`, `drivers`, `driver_method`, and `lineage`. Global `thresholds`: z-score admission gate 2.0, critical severity 3.0, confidence floor 40, evidence relevance tiers, and a graph temporal window of minus five to plus ten days. Per-role `entitlements`: allowed and restricted columns, and a masking action per restricted column. |
+| KPIs | `Revenue` (additive, PVM-decomposed), `GrossMarginPercent`, `InventoryTurnover` (non-additive) — all three detected, charted, independently flagged |
+| Structured sources | `fact_sales_daily` (real M5/Walmart, daily, 27,409 rows); `source_marketing_weekly` (weekly, region names, 1,642 rows); `source_supply_monthly` (monthly, keyed by `warehouse_sku`, forces a lookup join, 384 rows) |
+| Unstructured | `unstructured_feedback` (7 reviews/tickets on real anomaly dates) plus `inventory_logs` (8,279 rows) |
+| Real backbone | M5: three items, CA and TX, Jan 2011 – Apr 2016. `FOODS_3_090` / `FOODS_3_586` share a department (real mix effect); `HOUSEHOLD_1_020` is short-history (sparse scenario) |
+| Deliberate mismatches | Region naming (`West`/`South` vs `CA`/`TX`), weekly (Monday) vs sales (Sunday) calendar, `warehouse_sku` vs `item_id`. One real `W-MON` calendar defect is documented, not concealed, in `KPI-data/README.md` |
+| Semantic contract | `schemas/semantic_contract.json`: per-KPI formula, grain, drivers, `driver_method`, lineage; global thresholds (z-gate 2.0, critical 3.0, confidence floor 40, graph window −5 to +10 days); per-role entitlements |
 
 ### 3.4 Detection: two signals and a materiality gate
 
-Signal one, statistical (`src/analytics/anomaly_detector.py`). For each item-and-state series, a
-rolling z-score compares the current period against the trailing eight-period baseline. For a monthly
-grain with at least twelve periods of history, the score is seasonally tempered by the formula
-`z = 0.7 x (year-on-year difference z) + 0.3 x (raw z)`, and confidence rises to 95 percent. The
-admission threshold is a z-score magnitude of at least 2.0. Severity is CRITICAL above a magnitude of
-3.0, WARNING above 2.0, and ACTIVE otherwise. This threshold is never lowered to admit other
-scenarios, and a dedicated test asserts this.
+**Statistical** (`anomaly_detector.py`): a rolling z-score against the trailing eight-period
+baseline, per item-and-state series; monthly grains with at least twelve periods are seasonally
+tempered (`z = 0.7·YoY-z + 0.3·raw-z`). Admission at |z| ≥ 2.0; severity CRITICAL > 3.0, WARNING
+> 2.0, ACTIVE otherwise. The threshold is never lowered to admit a scenario (asserted by test).
 
-Signal two, evidence-driven (`src/analytics/evidence_signal.py`). Independently, real customer and
-support records with no predetermined KPI or anomaly type are clustered into candidate windows
-defined by item, state, and month. Each window is scored on six normalised factors: item match,
-region match, temporal proximity, category relevance (cosine similarity to a keyword vocabulary),
-record count, and source reliability (a support ticket at 1.0 outweighs a customer review at 0.8).
-Each window is then classified as strong (score at or above 0.65), moderate (at or above 0.40), or
-dropped. This allows a statement such as "a pricing complaint names FOODS_3_586 in Texas around May
-2013" to create a candidate that the z-score scan would never have raised.
+**Evidence-driven** (`evidence_signal.py`): real reviews and tickets, with no predetermined KPI, are
+clustered into item/state/month windows and scored on six normalised factors (item, region, temporal
+proximity, category cosine relevance, record count, source reliability), then classified strong
+(≥ 0.65), moderate (≥ 0.40), or dropped. This surfaces candidates the z-score scan never raises.
 
-Merge (`scripts/generate_mock_data.py`). The two signals are merged on the key of KPI, item, state,
-and period:
+The two signals are merged on `(kpi, item, state, period)`:
 
 ```mermaid
 flowchart LR
@@ -365,30 +329,24 @@ evidence, so that a low-confidence case is never mislabelled as insufficient evi
 
 ### 3.9 Personas, narratives, and role-based access control
 
-Three roles. Two are operational personas that receive different narratives and actions; the third is
-an unrestricted governance role for auditing that the masking behaves as specified.
+Two operational personas receive different narratives and actions; `admin` is an unrestricted
+governance role for auditing the masking.
 
-| Role key | Role | Primary objective | Decision rights | What the engine delivers |
+| Role key | Role | Objective | Decision rights | Delivered |
 |---|---|---|---|---|
-| `vp_sales` | Vice-President of Retail Sales (executive) | Maximise regional revenue and gross margin; protect category market share | Authorise regional pricing promotions; reallocate marketing budget; initiate supplier renegotiation | An executive summary of 250 words or fewer; price/volume/mix framing; financial impact; one high-level action with a named owner and a monitoring plan |
-| `supply_planner` | Regional Supply Chain Planner (analyst) | Maintain inventory turnover; eliminate stockouts; control supplier lead times | Trigger supplier reorders; approve inter-warehouse transfers; flag lead-time violations | An operational report of 400 words or fewer; SKU, warehouse, and carrier detail; data-freshness notes; a quantitative reorder action |
-| `admin` | Data Governance and Compliance | Verify masking and audit decisions | Full read access, granted through the entitlements model rather than by bypassing it | The unredacted ground truth against which the two scoped roles can be compared, with abstention and data-quality caveats stated explicitly |
+| `vp_sales` | VP of Retail Sales (executive) | Regional revenue and gross margin; category share | Pricing promotions; marketing budget; supplier renegotiation | ≤ 250-word executive summary; PVM framing; financial impact; one high-level action with owner and monitoring plan |
+| `supply_planner` | Regional Supply Chain Planner (analyst) | Inventory turnover; no stockouts; supplier lead times | Supplier reorders; inter-warehouse transfers; lead-time flags | ≤ 400-word operational report; SKU / warehouse / carrier detail; data-freshness notes; a quantitative reorder action |
+| `admin` | Data Governance and Compliance | Verify masking; audit decisions | Full read access, through the entitlements model | Unredacted ground truth for comparing the scoped roles |
 
-**Narrative generation.** `src/llm/narrative_generator.py` computes every headline, summary, and
-action field directly from the numbers passed in. The deterministic template output is always the
-source of truth for the structured `recommended_action` (dollar figures, owner, monitoring plan).
-When `OPENAI_API_KEY` is set, one cached model call per curated scenario (covering both personas in a
-single call) polishes only the prose fields; the action and abstention payload is never altered by
-the model, and if the call fails or fails validation the deterministic prose is served unchanged.
-Forbidden-term regular-expression guards run over the output ("warehouse", "carrier", "SKU" for the
-executive; "gross margin", "revenue", "COGS" for the planner). The revenue timeline is persona-aware
-at source: a `supply_planner` request for the "revenue" metric receives Units, never a currency
-figure.
+Narratives are computed from the numbers by `narrative_generator.py`; the deterministic template is
+the source of truth for the structured action, and an optional cached model call (`OPENAI_API_KEY`)
+polishes prose only. Per-persona forbidden-term regex guards run over the output, and a
+`supply_planner` "revenue" timeline request returns Units, never currency.
 
-**Masking table.** Enforced in `_apply_entitlements`, `_mask_graph_for_role`, and
-`_redact_financial_disclosure` in `api_server.py`. Restricted fields are removed from the response
-payload on the server before the response leaves the API and before the conversational model receives
-them.
+Masking is enforced server-side (`_apply_entitlements`, `_mask_graph_for_role`,
+`_redact_financial_disclosure`): restricted fields are stripped before the payload leaves the API or
+reaches the model, including an `item_id` inside a compound `id` (`…-FOODS_3_090` → `…-ITEM`) and
+dollar figures inside free text. Role comes from `X-User-Role` or `?role=`; default `vp_sales`.
 
 | Field or column | `vp_sales` | `supply_planner` | `admin` |
 |---|---|---|---|
@@ -399,22 +357,10 @@ them.
 | Free-text evidence that narrates a dollar figure | Visible | Disclosing clause redacted | Visible |
 | Evidence-graph nodes and edges carrying any of the above | Masked | Masked | Full |
 
-Masking includes an `item_id` embedded inside a compound `id` string (for example
-`ANOM-2012-11-CA-FOODS_3_090` becomes `ANOM-2012-11-CA-ITEM`) and dollar figures narrated inside a
-support ticket. The role is taken from the `X-User-Role` request header or the `role` query
-parameter; permitted values are `vp_sales`, `supply_planner`, `admin`; the default is `vp_sales`.
-
-**Chat defence in depth.** `_mask_chat_reply` runs over the model's answer before it is returned and
-redacts any sentence that discloses a field the role is not entitled to, while keeping sentences that
-merely decline to give a detail. The response carries `reply_masked` and `redacted_terms` so the
-redaction is auditable. This exists because masking the evidence the model sees is the primary
-defence, but a generative model cannot be trusted to honour a prompt instruction on its own. Covered
-by `tests/test_chat_masking.py`.
-
-These personas generalise to any workflow of the form "a number moved: who needs to know, and what
-should they do about it" — financial planning and analysis, category management, revenue operations,
-marketing analytics, sales and operations planning. Full persona narratives and the entitlement
-matrix are in `persona_profiles.md` (Section 10.3).
+Defence in depth: `_mask_chat_reply` redacts any answer sentence that discloses a field the role
+cannot see (auditable via `reply_masked` / `redacted_terms`), because a generative model cannot be
+trusted to honour a prompt instruction alone (`tests/test_chat_masking.py`). Full persona narratives
+and the entitlement matrix: `persona_profiles.md` (Section 10.3).
 
 ### 3.10 Feedback capture and the learning loop
 
@@ -1016,9 +962,9 @@ values are `vp_sales`, `supply_planner`, and `admin`. The default is `vp_sales`.
   next step.
 - Reproducibility. All seed-time hashing and jitter use CRC-32 rather than Python's per-process
   randomised hash, so a reseed reproduces byte-identical anomalies on any machine.
-- The business-case figures in Section 2.2 are an explicit model with stated assumptions, not
-  measured outcomes. The load-bearing claim is architectural: cost scales with the number of
-  questions asked, not with the number of dashboards rendered.
+- The business-case figures in Section 2 are an explicit model with stated assumptions, not measured
+  outcomes. The load-bearing claim is architectural: cost scales with the number of questions asked,
+  not with the number of dashboards rendered.
 
 ---
 
