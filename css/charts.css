@@ -526,3 +526,23 @@ body.role-planner .rbac-masked {
 .pvm-driver-summary.pvm-summary-opposing {
   border-left: 3px solid var(--accent-amber, #f59e0b);
 }
+
+/* Live Revenue What-If Simulator -- sliders (reuses .pvm-*, .viz-*, .schema-* elsewhere) */
+.sim-slider-grid { display: flex; flex-direction: column; gap: 16px; }
+.sim-slider-row { display: flex; flex-direction: column; gap: 6px; }
+.sim-slider-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.sim-slider-val {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.sim-slider {
+  width: 100%;
+  accent-color: var(--accent-green, #10b981);
+  cursor: pointer;
+}

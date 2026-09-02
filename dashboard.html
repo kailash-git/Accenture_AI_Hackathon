@@ -218,6 +218,7 @@
           <button class="topbar-tab" data-target-section="section-why">PVM Analysis</button>
           <button class="topbar-tab" data-target-section="section-evidence">Evidence</button>
           <button class="topbar-tab" data-target-section="section-actions">Actions</button>
+          <button class="topbar-tab" data-target-section="section-simulator">What-If Simulator</button>
           <button class="topbar-tab" data-target-section="section-telemetry">Telemetry</button>
         </div>
 
@@ -704,11 +705,70 @@
         </section>
 
         <!-- =================================================================
-             SECTION 07: SYSTEM TELEMETRY (Bottom Section)
+             SECTION 07: LIVE REVENUE WHAT-IF SIMULATOR (client-side only)
+             ================================================================= -->
+        <section class="story-section scroll-reveal" id="section-simulator">
+          <div class="story-section-header">
+            <div class="story-step-indicator">07 / Live Revenue What-If Simulator</div>
+            <h2 class="story-section-title">Live Revenue What-If Simulator</h2>
+            <p class="story-section-description">
+              Adjust price, demand, and fill rate to project revenue and its Price / Volume /
+              Interaction breakdown live. Runs entirely in the browser -- no backend calls.
+            </p>
+          </div>
+
+          <div class="pvm-waterfall-card">
+            <div class="visualizer-top-bar" style="margin-bottom: 20px;">
+              <div class="viz-title-group">
+                <div class="viz-title-text" id="simScenarioName">Scenario</div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-action-outline" id="simMatchBtn" onclick="simMatchRecorded()">Match Recorded Outcome</button>
+                <button class="btn-action-outline" id="simResetBtn" onclick="simReset()">Reset</button>
+              </div>
+            </div>
+
+            <div class="sim-slider-grid">
+              <div class="sim-slider-row">
+                <div class="sim-slider-head"><span>Price adjustment</span><span class="sim-slider-val" id="simPriceVal">0%</span></div>
+                <input type="range" id="simPrice" class="sim-slider" min="-80" max="150" step="1" value="0" oninput="simRender()">
+              </div>
+              <div class="sim-slider-row">
+                <div class="sim-slider-head"><span>Demand shift</span><span class="sim-slider-val" id="simDemandVal">0%</span></div>
+                <input type="range" id="simDemand" class="sim-slider" min="-90" max="500" step="5" value="0" oninput="simRender()">
+              </div>
+              <div class="sim-slider-row">
+                <div class="sim-slider-head"><span>Fill rate</span><span class="sim-slider-val" id="simFillVal">0.98</span></div>
+                <input type="range" id="simFill" class="sim-slider" min="0.30" max="1.00" step="0.01" value="0.98" oninput="simRender()">
+              </div>
+            </div>
+
+            <div class="viz-headline-row" style="margin-top: 22px;">
+              <div class="viz-big-number"><span class="currency-prefix">$</span><span id="simRevenue">0</span></div>
+              <div class="viz-delta-badge positive" id="simRevDelta">+0.0% vs baseline</div>
+            </div>
+            <div id="simRevDollarDelta" style="font-size: 13px; color: var(--text-secondary); margin: -6px 0 18px;">&Delta; +$0 vs baseline</div>
+
+            <div class="schema-field-grid">
+              <div class="schema-field-box"><div class="schema-field-label">Units Sold</div><div class="schema-field-value" id="simUnits">0</div></div>
+              <div class="schema-field-box"><div class="schema-field-label">Gross Margin %</div><div class="schema-field-value" id="simMargin">0%</div></div>
+              <div class="schema-field-box"><div class="schema-field-label">Unit Price</div><div class="schema-field-value" id="simPriceOut">$0.00</div></div>
+            </div>
+
+            <div class="pvm-bars-layout" id="simWaterfall" style="margin-top: 22px;"></div>
+
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 14px;">
+              Modeled projection from a simplified price/volume identity, not literal recorded history.
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             SECTION 08: SYSTEM TELEMETRY (Bottom Section)
              ================================================================= -->
         <section class="story-section scroll-reveal" id="section-telemetry">
           <div class="story-section-header">
-            <div class="story-step-indicator">07 / System Telemetry</div>
+            <div class="story-step-indicator">08 / System Telemetry</div>
             <h2 class="story-section-title">Engine Health & Pipeline Observability</h2>
             <p class="story-section-description">
               Observability metrics for query latency and token economics.
@@ -955,6 +1015,7 @@
   <script src="js/drawer.js"></script>
   <script src="js/evidence.js"></script>
   <script src="js/actions.js"></script>
+  <script src="js/simulator.js"></script>
   <script src="js/app.js"></script>
   <script src="js/chat.js"></script>
 </body>

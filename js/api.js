@@ -105,6 +105,10 @@ class BackendApiClient {
       logistics: raw.logistics,
       rootCause: raw.rootCause || (existing && existing.rootCause) || null,
       attribution: raw.attribution || (existing && existing.attribution) || null,
+      // What-If Simulator inputs live only in js/state.js -- the backend never
+      // sends them, so carry them through the merge explicitly.
+      baselineEconomics: (existing && existing.baselineEconomics) || raw.baselineEconomics || null,
+      recordedOutcome: (existing && existing.recordedOutcome) || raw.recordedOutcome || null,
       graph_context: raw.graph_context,
       persona: raw.persona,
       generation_method: raw.generation_method,
