@@ -639,7 +639,10 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2v11M22 11V4a2 2 0 0 0-2-2H7.5a2 2 0 0 0-2 1.6l-1.4 7A2 2 0 0 0 6 13h5v6a2.5 2.5 0 0 0 5 0v-1.2c0-.7.3-1.4.8-1.9l1.2-1.4"/></svg>
                 </button>
               </div>
-              <button class="btn-copy-reasoning" onclick="copySynthesisReasoning()">Copy Briefing</button>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-copy-reasoning" onclick="downloadAnomalyReport()">Download Report</button>
+                <button class="btn-copy-reasoning" onclick="copySynthesisReasoning()">Copy Briefing</button>
+              </div>
             </div>
           </div>
         </section>
@@ -725,7 +728,6 @@
               <div style="display: flex; gap: 8px;">
                 <button class="btn-action-outline" id="simMatchBtn" onclick="simMatchRecorded()">Match Recorded Outcome</button>
                 <button class="btn-action-outline" id="simResetBtn" onclick="simReset()">Reset</button>
-                <button class="btn-action-outline" id="simDownloadBtn" onclick="simDownloadReport()">Download Report</button>
               </div>
             </div>
 
@@ -1017,6 +1019,7 @@
   <script src="js/evidence.js"></script>
   <script src="js/actions.js"></script>
   <script src="js/simulator.js"></script>
+  <script src="js/report.js"></script>
   <script src="js/app.js"></script>
   <script src="js/chat.js"></script>
 </body>
